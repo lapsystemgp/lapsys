@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
+    "dev": "npx concurrently \"npm --prefix apps/backend run start:dev\" \"npm --prefix apps/frontend run dev\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

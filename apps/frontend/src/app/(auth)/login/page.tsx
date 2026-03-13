@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
@@ -31,6 +31,7 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
@@ -38,7 +39,6 @@ export default function LoginPage() {
         throw new Error('Invalid credentials');
       }
 
-      // If successful, push home or dashboard
       router.push('/');
     } catch (err: any) {
       setError(err.message);
@@ -57,10 +57,7 @@ export default function LoginPage() {
 
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-neutral-300"
-          >
+          <label htmlFor="email" className="block text-sm font-medium text-neutral-300">
             Email address
           </label>
           <div className="mt-1">
@@ -78,10 +75,7 @@ export default function LoginPage() {
         </div>
 
         <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-neutral-300"
-          >
+          <label htmlFor="password" className="block text-sm font-medium text-neutral-300">
             Password
           </label>
           <div className="mt-1">
@@ -118,10 +112,7 @@ export default function LoginPage() {
       <div className="mt-6 text-center">
         <p className="text-sm text-neutral-400">
           Don't have an account?{' '}
-          <Link
-            href="/register"
-            className="font-medium text-blue-500 hover:text-blue-400"
-          >
+          <Link href="/register" className="font-medium text-blue-500 hover:text-blue-400">
             Register here
           </Link>
         </p>
@@ -129,3 +120,12 @@ export default function LoginPage() {
     </>
   );
 }
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="text-neutral-400 text-center">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+

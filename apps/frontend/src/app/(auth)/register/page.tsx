@@ -17,21 +17,28 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
+      console.log('Sending registration request to backend...');
       const res = await fetch('http://localhost:3001/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
+      console.log('Backend response status:', res.status);
+
       if (!res.ok) {
         const data = await res.json();
+        console.error('Registration failed data:', data);
         throw new Error(data.message || 'Registration failed');
       }
 
+      console.log('Registration successful!');
       router.push('/login?registered=true');
     } catch (err: any) {
+      console.error('Registration fetch error:', err);
       setError(err.message);
     } finally {
       setLoading(false);

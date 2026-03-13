@@ -12,10 +12,10 @@ description: "Task list for User Authentication feature"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize the monorepo structure with `apps/frontend` and `apps/backend`
-- [ ] T002 [P] Initialize `apps/frontend` as a Next.js App Router project with TailwindCSS
-- [ ] T003 [P] Initialize `apps/backend` as a NestJS project
-- [ ] T004 [P] Setup ESLint/Prettier across the monorepo
+- [x] T001 Initialize the monorepo structure with `apps/frontend` and `apps/backend`
+- [x] T002 [P] Initialize `apps/frontend` as a Next.js App Router project with TailwindCSS
+- [x] T003 [P] Initialize `apps/backend` as a NestJS project
+- [x] T004 [P] Setup ESLint/Prettier across the monorepo
 
 ---
 
@@ -25,11 +25,11 @@ description: "Task list for User Authentication feature"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Setup PostgreSQL and initialize Prisma ORM in `apps/backend`
-- [ ] T006 [P] Configure global ValidationPipe in NestJS
-- [ ] T007 [P] Configure Swagger Module in NestJS
-- [ ] T008 [P] Setup JWT Module and `bcrypt` dependencies in `apps/backend`
-- [ ] T009 [P] Create base `ui` layout components and Tailwind configuration in `apps/frontend`
+- [x] T005 Setup PostgreSQL and initialize Prisma ORM in `apps/backend`
+- [x] T006 [P] Configure global ValidationPipe in NestJS
+- [x] T007 [P] Configure Swagger Module in NestJS
+- [x] T008 [P] Setup JWT Module and `bcrypt` dependencies in `apps/backend`
+- [x] T009 [P] Create base `ui` layout components and Tailwind configuration in `apps/frontend`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

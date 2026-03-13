@@ -43,13 +43,13 @@ description: "Task list for User Authentication feature"
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] Create `User` Prisma model with `id`, `email`, `password_hash`, and `created_at` fields in `apps/backend/prisma/schema.prisma`
-- [ ] T011 [US1] Run Prisma migrations to apply the `User` schema
-- [ ] T012 [P] [US1] Create `RegisterDto` with strict class-validator decorators in `apps/backend/src/auth/`
-- [ ] T013 [US1] Implement `AuthService.register()` encapsulating password hashing with `bcrypt` in `apps/backend/src/auth/`
-- [ ] T014 [US1] Implement POST `/auth/register` endpoint in `AuthController` with Swagger documentation
-- [ ] T015 [P] [US1] Build responsive, dark-themed `/register` page UI in `apps/frontend/src/app/(auth)/register/page.tsx`
-- [ ] T016 [US1] Connect frontend `/register` form to backend `/auth/register` endpoint handling success and API errors
+- [x] T010 [P] [US1] Create `User` Prisma model with `id`, `email`, `password_hash`, and `created_at` fields in `apps/backend/prisma/schema.prisma`
+- [x] T011 [US1] Run Prisma migrations to apply the `User` schema
+- [x] T012 [P] [US1] Create `RegisterDto` with strict class-validator decorators in `apps/backend/src/auth/`
+- [x] T013 [US1] Implement `AuthService.register()` encapsulating password hashing with `bcrypt` in `apps/backend/src/auth/`
+- [x] T014 [US1] Implement POST `/auth/register` endpoint in `AuthController` with Swagger documentation
+- [x] T015 [P] [US1] Build responsive, dark-themed `/register` page UI in `apps/frontend/src/app/(auth)/register/page.tsx`
+- [x] T016 [US1] Connect frontend `/register` form to backend `/auth/register` endpoint handling success and API errors
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -63,12 +63,12 @@ description: "Task list for User Authentication feature"
 
 ### Implementation for User Story 2
 
-- [ ] T017 [P] [US2] Create `LoginDto` with strict validation in `apps/backend/src/auth/`
-- [ ] T018 [US2] Implement `AuthService.validateUser()` and `AuthService.login()` generating a JWT token
-- [ ] T019 [US2] Implement POST `/auth/login` endpoint in `AuthController` returning HttpOnly cookie and Swagger docs
-- [ ] T020 [P] [US2] Build responsive, dark-themed `/login` page UI in `apps/frontend/src/app/(auth)/login/page.tsx`
-- [ ] T021 [US2] Connect frontend `/login` form to backend `/auth/login` endpoint
-- [ ] T022 [US2] Ensure a generic "Invalid credentials" error is shown on login failure
+- [x] T017 [P] [US2] Create `LoginDto` with strict validation in `apps/backend/src/auth/`
+- [x] T018 [US2] Implement `AuthService.validateUser()` and `AuthService.login()` generating a JWT token
+- [x] T019 [US2] Implement POST `/auth/login` endpoint in `AuthController` returning HttpOnly cookie and Swagger docs
+- [x] T020 [P] [US2] Build responsive, dark-themed `/login` page UI in `apps/frontend/src/app/(auth)/login/page.tsx`
+- [x] T021 [US2] Connect frontend `/login` form to backend `/auth/login` endpoint
+- [x] T022 [US2] Ensure a generic "Invalid credentials" error is shown on login failure
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 

@@ -14,5 +14,12 @@ model User {
   id            String   @id @default(uuid())
   email         String   @unique
   password_hash String
+  role          Role     @default(Patient)
   created_at    DateTime @default(now())
+}
+
+enum Role {
+  Patient
+  LabStaff
+  Admin
 }

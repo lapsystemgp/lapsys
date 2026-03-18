@@ -22,6 +22,7 @@ npm test && npm run lint
 TypeScript (Node.js): Follow standard conventions
 
 ## Recent Changes
+- 002-rbac-auth: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
 - 001-user-auth: Added TypeScript (Node.js)
 

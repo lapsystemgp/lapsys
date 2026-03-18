@@ -29,7 +29,7 @@ export class AuthService {
         email: registerDto.email,
         password_hash,
       },
-      select: { id: true, email: true, created_at: true }, // Exclude password_hash
+      select: { id: true, email: true, role: true, created_at: true }, // Exclude password_hash
     });
 
     return user;
@@ -48,12 +48,13 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { email: user.email, sub: user.id };
+    const payload = { email: user.email, sub: user.id, role: user.role };
     return {
       access_token: this.jwtService.sign(payload),
       user: {
         id: user.id,
-        email: user.email
+        email: user.email,
+        role: user.role
       }
     };
   }

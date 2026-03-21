@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, MapPin, Star, Clock, Home, Phone, Mail, Award, CheckCircle, Calendar } from 'lucide-react';
+import { labTests } from '../data/labs';
 
 interface LabDetailsPageProps {
   lab: any;
@@ -23,89 +24,7 @@ export function LabDetailsPage({ lab, onBack, onBookTest }: LabDetailsPageProps)
     );
   }
 
-  // Mock test catalog for the lab
-  const testCatalog = [
-    {
-      id: 1,
-      name: 'Complete Blood Count (CBC)',
-      category: 'Blood Tests',
-      price: 450,
-      description: 'Measures red blood cells, white blood cells, hemoglobin, and platelets',
-      preparation: 'No fasting required',
-      turnaround: '24 hours',
-      parameters: 18
-    },
-    {
-      id: 2,
-      name: 'Lipid Profile',
-      category: 'Blood Tests',
-      price: 650,
-      description: 'Tests for cholesterol levels and heart disease risk',
-      preparation: 'Fasting for 9-12 hours required',
-      turnaround: '24 hours',
-      parameters: 8
-    },
-    {
-      id: 3,
-      name: 'Thyroid Panel (TSH, T3, T4)',
-      category: 'Hormone Tests',
-      price: 580,
-      description: 'Complete thyroid function assessment',
-      preparation: 'No fasting required, best taken in morning',
-      turnaround: '48 hours',
-      parameters: 3
-    },
-    {
-      id: 4,
-      name: 'Liver Function Test (LFT)',
-      category: 'Blood Tests',
-      price: 520,
-      description: 'Evaluates liver health and function',
-      preparation: 'Fasting for 8-12 hours recommended',
-      turnaround: '24 hours',
-      parameters: 12
-    },
-    {
-      id: 5,
-      name: 'Kidney Function Test',
-      category: 'Blood Tests',
-      price: 490,
-      description: 'Assesses kidney health and function',
-      preparation: 'No fasting required',
-      turnaround: '24 hours',
-      parameters: 10
-    },
-    {
-      id: 6,
-      name: 'HbA1c (Diabetes)',
-      category: 'Diabetes',
-      price: 420,
-      description: 'Measures average blood sugar over 3 months',
-      preparation: 'No fasting required',
-      turnaround: '24 hours',
-      parameters: 1
-    },
-    {
-      id: 7,
-      name: 'Vitamin D Test',
-      category: 'Vitamin Tests',
-      price: 850,
-      description: 'Measures Vitamin D levels in blood',
-      preparation: 'No fasting required',
-      turnaround: '48 hours',
-      parameters: 1
-    },
-    {
-      id: 8,
-      name: 'Vitamin B12',
-      category: 'Vitamin Tests',
-      price: 680,
-      description: 'Tests for Vitamin B12 deficiency',
-      preparation: 'No fasting required',
-      turnaround: '48 hours',
-      parameters: 1
-    }
-  ];
+  const testCatalog = labTests;
 
   const categories = ['all', 'Blood Tests', 'Hormone Tests', 'Diabetes', 'Vitamin Tests'];
   

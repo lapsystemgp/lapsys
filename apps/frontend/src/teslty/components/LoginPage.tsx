@@ -7,10 +7,11 @@ import { Input } from './ui/input';
 interface LoginPageProps {
   onLogin: (role: 'patient' | 'lab') => void;
   onBack: () => void;
+  defaultMode?: 'login' | 'register';
 }
 
-export function LoginPage({ onLogin, onBack }: LoginPageProps) {
-  const [isSignup, setIsSignup] = useState(false);
+export function LoginPage({ onLogin, onBack, defaultMode = 'login' }: LoginPageProps) {
+  const [isSignup, setIsSignup] = useState(defaultMode === 'register');
   const [userType, setUserType] = useState<'patient' | 'lab'>('patient');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

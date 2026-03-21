@@ -1,19 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, MapPin, Star, Clock, Home, Filter, SlidersHorizontal, Info, Search } from 'lucide-react';
-
-interface Lab {
-  id: number;
-  name: string;
-  rating: number;
-  reviews: number;
-  distance: number;
-  price: number;
-  homeCollection: boolean;
-  timeSlots: string[];
-  address: string;
-  accreditation: string;
-  turnaroundTime: string;
-}
+import { labs } from '../data/labs';
+import type { Lab } from '../data/labs';
 
 interface LabComparisonProps {
   searchQuery: string;
@@ -36,74 +24,7 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
     window.scrollTo(0, 0);
   }, []);
 
-  // Mock data
-  const labs: Lab[] = [
-    {
-      id: 1,
-      name: 'Alaf labs',
-      rating: 4.8,
-      reviews: 342,
-      distance: 1.2,
-      price: 450,
-      homeCollection: true,
-      timeSlots: ['9:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'],
-      address: '12 Nile Corniche, Downtown Cairo',
-      accreditation: 'NABL, CAP',
-      turnaroundTime: '24 hours'
-    },
-    {
-      id: 2,
-      name: 'Al mokhtabar',
-      rating: 4.6,
-      reviews: 218,
-      distance: 2.5,
-      price: 380,
-      homeCollection: true,
-      timeSlots: ['8:00 AM', '10:00 AM', '1:00 PM', '3:00 PM'],
-      address: '45 Tahrir Street, Garden City, Cairo',
-      accreditation: 'NABL',
-      turnaroundTime: '48 hours'
-    },
-    {
-      id: 3,
-      name: 'Daman labs',
-      rating: 4.9,
-      reviews: 567,
-      distance: 3.8,
-      price: 520,
-      homeCollection: true,
-      timeSlots: ['9:30 AM', '12:00 PM', '3:00 PM', '5:00 PM'],
-      address: '78 El Merghany Street, Heliopolis, Cairo',
-      accreditation: 'NABL, CAP, ISO',
-      turnaroundTime: '12 hours'
-    },
-    {
-      id: 4,
-      name: 'Makka lab',
-      rating: 4.3,
-      reviews: 156,
-      distance: 0.8,
-      price: 350,
-      homeCollection: false,
-      timeSlots: ['8:30 AM', '11:30 AM', '2:30 PM'],
-      address: '32 Ramses Street, Downtown Cairo',
-      accreditation: 'NABL',
-      turnaroundTime: '48 hours'
-    },
-    {
-      id: 5,
-      name: 'Future lab',
-      rating: 4.7,
-      reviews: 423,
-      distance: 4.2,
-      price: 580,
-      homeCollection: true,
-      timeSlots: ['7:00 AM', '10:00 AM', '1:00 PM', '4:00 PM', '6:00 PM'],
-      address: '55 Road 9, Maadi, Cairo',
-      accreditation: 'NABL, CAP, ISO, JCI',
-      turnaroundTime: '6 hours'
-    }
-  ];
+  const labList: Lab[] = labs;
 
   const testInfo = {
     name: searchQuery || 'Complete Blood Count (CBC)',
@@ -117,7 +38,7 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
     commonlyDetects: ['Anemia', 'Infections', 'Blood disorders', 'Immune system issues']
   };
 
-  const filteredLabs = labs
+  const filteredLabs = labList
     .filter(lab => !homeCollectionOnly || lab.homeCollection)
     .filter(lab => lab.name.toLowerCase().includes(localSearchQuery.toLowerCase()))
     .filter(lab => lab.rating >= minRating)

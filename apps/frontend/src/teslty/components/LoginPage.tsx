@@ -1,47 +1,109 @@
 import { useState } from 'react';
 import { ArrowLeft, TestTube, Mail, Lock, User } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
-import { Label } from './ui/label';
-import { Input } from './ui/input';
+import { API_BASE_URL } from '../../lib/api';
+import { useSession } from '../../components/SessionProvider';
 
 interface LoginPageProps {
   onLogin: (role: 'patient' | 'lab') => void;
   onBack: () => void;
   defaultMode?: 'login' | 'register';
+  onAuthenticated?: (params: { role: 'patient' | 'lab'; lab_onboarding_status?: string | null }) => void;
 }
 
-export function LoginPage({ onLogin, onBack, defaultMode = 'login' }: LoginPageProps) {
+export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthenticated }: LoginPageProps) {
   const [isSignup, setIsSignup] = useState(defaultMode === 'register');
   const [userType, setUserType] = useState<'patient' | 'lab'>('patient');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
-  const [resetEmail, setResetEmail] = useState('');
-  const [resetSent, setResetSent] = useState(false);
+  const [labAddress, setLabAddress] = useState('');
+  const [labPhone, setLabPhone] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { refresh } = useSession();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Sign in directly without validation - fields are optional
-    onLogin(userType);
-  };
+    setError(null);
+    setLoading(true);
 
-  const handleForgotPassword = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simulate sending a reset email
-    setResetSent(true);
-    setTimeout(() => {
-      setIsForgotPasswordOpen(false);
-      setResetSent(false);
-      setResetEmail('');
-    }, 2000);
-  };
+    try {
+      if (isSignup) {
+        if (userType === 'patient') {
+          const registerRes = await fetch(`${API_BASE_URL}/auth/register/patient`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              email,
+              password,
+              full_name: name || undefined,
+            }),
+          });
 
-  const handleDialogClose = (open: boolean) => {
-    setIsForgotPasswordOpen(open);
-    if (!open) {
-      setResetSent(false);
-      setResetEmail('');
+          if (!registerRes.ok) {
+            const msg = await registerRes.text();
+            throw new Error(msg || 'Failed to register');
+          }
+        } else {
+          if (!labAddress.trim()) {
+            throw new Error('Lab address is required');
+          }
+          if (!name.trim()) {
+            throw new Error('Lab name is required');
+          }
+
+          const registerRes = await fetch(`${API_BASE_URL}/auth/register/lab`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              email,
+              password,
+              lab_name: name,
+              address: labAddress,
+              phone: labPhone || undefined,
+            }),
+          });
+
+          if (!registerRes.ok) {
+            const msg = await registerRes.text();
+            throw new Error(msg || 'Failed to register');
+          }
+        }
+      }
+
+      const loginRes = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!loginRes.ok) {
+        const msg = await loginRes.text();
+        throw new Error(msg || 'Invalid credentials');
+      }
+
+      const data = (await loginRes.json()) as {
+        user?: { role?: string; lab_onboarding_status?: string | null };
+      };
+
+      const role = data.user?.role === 'LabStaff' ? 'lab' : 'patient';
+      const lab_onboarding_status = data.user?.lab_onboarding_status ?? null;
+
+      await refresh();
+
+      if (onAuthenticated) {
+        onAuthenticated({ role, lab_onboarding_status });
+      } else {
+        onLogin(role);
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -109,8 +171,36 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login' }: LoginPageP
                       onChange={(e) => setName(e.target.value)}
                       className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder={userType === 'lab' ? 'Enter lab name' : 'Enter your name'}
+                      required={userType === 'lab'}
                     />
                   </div>
+                </div>
+              )}
+
+              {isSignup && userType === 'lab' && (
+                <div>
+                  <label className="block text-gray-700 mb-2">Lab Address</label>
+                  <input
+                    type="text"
+                    value={labAddress}
+                    onChange={(e) => setLabAddress(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter lab address"
+                    required
+                  />
+                </div>
+              )}
+
+              {isSignup && userType === 'lab' && (
+                <div>
+                  <label className="block text-gray-700 mb-2">Lab Phone (Optional)</label>
+                  <input
+                    type="tel"
+                    value={labPhone}
+                    onChange={(e) => setLabPhone(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="+20 ..."
+                  />
                 </div>
               )}
 
@@ -124,6 +214,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login' }: LoginPageP
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter your email"
+                    required
                   />
                 </div>
               </div>
@@ -138,23 +229,17 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login' }: LoginPageP
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter your password"
+                    minLength={8}
+                    required
                   />
                 </div>
               </div>
 
               {!isSignup && (
                 <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
-                    <span className="text-gray-600">Remember me</span>
-                  </label>
-                  <button 
-                    type="button"
-                    onClick={() => setIsForgotPasswordOpen(true)}
-                    className="text-blue-600 hover:text-blue-700"
-                  >
-                    Forgot password?
-                  </button>
+                  <div className="text-sm text-gray-500">
+                    Password reset is not available yet.
+                  </div>
                 </div>
               )}
 
@@ -166,11 +251,18 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login' }: LoginPageP
                 </div>
               )}
 
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-800">{error}</p>
+                </div>
+              )}
+
               <button
                 type="submit"
+                disabled={loading}
                 className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
-                {isSignup ? 'Create Account' : 'Sign In'}
+                {loading ? 'Please wait…' : isSignup ? 'Create Account' : 'Sign In'}
               </button>
             </form>
 
@@ -189,9 +281,11 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login' }: LoginPageP
 
             {/* Demo Credentials */}
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <p className="text-gray-700 mb-2">Demo Mode:</p>
+              <p className="text-gray-700 mb-2">Demo Credentials:</p>
               <div className="space-y-1 text-gray-600">
-                <p>Just click "Sign In" to continue - no credentials needed!</p>
+                <p>Patient: `patient@testly.com` / `password123`</p>
+                <p>Lab: `alaflabs@testly.com` / `password123`</p>
+                <p>Lab (Pending): `pendinglab@testly.com` / `password123`</p>
               </div>
             </div>
           </div>
@@ -206,62 +300,6 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login' }: LoginPageP
         </div>
       </div>
 
-      {/* Forgot Password Dialog */}
-      <Dialog open={isForgotPasswordOpen} onOpenChange={handleDialogClose}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Forgot password</DialogTitle>
-            <DialogDescription>
-              {resetSent 
-                ? 'Check your email for password reset instructions'
-                : "Enter your email below and we'll send you a password reset link"
-              }
-            </DialogDescription>
-          </DialogHeader>
-          {!resetSent && (
-            <>
-              <div className="mt-4">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  className="mt-2"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-              <DialogFooter>
-                <button
-                  type="button"
-                  className="text-sm text-gray-500 hover:text-gray-900"
-                  onClick={() => handleDialogClose(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={!resetEmail}
-                  className="py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleForgotPassword}
-                >
-                  Send Reset
-                </button>
-              </DialogFooter>
-            </>
-          )}
-          {resetSent && (
-            <div className="py-4">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-green-800 text-center">
-                  Password reset email sent successfully! Check your inbox.
-                </p>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

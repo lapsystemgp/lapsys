@@ -16,10 +16,212 @@ model User {
   password_hash String
   role          Role     @default(Patient)
   created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  patient_profile PatientProfile?
+  lab_profile     LabProfile?
+  status_events   BookingStatusEvent[]
+  result_files    ResultFile[]         @relation("ResultFilesUploadedBy")
 }
 
 enum Role {
   Patient
   LabStaff
   Admin
+}
+
+enum LabOnboardingStatus {
+  PendingReview
+  Active
+  Rejected
+  Suspended
+}
+
+enum BookingType {
+  LabVisit
+  HomeCollection
+}
+
+enum BookingStatus {
+  Pending
+  Confirmed
+  Rejected
+  Cancelled
+  Completed
+}
+
+enum ResultStatus {
+  Pending
+  Uploaded
+  Delivered
+}
+
+enum ReviewStatus {
+  Pending
+  Published
+  Rejected
+}
+
+model PatientProfile {
+  id         String   @id @default(uuid())
+  user_id    String   @unique
+  full_name  String?
+  phone      String?
+  address    String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user     User      @relation(fields: [user_id], references: [id])
+  bookings Booking[]
+  reviews  Review[]
+}
+
+model LabProfile {
+  id                String              @id @default(uuid())
+  user_id           String              @unique
+  lab_name          String
+  phone             String?
+  address           String
+  accreditation     String?
+  turnaround_time   String?
+  home_collection   Boolean             @default(false)
+  onboarding_status LabOnboardingStatus @default(PendingReview)
+  rating_average    Float?
+  review_count      Int                 @default(0)
+  created_at        DateTime            @default(now())
+  updated_at        DateTime            @updatedAt
+
+  user           User             @relation(fields: [user_id], references: [id])
+  tests          LabTest[]
+  schedule_slots LabScheduleSlot[]
+  bookings       Booking[]
+  reviews        Review[]
+}
+
+model LabTest {
+  id               String   @id @default(uuid())
+  lab_profile_id   String
+  name             String
+  category         String
+  price_egp        Int
+  description      String?
+  preparation      String?
+  turnaround_time  String?
+  parameters_count Int?
+  is_active        Boolean  @default(true)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  lab_profile LabProfile @relation(fields: [lab_profile_id], references: [id])
+  bookings    Booking[]
+}
+
+model LabScheduleSlot {
+  id             String   @id @default(uuid())
+  lab_profile_id String
+  starts_at      DateTime
+  ends_at        DateTime
+  capacity       Int      @default(1)
+  is_active      Boolean  @default(true)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  lab_profile LabProfile @relation(fields: [lab_profile_id], references: [id])
+  booking     Booking?
+
+  @@index([lab_profile_id, starts_at])
+}
+
+model Booking {
+  id                 String        @id @default(uuid())
+  patient_profile_id String
+  lab_profile_id     String
+  lab_test_id        String
+  booking_type       BookingType
+  status             BookingStatus @default(Pending)
+  scheduled_at       DateTime
+  home_address       String?
+  total_price_egp    Int
+  created_at         DateTime      @default(now())
+  updated_at         DateTime      @updatedAt
+
+  patient_profile PatientProfile     @relation(fields: [patient_profile_id], references: [id])
+  lab_profile     LabProfile         @relation(fields: [lab_profile_id], references: [id])
+  lab_test        LabTest            @relation(fields: [lab_test_id], references: [id])
+  status_events   BookingStatusEvent[]
+  result_file     ResultFile?
+  result_summary  ResultSummary?
+  review          Review?
+  schedule_slot_id String?           @unique
+  schedule_slot   LabScheduleSlot?   @relation(fields: [schedule_slot_id], references: [id])
+
+  @@index([lab_profile_id, scheduled_at])
+  @@index([patient_profile_id, scheduled_at])
+}
+
+model BookingStatusEvent {
+  id           String        @id @default(uuid())
+  booking_id   String
+  status       BookingStatus
+  note         String?
+  actor_user_id String?
+  created_at   DateTime      @default(now())
+
+  booking    Booking @relation(fields: [booking_id], references: [id])
+  actor_user User?   @relation(fields: [actor_user_id], references: [id])
+
+  @@index([booking_id, created_at])
+}
+
+model ResultFile {
+  id                String       @id @default(uuid())
+  booking_id        String       @unique
+  status            ResultStatus @default(Pending)
+  file_name         String
+  file_url          String
+  mime_type         String
+  size_bytes        Int
+  uploaded_at       DateTime     @default(now())
+  uploaded_by_user_id String?
+
+  booking          Booking @relation(fields: [booking_id], references: [id])
+  uploaded_by_user User?   @relation("ResultFilesUploadedBy", fields: [uploaded_by_user_id], references: [id])
+}
+
+model ResultSummary {
+  id         String   @id @default(uuid())
+  booking_id String   @unique
+  summary    String
+  highlights Json?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  booking Booking @relation(fields: [booking_id], references: [id])
+}
+
+model Review {
+  id                 String       @id @default(uuid())
+  booking_id         String       @unique
+  patient_profile_id String
+  lab_profile_id     String
+  rating             Int
+  comment            String?
+  status             ReviewStatus @default(Pending)
+  created_at         DateTime     @default(now())
+  updated_at         DateTime     @updatedAt
+
+  booking         Booking        @relation(fields: [booking_id], references: [id])
+  patient_profile PatientProfile @relation(fields: [patient_profile_id], references: [id])
+  lab_profile     LabProfile     @relation(fields: [lab_profile_id], references: [id])
+}
+
+model FaqEntry {
+  id         String   @id @default(uuid())
+  question   String
+  answer     String
+  category   String?
+  tags       String[]
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }

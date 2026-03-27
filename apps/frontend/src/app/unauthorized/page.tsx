@@ -1,6 +1,12 @@
 import Link from 'next/link';
 
-export default function UnauthorizedPage() {
+export default function UnauthorizedPage({
+  searchParams,
+}: {
+  searchParams?: { reason?: string };
+}) {
+  const isPendingReview = searchParams?.reason === 'pending_review';
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-24 bg-zinc-950 text-white">
       <div className="z-10 w-full max-w-md items-center justify-between font-mono text-sm">
@@ -9,7 +15,9 @@ export default function UnauthorizedPage() {
             Access Denied
           </h1>
           <p className="text-zinc-400">
-            You do not have the necessary permissions to view this page.
+            {isPendingReview
+              ? "Your lab account is pending review. You'll be able to access the lab dashboard after activation."
+              : 'You do not have the necessary permissions to view this page.'}
           </p>
           <div className="pt-4">
             <Link 

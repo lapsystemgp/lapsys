@@ -3,10 +3,24 @@
 import { useRouter } from 'next/navigation';
 import { LandingPage } from '../teslty/components/LandingPage';
 import type { Page, UserRole } from '../teslty/types';
+import { useSession } from '../components/SessionProvider';
 
 export default function HomePage() {
   const router = useRouter();
-  const userRole: UserRole = null;
+  const { user, logout } = useSession();
+
+  const userRole: UserRole =
+    user?.role === 'Patient' ? 'patient' : user?.role === 'LabStaff' ? 'lab' : null;
+
+  const userLabel =
+    userRole === 'lab'
+      ? user?.lab_profile?.lab_name || user?.email
+      : user?.patient_profile?.full_name || user?.email;
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
 
   const handleNavigate = (page: Page) => {
     switch (page) {
@@ -41,7 +55,8 @@ export default function HomePage() {
       onSearch={(query) => router.push(`/labs?q=${encodeURIComponent(query)}`)}
       onNavigate={handleNavigate}
       userRole={userRole}
-      onLogout={() => router.push('/login')}
+      currentUserLabel={userLabel}
+      onLogout={handleLogout}
       onLabSelect={(lab) => router.push(`/labs/${lab.id}`)}
     />
   );

@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:16
+    container_name: testly_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: testly_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - testly_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  testly_postgres_data:
+

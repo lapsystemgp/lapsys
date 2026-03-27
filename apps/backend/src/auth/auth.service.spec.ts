@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { Role } from '@prisma/client';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -44,16 +45,17 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    it('should create a new user if email is unique', async () => {
+    it('should create a new patient user if email is unique', async () => {
       const dto = { email: 'test@example.com', password: 'password123' };
       mockPrismaService.user.findUnique.mockResolvedValue(null);
       mockPrismaService.user.create.mockResolvedValue({
         id: '1',
         email: dto.email,
+        role: Role.Patient,
         created_at: new Date(),
       });
 
-      const result = await service.register(dto);
+      const result = await service.registerPatient(dto);
       expect(result.email).toEqual(dto.email);
       expect(mockPrismaService.user.create).toHaveBeenCalled();
     });
@@ -62,7 +64,7 @@ describe('AuthService', () => {
       const dto = { email: 'exist@example.com', password: 'password123' };
       mockPrismaService.user.findUnique.mockResolvedValue({ email: dto.email });
 
-      await expect(service.register(dto)).rejects.toThrow(ConflictException);
+      await expect(service.registerPatient(dto)).rejects.toThrow(ConflictException);
     });
   });
 
@@ -101,7 +103,8 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('should return an access token', async () => {
-      const user = { id: '1', email: 'test@example.com' };
+      const user = { id: '1', email: 'test@example.com', role: Role.Patient };
+      mockPrismaService.user.findUnique.mockResolvedValue({ lab_profile: null });
       const result = await service.login(user);
       expect(result.access_token).toEqual('test_token');
       expect(result.user.email).toEqual(user.email);

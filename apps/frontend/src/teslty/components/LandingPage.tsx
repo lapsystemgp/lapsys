@@ -8,11 +8,12 @@ interface LandingPageProps {
   onSearch: (query: string) => void;
   onNavigate: (page: Page) => void;
   userRole?: UserRole;
+  currentUserLabel?: string;
   onLogout?: () => void;
   onLabSelect?: (lab: any) => void;
 }
 
-export function LandingPage({ onSearch, onNavigate, userRole, onLogout, onLabSelect }: LandingPageProps) {
+export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, onLogout, onLabSelect }: LandingPageProps) {
   const [searchInput, setSearchInput] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -40,10 +41,10 @@ export function LandingPage({ onSearch, onNavigate, userRole, onLogout, onLabSel
             <nav className="hidden md:flex items-center gap-4 lg:gap-6">
               <a href="#features" className="text-gray-600 hover:text-gray-900 text-sm lg:text-base">Features</a>
               <a href="#how-it-works" className="text-gray-600 hover:text-gray-900 text-sm lg:text-base">How It Works</a>
-              {userRole === 'patient' ? (
+              {userRole ? (
                 <>
                   <button
-                    onClick={() => onNavigate('user-dashboard')}
+                    onClick={() => onNavigate(userRole === 'lab' ? 'lab-dashboard' : 'user-dashboard')}
                     className="flex items-center gap-2 px-3 lg:px-4 py-2 text-gray-600 hover:text-gray-900 text-sm lg:text-base"
                   >
                     <LayoutDashboard className="w-4 h-4 lg:w-5 lg:h-5" />
@@ -51,7 +52,7 @@ export function LandingPage({ onSearch, onNavigate, userRole, onLogout, onLabSel
                   </button>
                   <div className="flex items-center gap-2 px-4 py-3 bg-gray-100 rounded-lg">
                     <User className="w-4 h-4 text-gray-600" />
-                    <span className="text-gray-900">Mazen Amir</span>
+                    <span className="text-gray-900">{currentUserLabel || 'Account'}</span>
                   </div>
                   <button
                     onClick={onLogout}
@@ -80,14 +81,14 @@ export function LandingPage({ onSearch, onNavigate, userRole, onLogout, onLabSel
           </div>
 
           {/* Mobile Navigation */}
-          {mobileMenuOpen && (
+              {mobileMenuOpen && (
             <nav className="md:hidden mt-4 pb-4 space-y-3 border-t border-gray-200 pt-4">
               <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block text-gray-600 hover:text-gray-900 py-2">Features</a>
               <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block text-gray-600 hover:text-gray-900 py-2">How It Works</a>
-              {userRole === 'patient' ? (
+              {userRole ? (
                 <>
                   <button
-                    onClick={() => { onNavigate('user-dashboard'); setMobileMenuOpen(false); }}
+                    onClick={() => { onNavigate(userRole === 'lab' ? 'lab-dashboard' : 'user-dashboard'); setMobileMenuOpen(false); }}
                     className="w-full flex items-center gap-2 px-4 py-3 text-gray-600 hover:text-gray-900 bg-gray-50 rounded-lg"
                   >
                     <LayoutDashboard className="w-5 h-5" />
@@ -95,7 +96,7 @@ export function LandingPage({ onSearch, onNavigate, userRole, onLogout, onLabSel
                   </button>
                   <div className="flex items-center gap-2 px-4 py-3 bg-gray-100 rounded-lg">
                     <User className="w-4 h-4 text-gray-600" />
-                    <span className="text-gray-900">Mazen Amir</span>
+                    <span className="text-gray-900">{currentUserLabel || 'Account'}</span>
                   </div>
                   <button
                     onClick={() => { onLogout?.(); setMobileMenuOpen(false); }}

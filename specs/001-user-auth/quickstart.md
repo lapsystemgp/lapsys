@@ -3,7 +3,7 @@
 This document outlines the steps needed to quickly start the application and test the User Authentication feature once implemented.
 
 ## Prerequisites
-- PostgreSQL running locally (e.g., via Docker).
+- PostgreSQL running locally (e.g., via Docker). From repo root you can run `npm run db:up`.
 - Node.js (v20+) and `pnpm`/`npm` installed.
 
 ## Setup Steps
@@ -12,7 +12,8 @@ This document outlines the steps needed to quickly start the application and tes
    Change into the backend directory and run the Prisma migrations to set up the `User` table.
    ```bash
    cd apps/backend
-   npx prisma migrate dev --name init_user
+   npx prisma migrate dev --name init_full_schema
+   npx prisma db seed
    ```
 
 2. **Environment Variables**:

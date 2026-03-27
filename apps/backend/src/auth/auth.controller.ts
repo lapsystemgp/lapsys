@@ -1,10 +1,24 @@
-import { Controller, Post, Body, Res, HttpCode, HttpStatus, UnauthorizedException, Get, UseGuards, Req, Logger } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Post,
+  Req,
+  Res,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth } from '@nestjs/swagger';
 import { Response, Request } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { AUTH_COOKIE_NAME } from './auth.constants';
+import { PatientRegisterDto } from './dto/patient-register.dto';
+import { LabRegisterDto } from './dto/lab-register.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -14,13 +28,22 @@ export class AuthController {
 
   constructor(private readonly authService: AuthService) {}
 
-  @Post('register')
-  @ApiOperation({ summary: 'Register a new user' })
+  @Post('register/patient')
+  @ApiOperation({ summary: 'Register a new patient' })
   @ApiResponse({ status: 201, description: 'User successfully created.' })
   @ApiResponse({ status: 400, description: 'Validation failed or email taken.' })
-  async register(@Body() registerDto: RegisterDto) {
-    this.logger.log(`Incoming registration request for: ${registerDto.email}`);
-    return this.authService.register(registerDto);
+  async registerPatient(@Body() registerDto: PatientRegisterDto) {
+    this.logger.log(`Incoming patient registration request for: ${registerDto.email}`);
+    return this.authService.registerPatient(registerDto);
+  }
+
+  @Post('register/lab')
+  @ApiOperation({ summary: 'Register a new lab account (PendingReview)' })
+  @ApiResponse({ status: 201, description: 'Lab account successfully created (pending review).' })
+  @ApiResponse({ status: 400, description: 'Validation failed or email taken.' })
+  async registerLab(@Body() registerDto: LabRegisterDto) {
+    this.logger.log(`Incoming lab registration request for: ${registerDto.email}`);
+    return this.authService.registerLab(registerDto);
   }
 
   @Post('login')
@@ -37,22 +60,38 @@ export class AuthController {
     const { access_token, user: userData } = await this.authService.login(user);
     
     // Set HttpOnly cookie
-    response.cookie('Authentication', access_token, {
+    response.cookie(AUTH_COOKIE_NAME, access_token, {
       httpOnly: true,
       path: '/',
       maxAge: 3600 * 1000, // 1 hour
       sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
     });
 
     return { message: 'Login successful', user: userData };
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  @ApiOperation({ summary: 'Get current user profile (Protected)' })
+  @Get('me')
+  @ApiOperation({ summary: 'Get current user (Protected)' })
   @ApiResponse({ status: 200, description: 'Profile retrieved' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  getProfile(@Req() req: Request) {
-    return req.user;
+  async getMe(@Req() req: Request) {
+    // JwtStrategy sets req.user to include id/role, but we fetch the canonical user from DB.
+    // @ts-expect-error - passport attaches user at runtime
+    const userId: string | undefined = req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException();
+    }
+    return this.authService.getCurrentUser(userId);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Logout (clears session cookie)' })
+  @ApiResponse({ status: 200, description: 'Logged out' })
+  logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie(AUTH_COOKIE_NAME, { path: '/' });
+    return { message: 'Logged out' };
   }
 }

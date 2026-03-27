@@ -13,14 +13,17 @@ export function middleware(request: NextRequest) {
   try {
     const payload = decodeJwt(token);
     const role = payload.role;
-
-/* Handled above already, confirming the middleware currently has this block:
-  if (request.nextUrl.pathname.startsWith('/admin') && role !== 'Admin') {
-    return NextResponse.redirect(new URL('/unauthorized', request.url));
-  }
-*/
+    const labStatus = payload.lab_onboarding_status;
 
     if (request.nextUrl.pathname.startsWith('/lab') && role !== 'LabStaff') {
+      return NextResponse.redirect(new URL('/unauthorized', request.url));
+    }
+
+    if (request.nextUrl.pathname.startsWith('/lab') && role === 'LabStaff' && labStatus !== 'Active') {
+      return NextResponse.redirect(new URL('/unauthorized?reason=pending_review', request.url));
+    }
+
+    if (request.nextUrl.pathname.startsWith('/patient') && role !== 'Patient') {
       return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
 
@@ -32,5 +35,5 @@ export function middleware(request: NextRequest) {
 
 // Config to specify which paths the middleware should run on.
 export const config = {
-  matcher: ['/admin/:path*', '/lab/:path*'],
+  matcher: ['/lab/:path*', '/patient/:path*'],
 };

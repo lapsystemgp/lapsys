@@ -6,6 +6,7 @@ import { Input } from './ui/input';
 
 interface LabDashboardProps {
   onLogout: () => void;
+  labName?: string;
 }
 
 interface Test {
@@ -29,7 +30,7 @@ interface Booking {
   archived?: boolean;
 }
 
-export function LabDashboard({ onLogout }: LabDashboardProps) {
+export function LabDashboard({ onLogout, labName }: LabDashboardProps) {
   const [activeTab, setActiveTab] = useState<'bookings' | 'tests' | 'results' | 'analytics' | 'schedule'>('bookings');
   const [tests, setTests] = useState<Test[]>([
     { id: 1, name: 'Complete Blood Count (CBC)', price: 450, turnaround: '24 hours', active: true },
@@ -241,7 +242,7 @@ export function LabDashboard({ onLogout }: LabDashboardProps) {
           <div className="flex items-center gap-2">
             <TestTube className="w-8 h-8 text-blue-600" />
             <div>
-              <div className="text-xl text-blue-600">Alaf labs</div>
+              <div className="text-xl text-blue-600">{labName || 'Lab'}</div>
               <div className="text-gray-600">Lab Dashboard</div>
             </div>
           </div>

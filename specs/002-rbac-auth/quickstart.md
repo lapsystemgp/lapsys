@@ -6,40 +6,60 @@
 
 1. PostgreSQL Database running locally or via Docker.
 2. Backend (NestJS) and Frontend (Next.js) servers up and running.
-3. At least one user account seeded into the `Users` table for each role:
-   - User Admin (`role: 'Admin'`)
-   - User Lab Staff (`role: 'Lab Staff'`)
-   - User Patient (`role: 'Patient'`)
+3. At least one seeded user for each product role:
+   - Lab Staff (`role: 'LabStaff'`) with `lab_profile.onboarding_status = 'Active'`
+   - Lab Staff pending review (`role: 'LabStaff'`) with `lab_profile.onboarding_status = 'PendingReview'`
+   - Patient (`role: 'Patient'`)
 
 ## Validating Backend Routes (cURL/Postman)
 
-1. Obtain a token by logging in as the Admin:
+1. Login as the Patient and store the session cookie:
    ```bash
-   curl -X POST http://localhost:3000/auth/login \
+   curl -i -c patient.txt -X POST http://localhost:3001/auth/login \
      -H 'Content-Type: application/json' \
-     -d '{"email":"admin@example.com","password":"password123"}'
+     -d '{"email":"patient@testly.com","password":"password123"}'
    ```
-   *Expected Response:* Contains `access_token` and `user.role: "Admin"`.
+   *Expected Response:* `Set-Cookie: access_token=...` and `user.role: "Patient"`.
 
-2. Test the Admin route with the token:
+2. Patient should access patient route:
    ```bash
-   curl -X GET http://localhost:3000/api/admin/data \
-     -H 'Authorization: Bearer <ADMIN_TOKEN>'
+   curl -b patient.txt -X GET http://localhost:3001/api/patient/data
    ```
-   *Expected Response:* `200 OK` (Admin data)
+   *Expected Response:* `200 OK`
 
-3. Test the Lab route with the Admin token:
+3. Patient should NOT access lab route:
    ```bash
-   curl -X GET http://localhost:3000/api/lab/data \
-     -H 'Authorization: Bearer <ADMIN_TOKEN>'
+   curl -b patient.txt -X GET http://localhost:3001/api/lab/data
    ```
    *Expected Response:* `403 Forbidden`
+
+4. Login as active Lab Staff and store the session cookie:
+   ```bash
+   curl -i -c lab.txt -X POST http://localhost:3001/auth/login \
+     -H 'Content-Type: application/json' \
+     -d '{"email":"alaflabs@testly.com","password":"password123"}'
+   ```
+
+5. Lab Staff should access lab route:
+   ```bash
+   curl -b lab.txt -X GET http://localhost:3001/api/lab/data
+   ```
+   *Expected Response:* `200 OK`
+
+6. Pending-review lab should be blocked:
+   ```bash
+   curl -i -c pending.txt -X POST http://localhost:3001/auth/login \
+     -H 'Content-Type: application/json' \
+     -d '{"email":"pendinglab@testly.com","password":"password123"}'
+   curl -b pending.txt -X GET http://localhost:3001/api/lab/data
+   ```
+   *Expected Response:* `403 Forbidden` (pending review)
 
 ## Validating Frontend Routes (Browser)
 
 1. Run the frontend `npm run dev` in `apps/frontend`.
 2. Login as the Lab Staff.
-3. Navigate to `http://localhost:3001/lab/dashboard`.
+3. Navigate to `http://localhost:3000/lab/dashboard`.
    *Expected Behavior:* Page loads successfully.
-4. Navigate to `http://localhost:3001/admin/dashboard`.
+4. Login as the pending-review lab and navigate to `http://localhost:3000/lab/dashboard`.
    *Expected Behavior:* Directed to `/unauthorized` or `/login`.

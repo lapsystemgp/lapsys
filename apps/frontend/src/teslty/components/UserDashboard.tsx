@@ -5,9 +5,11 @@ import type { Page } from '../types';
 interface UserDashboardProps {
   onNavigate: (page: Page) => void;
   onLogout: () => void;
+  currentUserLabel?: string;
+  currentUserEmail?: string;
 }
 
-export function UserDashboard({ onNavigate, onLogout }: UserDashboardProps) {
+export function UserDashboard({ onNavigate, onLogout, currentUserLabel, currentUserEmail }: UserDashboardProps) {
   const [activeTab, setActiveTab] = useState<'bookings' | 'results' | 'profile'>('bookings');
 
   const upcomingBookings = [
@@ -74,7 +76,7 @@ export function UserDashboard({ onNavigate, onLogout }: UserDashboardProps) {
             </button>
             <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
               <User className="w-5 h-5 text-gray-600" />
-              <span className="text-gray-900">Mazen Amir</span>
+              <span className="text-gray-900">{currentUserLabel || 'Account'}</span>
             </div>
             <button
               onClick={onLogout}
@@ -241,7 +243,7 @@ export function UserDashboard({ onNavigate, onLogout }: UserDashboardProps) {
                     <label className="block text-gray-700 mb-2">Full Name</label>
                     <input
                       type="text"
-                      defaultValue="Mazen Amir"
+                      defaultValue={currentUserLabel || ''}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg"
                     />
                   </div>
@@ -249,7 +251,7 @@ export function UserDashboard({ onNavigate, onLogout }: UserDashboardProps) {
                     <label className="block text-gray-700 mb-2">Email</label>
                     <input
                       type="email"
-                      defaultValue="mazen.amir@example.com"
+                      defaultValue={currentUserEmail || ''}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg"
                     />
                   </div>

@@ -3,6 +3,8 @@
 **Input**: Design documents from `/specs/002-rbac-auth/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/api.md
 
+> Note: The product delivery plan excludes Admin UI/routes for v1; only `Patient` and `LabStaff` role routing is treated as in-scope.
+
 ## Phase 1: Setup (Shared Infrastructure)
 
 **Purpose**: Project initialization and basic structure

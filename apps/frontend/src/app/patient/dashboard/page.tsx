@@ -3,9 +3,16 @@
 import { useRouter } from "next/navigation";
 import { UserDashboard } from "../../../teslty/components/UserDashboard";
 import type { Page } from "../../../teslty/types";
+import { useSession } from "../../../components/SessionProvider";
 
 export default function PatientDashboardPage() {
   const router = useRouter();
+  const { user, logout } = useSession();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
 
   const handleNavigate = (page: Page) => {
     switch (page) {
@@ -35,5 +42,14 @@ export default function PatientDashboardPage() {
     }
   };
 
-  return <UserDashboard onNavigate={handleNavigate} onLogout={() => router.push("/login")} />;
+  const userLabel = user?.patient_profile?.full_name || user?.email;
+
+  return (
+    <UserDashboard
+      onNavigate={handleNavigate}
+      onLogout={handleLogout}
+      currentUserLabel={userLabel}
+      currentUserEmail={user?.email}
+    />
+  );
 }

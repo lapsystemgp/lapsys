@@ -30,8 +30,10 @@ async function bootstrap() {
 
   // Swagger Documentation
   const config = new DocumentBuilder()
-    .setTitle('Authentication API')
-    .setDescription('The User Authentication API description for the monorepo')
+    .setTitle('TesTly Backend API')
+    .setDescription(
+      'API documentation for auth, public marketplace, bookings, patient workspace, lab workspace, and FAQ endpoints.',
+    )
     .setVersion('1.0')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);

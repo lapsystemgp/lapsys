@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ApiError } from "../../../lib/api";
+import { API_BASE_URL, ApiError } from "../../../lib/api";
 import { cancelPatientBooking } from "../../../lib/bookingsApi";
 import {
   fetchPatientWorkspace,
@@ -32,6 +32,11 @@ function bookingStatusClass(status: string) {
   if (status === "Cancelled") return "bg-gray-100 text-gray-700";
   if (status === "Rejected") return "bg-red-100 text-red-700";
   return "bg-blue-100 text-blue-700";
+}
+
+function resolveResultFileUrl(fileUrl: string) {
+  if (/^https?:\/\//i.test(fileUrl)) return fileUrl;
+  return `${API_BASE_URL}${fileUrl.startsWith("/") ? "" : "/"}${fileUrl}`;
 }
 
 export default function PatientDashboardPage() {
@@ -262,7 +267,7 @@ export default function PatientDashboardPage() {
                         <div className="flex gap-3 mb-4">
                           {result.file ? (
                             <a
-                              href={result.file.fileUrl}
+                              href={resolveResultFileUrl(result.file.fileUrl)}
                               target="_blank"
                               rel="noreferrer"
                               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

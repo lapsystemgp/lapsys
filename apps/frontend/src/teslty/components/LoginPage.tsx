@@ -11,6 +11,11 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthenticated }: LoginPageProps) {
+  const showDemoCredentials =
+    process.env.NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS === 'true' ||
+    (process.env.NODE_ENV !== 'production' &&
+      process.env.NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS !== 'false');
+
   const [isSignup, setIsSignup] = useState(defaultMode === 'register');
   const [userType, setUserType] = useState<'patient' | 'lab'>('patient');
   const [email, setEmail] = useState('');
@@ -307,15 +312,17 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
               </p>
             </div>
 
-            {/* Demo Credentials */}
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <p className="text-gray-700 mb-2">Demo Credentials:</p>
-              <div className="space-y-1 text-gray-600">
-                <p>Patient: `patient@testly.com` / `password123`</p>
-                <p>Lab: `alaflabs@testly.com` / `password123`</p>
-                <p>Lab (Pending): `pendinglab@testly.com` / `password123`</p>
+            {/* Demo Credentials (dev/demo only) */}
+            {showDemoCredentials && (
+              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                <p className="text-gray-700 mb-2">Demo Credentials:</p>
+                <div className="space-y-1 text-gray-600">
+                  <p>Patient: `patient@testly.com` / `password123`</p>
+                  <p>Lab: `alaflabs@testly.com` / `password123`</p>
+                  <p>Lab (Pending): `pendinglab@testly.com` / `password123`</p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Security Badge */}

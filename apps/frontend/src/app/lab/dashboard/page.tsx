@@ -200,11 +200,23 @@ export default function LabDashboardPage() {
         file: state.file,
         summary: state.summary,
       });
-      await setLabResultStatus(bookingId, "Delivered");
       setUploadState((prev) => ({ ...prev, [bookingId]: { summary: "", file: null } }));
       await loadWorkspace();
     } catch {
       setError("Could not upload result.");
+    }
+  };
+
+  const handleDeliverResult = async (bookingId: string) => {
+    try {
+      await setLabResultStatus(bookingId, "Delivered");
+      await loadWorkspace();
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 400) {
+        setError("Upload the result PDF first, then mark it as delivered.");
+        return;
+      }
+      setError("Could not mark result as delivered.");
     }
   };
 
@@ -399,7 +411,13 @@ export default function LabDashboardPage() {
                             className="px-3 py-2 border border-gray-300 rounded-lg"
                           />
                           <button onClick={() => handleUploadResult(booking.id)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                            Upload + Deliver
+                            Upload Result
+                          </button>
+                          <button
+                            onClick={() => handleDeliverResult(booking.id)}
+                            className="px-4 py-2 border border-green-300 text-green-700 rounded-lg hover:bg-green-50"
+                          >
+                            Mark Delivered
                           </button>
                         </div>
                       </div>

@@ -11,6 +11,8 @@ import { PublicTestsController } from './public/public-tests.controller';
 import { BookingsController } from './bookings/bookings.controller';
 import { BookingsService } from './bookings/bookings.service';
 import { PatientService } from './api/patient.service';
+import { LabService } from './api/lab.service';
+import { LabStorageService } from './api/lab-storage.service';
 
 @Module({
   imports: [AuthModule],
@@ -22,6 +24,13 @@ import { PatientService } from './api/patient.service';
     PublicTestsController,
     BookingsController,
   ],
-  providers: [AppService, PrismaService, BookingsService, PatientService],
+  providers: [
+    AppService,
+    PrismaService,
+    BookingsService,
+    PatientService,
+    LabService,
+    LabStorageService,
+  ],
 })
 export class AppModule {}

@@ -1,0 +1,29 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { FaqController } from './faq.controller';
+import { FaqService } from './faq.service';
+
+describe('FaqController', () => {
+  let controller: FaqController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [FaqController],
+      providers: [
+        {
+          provide: FaqService,
+          useValue: {
+            listIntents: jest.fn(),
+            search: jest.fn(),
+            ask: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
+
+    controller = module.get<FaqController>(FaqController);
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+});

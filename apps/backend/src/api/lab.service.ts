@@ -18,6 +18,7 @@ import { UpdateScheduleSlotDto } from './dto/update-schedule-slot.dto';
 import { UploadResultDto } from './dto/upload-result.dto';
 import { SetResultStatusDto } from './dto/set-result-status.dto';
 import { LabStorageService, UploadedLabFile } from './lab-storage.service';
+import { AuditLogService } from '../common/services/audit-log.service';
 
 @Injectable()
 export class LabService {
@@ -25,6 +26,7 @@ export class LabService {
     private readonly prisma: PrismaService,
     private readonly bookingsService: BookingsService,
     private readonly labStorageService: LabStorageService,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   async getWorkspace(userId: string) {
@@ -189,6 +191,7 @@ export class LabService {
     }
 
     await this.prisma.labTest.delete({ where: { id: testId } });
+    this.auditLogService.log('lab.test.deleted', { labUserId: userId, testId });
     return { success: true };
   }
 
@@ -359,12 +362,18 @@ export class LabService {
       return resultFile;
     });
 
-    return {
+    const response = {
       bookingId: booking.id,
       resultStatus: result.status,
       fileName: result.file_name,
       fileUrl: result.file_url,
     };
+    this.auditLogService.log('lab.result_uploaded', {
+      labUserId: userId,
+      bookingId: booking.id,
+      resultStatus: response.resultStatus,
+    });
+    return response;
   }
 
   async setResultStatus(userId: string, bookingId: string, dto: SetResultStatusDto) {
@@ -409,10 +418,16 @@ export class LabService {
       return file;
     });
 
-    return {
+    const response = {
       bookingId: booking.id,
       resultStatus: updated.status,
     };
+    this.auditLogService.log('lab.result_status.updated', {
+      labUserId: userId,
+      bookingId: booking.id,
+      resultStatus: response.resultStatus,
+    });
+    return response;
   }
 
   private async computeAnalytics(labProfileId: string) {

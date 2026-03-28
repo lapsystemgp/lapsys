@@ -4,6 +4,7 @@ import { BookingsService } from '../bookings/bookings.service';
 import { LabService } from './lab.service';
 import { LabStorageService } from './lab-storage.service';
 import { UploadedLabFile } from './lab-storage.service';
+import { AuditLogService } from '../common/services/audit-log.service';
 
 describe('LabService', () => {
   const prismaMock = {
@@ -46,10 +47,11 @@ describe('LabService', () => {
   } as unknown as LabStorageService;
 
   let service: LabService;
+  const auditMock = { log: jest.fn() } as unknown as AuditLogService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new LabService(prismaMock, bookingsServiceMock, storageMock);
+    service = new LabService(prismaMock, bookingsServiceMock, storageMock, auditMock);
   });
 
   it('rejects schedule slot with invalid range', async () => {

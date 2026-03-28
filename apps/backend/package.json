@@ -17,6 +17,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
     "prisma:reset": "prisma migrate reset --force",
+    "prisma:bootstrap": "npm run prisma:reset && npm run prisma:seed",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",

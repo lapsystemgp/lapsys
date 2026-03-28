@@ -19,6 +19,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AUTH_COOKIE_NAME } from './auth.constants';
 import { PatientRegisterDto } from './dto/patient-register.dto';
 import { LabRegisterDto } from './dto/lab-register.dto';
+import { AuditLogService } from '../common/services/audit-log.service';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -26,7 +27,10 @@ import { LabRegisterDto } from './dto/lab-register.dto';
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly auditLogService: AuditLogService,
+  ) {}
 
   @Post('register/patient')
   @ApiOperation({ summary: 'Register a new patient' })
@@ -34,7 +38,9 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Validation failed or email taken.' })
   async registerPatient(@Body() registerDto: PatientRegisterDto) {
     this.logger.log(`Incoming patient registration request for: ${registerDto.email}`);
-    return this.authService.registerPatient(registerDto);
+    const result = await this.authService.registerPatient(registerDto);
+    this.auditLogService.log('auth.register.patient', { userId: result.id, email: result.email });
+    return result;
   }
 
   @Post('register/lab')
@@ -43,7 +49,9 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Validation failed or email taken.' })
   async registerLab(@Body() registerDto: LabRegisterDto) {
     this.logger.log(`Incoming lab registration request for: ${registerDto.email}`);
-    return this.authService.registerLab(registerDto);
+    const result = await this.authService.registerLab(registerDto);
+    this.auditLogService.log('auth.register.lab', { userId: result.id, email: result.email });
+    return result;
   }
 
   @Post('login')
@@ -58,6 +66,7 @@ export class AuthController {
     }
 
     const { access_token, user: userData } = await this.authService.login(user);
+    this.auditLogService.log('auth.login', { userId: userData.id, role: userData.role });
     
     // Set HttpOnly cookie
     response.cookie(AUTH_COOKIE_NAME, access_token, {
@@ -92,6 +101,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Logged out' })
   logout(@Res({ passthrough: true }) response: Response) {
     response.clearCookie(AUTH_COOKIE_NAME, { path: '/' });
+    this.auditLogService.log('auth.logout', {});
     return { message: 'Logged out' };
   }
 }

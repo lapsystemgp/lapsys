@@ -13,6 +13,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { AvailabilityQueryDto } from './dto/availability-query.dto';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { AuditLogService } from '../common/services/audit-log.service';
 
 type BookingWithRelations = {
   id: string;
@@ -43,7 +44,10 @@ const ACTIVE_SLOT_STATUSES: BookingStatus[] = [
 
 @Injectable()
 export class BookingsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLogService: AuditLogService,
+  ) {}
 
   async getAvailability(query: AvailabilityQueryDto) {
     const days = query.days ?? 7;
@@ -206,7 +210,14 @@ export class BookingsService {
       });
     });
 
-    return this.toBookingResponse(created);
+    const response = this.toBookingResponse(created);
+    this.auditLogService.log('booking.created', {
+      bookingId: response.id,
+      patientUserId: userId,
+      bookingType: response.bookingType,
+      status: response.status,
+    });
+    return response;
   }
 
   async listPatientBookings(userId: string) {
@@ -302,7 +313,12 @@ export class BookingsService {
       });
     });
 
-    return this.toBookingResponse(updated);
+    const response = this.toBookingResponse(updated);
+    this.auditLogService.log('booking.cancelled_by_patient', {
+      bookingId: response.id,
+      patientUserId: userId,
+    });
+    return response;
   }
 
   async setLabBookingStatus(
@@ -368,7 +384,13 @@ export class BookingsService {
       });
     });
 
-    return this.toBookingResponse(updated);
+    const response = this.toBookingResponse(updated);
+    this.auditLogService.log('booking.status_updated_by_lab', {
+      bookingId: response.id,
+      labUserId: userId,
+      status: response.status,
+    });
+    return response;
   }
 
   private bookingInclude() {

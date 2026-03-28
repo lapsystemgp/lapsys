@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
 import * as path from 'node:path';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // Global Validation Pipe
   app.useGlobalPipes(

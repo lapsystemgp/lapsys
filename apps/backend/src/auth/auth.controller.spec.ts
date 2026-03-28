@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { AuditLogService } from '../common/services/audit-log.service';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -18,6 +19,10 @@ describe('AuthController', () => {
             login: jest.fn(),
             getCurrentUser: jest.fn(),
           },
+        },
+        {
+          provide: AuditLogService,
+          useValue: { log: jest.fn() },
         },
       ],
     }).compile();

@@ -9,7 +9,9 @@
   "scripts": {
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
+    "db:seed": "npm --prefix apps/backend run prisma:seed",
     "db:reset": "npm --prefix apps/backend run prisma:reset && npm --prefix apps/backend run prisma:seed",
+    "db:bootstrap": "npm run db:up && npm run db:reset",
     "dev": "npx concurrently \"npm --prefix apps/backend run start:dev\" \"npm --prefix apps/frontend run dev\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

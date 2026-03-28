@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BookingStatus, BookingType, LabOnboardingStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { BookingsService } from './bookings.service';
+import { AuditLogService } from '../common/services/audit-log.service';
 
 function bookingRecord(overrides?: Partial<any>) {
   return {
@@ -84,6 +85,10 @@ describe('BookingsService', () => {
         {
           provide: PrismaService,
           useValue: prismaMock,
+        },
+        {
+          provide: AuditLogService,
+          useValue: { log: jest.fn() },
         },
       ],
     }).compile();

@@ -53,3 +53,22 @@ npm run db:down
 
 ## (Optional) Frontend API base URL
 By default the frontend uses `http://localhost:3001`. To override, create `apps/frontend/.env.local` using `apps/frontend/.env.local.example`.
+
+## Phase 7 Guided Assistant + Production Readiness
+- Guided FAQ assistant endpoints:
+  - `GET /faq/intents`
+  - `GET /faq/search`
+  - `POST /faq/ask`
+- Chatbot in frontend now calls the FAQ API (curated, non-LLM).
+- Standardized backend error response payload is enabled globally.
+- Audit logs are emitted for auth and booking/result status operations.
+
+## Useful Commands
+```bash
+npm run db:seed
+npm run db:bootstrap
+```
+
+## Docs
+- Environment variables: `docs/ENVIRONMENT.md`
+- Deployment checklist: `docs/DEPLOYMENT_CHECKLIST.md`

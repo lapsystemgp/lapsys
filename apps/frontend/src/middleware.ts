@@ -27,6 +27,10 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
 
+    if (request.nextUrl.pathname.startsWith('/booking') && role !== 'Patient') {
+      return NextResponse.redirect(new URL('/unauthorized', request.url));
+    }
+
     return NextResponse.next();
   } catch (error) {
     return NextResponse.redirect(new URL('/login', request.url));
@@ -35,5 +39,5 @@ export function middleware(request: NextRequest) {
 
 // Config to specify which paths the middleware should run on.
 export const config = {
-  matcher: ['/lab/:path*', '/patient/:path*'],
+  matcher: ['/lab/:path*', '/patient/:path*', '/booking/:path*'],
 };

@@ -1,40 +1,104 @@
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Clock, Home, MapPin, CheckCircle } from 'lucide-react';
-import type { PublicLabCard, PublicTestResponse } from '../../lib/publicApi';
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, CheckCircle, Clock, Home, MapPin } from "lucide-react";
+import type { PublicLabCard, PublicTestResponse } from "../../lib/publicApi";
+
+type DisplaySlot = {
+  id: string;
+  startsAt: string;
+  endsAt: string;
+};
 
 interface BookingPageProps {
-  lab: (PublicLabCard & { timeSlots?: string[]; price?: number }) | null;
+  lab: PublicLabCard | null;
   test?: PublicTestResponse | null;
+  slots: DisplaySlot[];
   isLoading?: boolean;
+  isSubmitting?: boolean;
+  errorMessage?: string | null;
   onBack: () => void;
   onComplete: () => void;
+  onSubmit: (payload: {
+    slotId: string;
+    bookingType: "LabVisit" | "HomeCollection";
+    homeAddress?: string;
+  }) => Promise<void>;
 }
 
-export function BookingPage({ lab, test, isLoading, onBack, onComplete }: BookingPageProps) {
-  const [bookingType, setBookingType] = useState<'lab' | 'home'>('lab');
-  const [selectedDate, setSelectedDate] = useState('2025-12-07');
-  const [selectedTime, setSelectedTime] = useState('');
-  const [homeAddress, setHomeAddress] = useState('');
-  const [showConfirmation, setShowConfirmation] = useState(false);
+function toDateKey(dateIso: string) {
+  return new Date(dateIso).toISOString().slice(0, 10);
+}
 
-  // Scroll to top when component mounts
+function formatDay(dateIso: string) {
+  const date = new Date(dateIso);
+  return date.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short" });
+}
+
+function formatTime(dateIso: string) {
+  const date = new Date(dateIso);
+  return date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+}
+
+export function BookingPage({
+  lab,
+  test,
+  slots,
+  isLoading,
+  isSubmitting,
+  errorMessage,
+  onBack,
+  onComplete,
+  onSubmit,
+}: BookingPageProps) {
+  const [bookingType, setBookingType] = useState<"lab" | "home">("lab");
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedSlotId, setSelectedSlotId] = useState("");
+  const [homeAddress, setHomeAddress] = useState("");
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const testPrice = test?.priceEgp ?? null;
+  const dates = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const slot of slots) {
+      const key = toDateKey(slot.startsAt);
+      if (!map.has(key)) {
+        map.set(key, formatDay(slot.startsAt));
+      }
+    }
+    return Array.from(map.entries()).map(([key, label]) => ({ key, label }));
+  }, [slots]);
 
-  const handleBooking = () => {
-    setShowConfirmation(true);
-    setTimeout(() => {
-      onComplete();
-    }, 2000);
-  };
+  useEffect(() => {
+    if (!selectedDate && dates.length > 0) {
+      setSelectedDate(dates[0].key);
+    }
+  }, [dates, selectedDate]);
+
+  const timeSlotsForDate = useMemo(
+    () => slots.filter((slot) => toDateKey(slot.startsAt) === selectedDate),
+    [selectedDate, slots],
+  );
+
+  useEffect(() => {
+    if (!selectedSlotId) return;
+    const stillAvailable = timeSlotsForDate.some((slot) => slot.id === selectedSlotId);
+    if (!stillAvailable) {
+      setSelectedSlotId("");
+    }
+  }, [selectedSlotId, timeSlotsForDate]);
+
+  const selectedSlot = useMemo(
+    () => slots.find((slot) => slot.id === selectedSlotId) ?? null,
+    [selectedSlotId, slots],
+  );
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p>Loading booking…</p>
+        <p>Loading booking...</p>
       </div>
     );
   }
@@ -47,9 +111,33 @@ export function BookingPage({ lab, test, isLoading, onBack, onComplete }: Bookin
     );
   }
 
-  const basePrice = testPrice ?? lab.startingFromEgp ?? lab.price ?? 0;
+  const basePrice = test?.priceEgp ?? lab.startingFromEgp ?? 0;
 
-  if (showConfirmation) {
+  const handleBooking = async () => {
+    setLocalError(null);
+    if (!selectedSlotId) {
+      setLocalError("Please select a time slot.");
+      return;
+    }
+    if (bookingType === "home" && !homeAddress.trim()) {
+      setLocalError("Home address is required for home collection.");
+      return;
+    }
+
+    try {
+      await onSubmit({
+        slotId: selectedSlotId,
+        bookingType: bookingType === "home" ? "HomeCollection" : "LabVisit",
+        homeAddress: bookingType === "home" ? homeAddress.trim() : undefined,
+      });
+      setShowConfirmation(true);
+      setTimeout(() => onComplete(), 1200);
+    } catch {
+      // Parent handles API error state.
+    }
+  };
+
+  if (showConfirmation && selectedSlot) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
@@ -57,15 +145,12 @@ export function BookingPage({ lab, test, isLoading, onBack, onComplete }: Bookin
             <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
           <h2 className="text-2xl text-gray-900 mb-2">Booking Confirmed!</h2>
-          <p className="text-gray-600 mb-4">
-            Your appointment has been successfully booked. You will receive a confirmation email shortly.
-          </p>
           <div className="bg-blue-50 rounded-lg p-4 text-left">
             <div className="text-gray-900 mb-2">{lab.name}</div>
-            <div className="text-gray-600">{selectedDate} at {selectedTime}</div>
             <div className="text-gray-600">
-              {bookingType === 'home' ? 'Home Collection' : 'Lab Visit'}
+              {formatDay(selectedSlot.startsAt)} at {formatTime(selectedSlot.startsAt)}
             </div>
+            <div className="text-gray-600">{bookingType === "home" ? "Home Collection" : "Lab Visit"}</div>
           </div>
         </div>
       </div>
@@ -85,7 +170,6 @@ export function BookingPage({ lab, test, isLoading, onBack, onComplete }: Bookin
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Lab Info Summary */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <div className="flex items-start justify-between">
             <div>
@@ -94,7 +178,7 @@ export function BookingPage({ lab, test, isLoading, onBack, onComplete }: Bookin
                 <MapPin className="w-4 h-4" />
                 <span>{lab.address}</span>
               </div>
-              <div className="text-gray-600">{test?.name || 'Complete Blood Count (CBC)'}</div>
+              <div className="text-gray-600">{test?.name || "Selected test"}</div>
             </div>
             <div className="text-right">
               <div className="text-3xl text-blue-600">EGP {basePrice}</div>
@@ -102,33 +186,27 @@ export function BookingPage({ lab, test, isLoading, onBack, onComplete }: Bookin
           </div>
         </div>
 
-        {/* Booking Type Selection */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <h3 className="text-lg text-gray-900 mb-4">Choose Collection Type</h3>
           <div className="grid grid-cols-2 gap-4">
             <button
-              onClick={() => setBookingType('lab')}
+              onClick={() => setBookingType("lab")}
               className={`p-6 rounded-lg border-2 transition ${
-                bookingType === 'lab'
-                  ? 'border-blue-600 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                bookingType === "lab" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
               }`}
             >
-              <MapPin className={`w-8 h-8 mx-auto mb-3 ${bookingType === 'lab' ? 'text-blue-600' : 'text-gray-400'}`} />
+              <MapPin className={`w-8 h-8 mx-auto mb-3 ${bookingType === "lab" ? "text-blue-600" : "text-gray-400"}`} />
               <div className="text-gray-900 mb-1">Visit Lab</div>
               <div className="text-gray-600">Come to our facility</div>
             </button>
-            
             {lab.homeCollection && (
               <button
-                onClick={() => setBookingType('home')}
+                onClick={() => setBookingType("home")}
                 className={`p-6 rounded-lg border-2 transition ${
-                  bookingType === 'home'
-                    ? 'border-blue-600 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                  bookingType === "home" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <Home className={`w-8 h-8 mx-auto mb-3 ${bookingType === 'home' ? 'text-blue-600' : 'text-gray-400'}`} />
+                <Home className={`w-8 h-8 mx-auto mb-3 ${bookingType === "home" ? "text-blue-600" : "text-gray-400"}`} />
                 <div className="text-gray-900 mb-1">Home Collection</div>
                 <div className="text-gray-600">We come to you (+EGP 100)</div>
               </button>
@@ -136,55 +214,51 @@ export function BookingPage({ lab, test, isLoading, onBack, onComplete }: Bookin
           </div>
         </div>
 
-        {/* Date Selection */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <h3 className="text-lg text-gray-900 mb-4">Select Date</h3>
-          <div className="grid grid-cols-4 gap-3">
-            {['Dec 7', 'Dec 8', 'Dec 9', 'Dec 10', 'Dec 11', 'Dec 12', 'Dec 13', 'Dec 14'].map((date, index) => (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {dates.map((date) => (
               <button
-                key={date}
-                onClick={() => setSelectedDate(`2025-12-${7 + index}`)}
+                key={date.key}
+                onClick={() => setSelectedDate(date.key)}
                 className={`p-4 rounded-lg border-2 transition ${
-                  selectedDate === `2025-12-${7 + index}`
-                    ? 'border-blue-600 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                  selectedDate === date.key ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <div className="text-gray-600">Sat</div>
-                <div className="text-gray-900">{date}</div>
+                <div className="text-gray-900">{date.label}</div>
               </button>
             ))}
+            {dates.length === 0 && <p className="text-gray-600 col-span-4">No available dates in the selected range.</p>}
           </div>
         </div>
 
-        {/* Time Slot Selection */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <h3 className="text-lg text-gray-900 mb-4">Select Time Slot</h3>
-          <div className="grid grid-cols-4 gap-3">
-            {lab.timeSlots?.map((time: string) => (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {timeSlotsForDate.map((slot) => (
               <button
-                key={time}
-                onClick={() => setSelectedTime(time)}
+                key={slot.id}
+                onClick={() => setSelectedSlotId(slot.id)}
                 className={`p-4 rounded-lg border-2 transition ${
-                  selectedTime === time
-                    ? 'border-blue-600 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                  selectedSlotId === slot.id ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <Clock className={`w-5 h-5 mx-auto mb-2 ${selectedTime === time ? 'text-blue-600' : 'text-gray-400'}`} />
-                <div className="text-gray-900">{time}</div>
+                <Clock className={`w-5 h-5 mx-auto mb-2 ${selectedSlotId === slot.id ? "text-blue-600" : "text-gray-400"}`} />
+                <div className="text-gray-900">{formatTime(slot.startsAt)}</div>
               </button>
             ))}
+            {selectedDate && timeSlotsForDate.length === 0 && (
+              <p className="text-gray-600 col-span-4">No slots available for this date.</p>
+            )}
           </div>
         </div>
 
-        {/* Home Address if home collection */}
-        {bookingType === 'home' && (
+        {bookingType === "home" && (
           <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
             <h3 className="text-lg text-gray-900 mb-4">Home Address</h3>
             <textarea
               value={homeAddress}
-              onChange={(e) => setHomeAddress(e.target.value)}
+              onChange={(event) => setHomeAddress(event.target.value)}
               placeholder="Enter your complete address for sample collection"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg resize-none"
               rows={3}
@@ -192,7 +266,6 @@ export function BookingPage({ lab, test, isLoading, onBack, onComplete }: Bookin
           </div>
         )}
 
-        {/* Summary and Confirm */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h3 className="text-lg text-gray-900 mb-4">Booking Summary</h3>
           <div className="space-y-3 mb-6">
@@ -200,7 +273,7 @@ export function BookingPage({ lab, test, isLoading, onBack, onComplete }: Bookin
               <span className="text-gray-600">Test Price</span>
               <span className="text-gray-900">EGP {basePrice}</span>
             </div>
-            {bookingType === 'home' && (
+            {bookingType === "home" && (
               <div className="flex justify-between">
                 <span className="text-gray-600">Home Collection Fee</span>
                 <span className="text-gray-900">EGP 100</span>
@@ -208,17 +281,16 @@ export function BookingPage({ lab, test, isLoading, onBack, onComplete }: Bookin
             )}
             <div className="border-t pt-3 flex justify-between">
               <span className="text-gray-900">Total Amount</span>
-              <span className="text-2xl text-blue-600">
-                EGP {basePrice + (bookingType === 'home' ? 100 : 0)}
-              </span>
+              <span className="text-2xl text-blue-600">EGP {basePrice + (bookingType === "home" ? 100 : 0)}</span>
             </div>
           </div>
+          {(localError || errorMessage) && <p className="text-red-600 mb-4">{localError || errorMessage}</p>}
           <button
             onClick={handleBooking}
-            disabled={!selectedTime}
+            disabled={!selectedSlotId || !!isSubmitting}
             className="w-full py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
-            Confirm Booking
+            {isSubmitting ? "Confirming..." : "Confirm Booking"}
           </button>
         </div>
       </div>

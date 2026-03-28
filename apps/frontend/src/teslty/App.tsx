@@ -14,7 +14,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedLab, setSelectedLab] = useState<(PublicLabCard & { timeSlots?: string[]; price?: number }) | null>(null);
+  const [selectedLab, setSelectedLab] = useState<PublicLabCard | null>(null);
   const [selectedTest, setSelectedTest] = useState<PublicTestResponse | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
@@ -24,12 +24,7 @@ export default function App() {
   };
 
   const handleLabSelect = (lab: PublicLabCard) => {
-    const slots = ['08:00', '09:30', '11:00', '13:00', '15:00', '16:30', '18:00'];
-    const stable = String(lab?.id ?? lab?.name ?? 'lab');
-    const seed = stable.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-    const count = 3 + (seed % 3);
-    const start = seed % (slots.length - count);
-    setSelectedLab({ ...lab, timeSlots: slots.slice(start, start + count) });
+    setSelectedLab(lab);
     setCurrentPage('lab-details');
   };
 
@@ -48,7 +43,7 @@ export default function App() {
   };
 
   const handleBookFromLabDetails = (
-    lab: PublicLabCard & { timeSlots?: string[]; price?: number },
+    lab: PublicLabCard,
     test: {
       id: string;
       name: string;
@@ -93,13 +88,22 @@ export default function App() {
           <LabDetailsPage
             lab={selectedLab}
             tests={[]}
-            timeSlots={selectedLab?.timeSlots ?? []}
+            timeSlots={[]}
             onBack={() => setCurrentPage('landing')}
             onBookTest={handleBookFromLabDetails}
           />
         );
       case 'booking':
-        return <BookingPage lab={selectedLab} test={selectedTest} onBack={() => setCurrentPage('lab-details')} onComplete={() => setCurrentPage('user-dashboard')} />;
+        return (
+          <BookingPage
+            lab={selectedLab}
+            test={selectedTest}
+            slots={[]}
+            onBack={() => setCurrentPage('lab-details')}
+            onComplete={() => setCurrentPage('user-dashboard')}
+            onSubmit={async () => {}}
+          />
+        );
       case 'user-dashboard':
         return <UserDashboard onNavigate={setCurrentPage} onLogout={handleLogout} />;
       case 'lab-dashboard':

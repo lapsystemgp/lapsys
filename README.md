@@ -14,12 +14,24 @@ npm install
 npm run db:up
 ```
 
-## 3) Create tables + seed demo data
+## 3) Configure backend environment variables
+Prisma needs `DATABASE_URL` to connect to Postgres.
+
+Create `apps/backend/.env` from the example:
+```bash
+cp apps/backend/.env.example apps/backend/.env
+```
+On Windows (PowerShell):
+```powershell
+Copy-Item apps\\backend\\.env.example apps\\backend\\.env
+```
+
+## 4) Create tables + seed demo data
 ```bash
 npm run db:reset
 ```
 
-## 4) Run the app (backend + frontend)
+## 5) Run the app (backend + frontend)
 ```bash
 npm run dev
 ```
@@ -41,4 +53,3 @@ npm run db:down
 
 ## (Optional) Frontend API base URL
 By default the frontend uses `http://localhost:3001`. To override, create `apps/frontend/.env.local` using `apps/frontend/.env.local.example`.
-

@@ -4,6 +4,8 @@ build/
 .next/
 *.log
 .env*
+!.env.example
+!.env.local.example
 .DS_Store
 .vscode/
 .idea/

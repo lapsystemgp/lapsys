@@ -270,7 +270,10 @@ export class BookingsService {
       throw new ForbiddenException('You can only cancel your own bookings');
     }
 
-    if (![BookingStatus.Pending, BookingStatus.Confirmed].includes(booking.status)) {
+    if (
+      booking.status !== BookingStatus.Pending &&
+      booking.status !== BookingStatus.Confirmed
+    ) {
       throw new BadRequestException('Booking cannot be cancelled in its current status');
     }
 
@@ -307,7 +310,7 @@ export class BookingsService {
     bookingId: string,
     status: BookingStatus,
   ) {
-    if (![BookingStatus.Confirmed, BookingStatus.Rejected].includes(status)) {
+    if (status !== BookingStatus.Confirmed && status !== BookingStatus.Rejected) {
       throw new BadRequestException('Labs can only set status to Confirmed or Rejected');
     }
 

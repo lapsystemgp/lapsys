@@ -23,6 +23,26 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
 
   const { refresh } = useSession();
 
+  const readErrorMessage = async (response: Response, fallback: string) => {
+    try {
+      const contentType = response.headers.get('content-type') ?? '';
+      if (contentType.includes('application/json')) {
+        const data = (await response.json()) as { message?: string | string[] };
+        if (Array.isArray(data.message)) {
+          return data.message.join(', ');
+        }
+        if (typeof data.message === 'string' && data.message.trim()) {
+          return data.message;
+        }
+      }
+
+      const text = (await response.text()).trim();
+      return text || fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -43,7 +63,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
           });
 
           if (!registerRes.ok) {
-            const msg = await registerRes.text();
+            const msg = await readErrorMessage(registerRes, 'Failed to register');
             throw new Error(msg || 'Failed to register');
           }
         } else {
@@ -68,7 +88,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
           });
 
           if (!registerRes.ok) {
-            const msg = await registerRes.text();
+            const msg = await readErrorMessage(registerRes, 'Failed to register');
             throw new Error(msg || 'Failed to register');
           }
         }
@@ -82,7 +102,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
       });
 
       if (!loginRes.ok) {
-        const msg = await loginRes.text();
+        const msg = await readErrorMessage(loginRes, 'Invalid credentials');
         throw new Error(msg || 'Invalid credentials');
       }
 
@@ -101,21 +121,29 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
         onLogin(role);
       }
     } catch (err: any) {
-      setError(err?.message || 'Something went wrong');
+      const rawMessage = String(err?.message || '').trim();
+      if (rawMessage.toLowerCase() === 'failed to fetch') {
+        setError('Unable to reach the server. Please check that backend is running.');
+      } else {
+        setError(rawMessage || 'Something went wrong');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6">
-          <ArrowLeft className="w-5 h-5" />
-          Back to Home
-        </button>
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-100 relative">
+      <button
+        onClick={onBack}
+        className="absolute top-8 left-5 flex items-center gap-2 text-gray-600 hover:text-gray-900"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        Back to Home
+      </button>
 
-        <div className="max-w-md mx-auto">
+      <div className="min-h-screen w-full flex items-start justify-center pt-20">
+        <div className="w-full max-w-md">
           <div className="bg-white rounded-2xl shadow-xl p-8">
             {/* Logo */}
             <div className="flex justify-center mb-6">
@@ -299,7 +327,6 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
           </div>
         </div>
       </div>
-
     </div>
   );
 }

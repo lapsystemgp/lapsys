@@ -1,20 +1,42 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, MapPin, Star, Clock, Home, Phone, Mail, Award, CheckCircle, Calendar } from 'lucide-react';
-import { labTests } from '../data/labs';
+import { ArrowLeft, MapPin, Star, Clock, Home, Phone, Mail, Award, Calendar } from 'lucide-react';
+import type { PublicLabCard } from '../../lib/publicApi';
+
+type LabDetailsTest = {
+  id: string;
+  name: string;
+  category: string;
+  priceEgp: number;
+  description: string | null;
+  preparation: string | null;
+  turnaroundTime: string | null;
+  parametersCount: number | null;
+};
 
 interface LabDetailsPageProps {
-  lab: any;
+  lab?: PublicLabCard | null;
+  tests: LabDetailsTest[];
+  isLoading?: boolean;
+  timeSlots?: string[];
   onBack: () => void;
-  onBookTest: (lab: any, test: any) => void;
+  onBookTest: (lab: PublicLabCard, test: LabDetailsTest) => void;
 }
 
-export function LabDetailsPage({ lab, onBack, onBookTest }: LabDetailsPageProps) {
+export function LabDetailsPage({ lab, tests, isLoading, timeSlots, onBack, onBookTest }: LabDetailsPageProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p>Loading lab…</p>
+      </div>
+    );
+  }
 
   if (!lab) {
     return (
@@ -24,13 +46,11 @@ export function LabDetailsPage({ lab, onBack, onBookTest }: LabDetailsPageProps)
     );
   }
 
-  const testCatalog = labTests;
-
-  const categories = ['all', 'Blood Tests', 'Hormone Tests', 'Diabetes', 'Vitamin Tests'];
+  const categories = ['all', ...Array.from(new Set(tests.map((t) => t.category))).sort()];
   
   const filteredTests = selectedCategory === 'all' 
-    ? testCatalog 
-    : testCatalog.filter(test => test.category === selectedCategory);
+    ? tests 
+    : tests.filter(test => test.category === selectedCategory);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -53,12 +73,12 @@ export function LabDetailsPage({ lab, onBack, onBookTest }: LabDetailsPageProps)
               <div className="flex items-center gap-6 text-gray-600 mb-4">
                 <div className="flex items-center gap-1">
                   <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                  <span className="text-xl">{lab.rating}</span>
+                  <span className="text-xl">{lab.rating ?? '—'}</span>
                   <span>({lab.reviews} reviews)</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="w-5 h-5" />
-                  <span>{lab.distance} km away</span>
+                  <span>{lab.distanceKm} km away</span>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-600 mb-4">
@@ -81,14 +101,14 @@ export function LabDetailsPage({ lab, onBack, onBookTest }: LabDetailsPageProps)
                 <Award className="w-5 h-5" />
                 <span>Accreditation</span>
               </div>
-              <div className="text-gray-900">{lab.accreditation}</div>
+              <div className="text-gray-900">{lab.accreditation ?? '—'}</div>
             </div>
             <div>
               <div className="flex items-center gap-2 text-gray-500 mb-2">
                 <Clock className="w-5 h-5" />
                 <span>Turnaround Time</span>
               </div>
-              <div className="text-gray-900">{lab.turnaroundTime}</div>
+              <div className="text-gray-900">{lab.turnaroundTime ?? '—'}</div>
             </div>
             <div>
               <div className="flex items-center gap-2 text-gray-500 mb-2">
@@ -110,7 +130,7 @@ export function LabDetailsPage({ lab, onBack, onBookTest }: LabDetailsPageProps)
           <div>
             <h3 className="text-lg text-gray-900 mb-3">Available Time Slots Today</h3>
             <div className="flex flex-wrap gap-2">
-              {lab.timeSlots?.map((time: string, index: number) => (
+              {timeSlots?.map((time: string, index: number) => (
                 <span key={index} className="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg">
                   {time}
                 </span>
@@ -152,25 +172,25 @@ export function LabDetailsPage({ lab, onBack, onBookTest }: LabDetailsPageProps)
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="text-xl text-gray-900">{test.name}</h3>
                       <div className="text-right ml-4">
-                        <div className="text-2xl text-blue-600">EGP {test.price}</div>
+                        <div className="text-2xl text-blue-600">EGP {test.priceEgp}</div>
                       </div>
                     </div>
-                    <p className="text-gray-600 mb-3">{test.description}</p>
+                    <p className="text-gray-600 mb-3">{test.description ?? '—'}</p>
                     <div className="grid grid-cols-3 gap-4 mb-4">
                       <div>
                         <div className="text-gray-500 mb-1">Preparation</div>
-                        <div className="text-gray-900">{test.preparation}</div>
+                        <div className="text-gray-900">{test.preparation ?? '—'}</div>
                       </div>
                       <div>
                         <div className="text-gray-500 mb-1">Turnaround</div>
                         <div className="flex items-center gap-1 text-gray-900">
                           <Clock className="w-4 h-4" />
-                          {test.turnaround}
+                          {test.turnaroundTime ?? '—'}
                         </div>
                       </div>
                       <div>
                         <div className="text-gray-500 mb-1">Parameters</div>
-                        <div className="text-gray-900">{test.parameters} parameters tested</div>
+                        <div className="text-gray-900">{test.parametersCount ?? '—'} parameters tested</div>
                       </div>
                     </div>
                   </div>

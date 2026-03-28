@@ -1,11 +1,12 @@
 import Link from 'next/link';
 
-export default function UnauthorizedPage({
+export default async function UnauthorizedPage({
   searchParams,
 }: {
-  searchParams?: { reason?: string };
+  searchParams?: Promise<{ reason?: string }>;
 }) {
-  const isPendingReview = searchParams?.reason === 'pending_review';
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const isPendingReview = resolvedSearchParams.reason === 'pending_review';
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-24 bg-zinc-950 text-white">

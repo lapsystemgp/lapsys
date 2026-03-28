@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
-import { ArrowLeft, MapPin, Star, Clock, Home, Filter, SlidersHorizontal, Info, Search } from 'lucide-react';
-import { labs } from '../data/labs';
-import type { Lab } from '../data/labs';
+import { useMemo, useState, useEffect } from 'react';
+import { ArrowLeft, MapPin, Star, Clock, Home, SlidersHorizontal, Info, Search } from 'lucide-react';
+import { fetchPublicLabs, type PublicLabCard } from '../../lib/publicApi';
 
 interface LabComparisonProps {
   searchQuery: string;
-  onLabSelect: (lab: Lab) => void;
+  onLabSelect: (lab: PublicLabCard) => void;
   onBack: () => void;
 }
 
@@ -18,13 +17,30 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
   const [maxDistance, setMaxDistance] = useState(10);
   const [maxPrice, setMaxPrice] = useState(1000);
   const [selectedAccreditations, setSelectedAccreditations] = useState<string[]>([]);
+  const [labs, setLabs] = useState<PublicLabCard[]>([]);
+  const [lastResolvedKey, setLastResolvedKey] = useState<string>('');
+
+  const requestKey = useMemo(
+    () =>
+      JSON.stringify({
+        searchQuery,
+        localSearchQuery,
+        sortBy,
+        homeCollectionOnly,
+        minRating,
+        maxDistance,
+        maxPrice,
+        selectedAccreditations,
+      }),
+    [homeCollectionOnly, localSearchQuery, maxDistance, maxPrice, minRating, searchQuery, selectedAccreditations, sortBy],
+  );
+
+  const isLoading = lastResolvedKey !== '' && lastResolvedKey !== requestKey;
 
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  const labList: Lab[] = labs;
 
   const testInfo = {
     name: searchQuery || 'Complete Blood Count (CBC)',
@@ -38,21 +54,35 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
     commonlyDetects: ['Anemia', 'Infections', 'Blood disorders', 'Immune system issues']
   };
 
-  const filteredLabs = labList
-    .filter(lab => !homeCollectionOnly || lab.homeCollection)
-    .filter(lab => lab.name.toLowerCase().includes(localSearchQuery.toLowerCase()))
-    .filter(lab => lab.rating >= minRating)
-    .filter(lab => lab.distance <= maxDistance)
-    .filter(lab => lab.price <= maxPrice)
-    .filter(lab => {
-      if (selectedAccreditations.length === 0) return true;
-      return selectedAccreditations.some(acc => lab.accreditation.includes(acc));
+  useEffect(() => {
+    let isMounted = true;
+    fetchPublicLabs({
+      q: searchQuery || undefined,
+      labName: localSearchQuery || undefined,
+      sort: sortBy,
+      minRating: minRating > 0 ? minRating : undefined,
+      maxDistanceKm: maxDistance < 10 ? maxDistance : undefined,
+      maxPriceEgp: maxPrice < 1000 ? maxPrice : undefined,
+      homeCollection: homeCollectionOnly ? true : undefined,
+      accreditations: selectedAccreditations.length > 0 ? selectedAccreditations : undefined,
+      page: 1,
+      pageSize: 50,
     })
-    .sort((a, b) => {
-      if (sortBy === 'price') return a.price - b.price;
-      if (sortBy === 'rating') return b.rating - a.rating;
-      return a.distance - b.distance;
-    });
+      .then((res) => {
+        if (!isMounted) return;
+        setLabs(res.items);
+        setLastResolvedKey(requestKey);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setLabs([]);
+        setLastResolvedKey(requestKey);
+      })
+
+    return () => {
+      isMounted = false;
+    };
+  }, [homeCollectionOnly, localSearchQuery, maxDistance, maxPrice, minRating, requestKey, searchQuery, selectedAccreditations, sortBy]);
 
   const availableAccreditations = ['NABL', 'CAP', 'ISO', 'JCI'];
 
@@ -78,6 +108,14 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
     (maxDistance < 10 ? 1 : 0) +
     (maxPrice < 1000 ? 1 : 0) +
     selectedAccreditations.length;
+
+  const getPlaceholderTimeSlots = (stableId: string) => {
+    const slots = ['08:00', '09:30', '11:00', '13:00', '15:00', '16:30', '18:00'];
+    const seed = stableId.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+    const count = 3 + (seed % 3); // 3..5
+    const start = seed % (slots.length - count);
+    return slots.slice(start, start + count);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -163,7 +201,10 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
                   <span className="text-gray-600">Sort by:</span>
                   <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === 'price' || value === 'rating' || value === 'distance') setSortBy(value);
+                    }}
                     className="px-4 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="price">Price (Low to High)</option>
@@ -287,7 +328,19 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
 
             {/* Lab Cards */}
             <div className="space-y-4">
-              {filteredLabs.length === 0 ? (
+              {lastResolvedKey === '' ? (
+                <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+                  <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl text-gray-900 mb-2">Loading labs…</h3>
+                  <p className="text-gray-600">Fetching real-time availability and pricing.</p>
+                </div>
+              ) : isLoading && labs.length === 0 ? (
+                <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+                  <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl text-gray-900 mb-2">Updating results…</h3>
+                  <p className="text-gray-600">Applying your filters.</p>
+                </div>
+              ) : labs.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-sm p-12 text-center">
                   <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-xl text-gray-900 mb-2">No labs found</h3>
@@ -296,7 +349,11 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
                   </p>
                 </div>
               ) : (
-                filteredLabs.map((lab) => (
+                labs.map((lab) => {
+                  const price = lab.priceForQueryEgp ?? lab.startingFromEgp;
+                  const priceLabel = lab.priceForQueryEgp ? 'for this test' : 'starting from';
+                  const timeSlots = getPlaceholderTimeSlots(lab.id);
+                  return (
                   <div key={lab.id} className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
@@ -310,18 +367,18 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
                         <div className="flex items-center gap-4 text-gray-600">
                           <div className="flex items-center gap-1">
                             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            <span>{lab.rating}</span>
+                            <span>{lab.rating ?? '—'}</span>
                             <span>({lab.reviews} reviews)</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <MapPin className="w-4 h-4" />
-                            <span>{lab.distance} km away</span>
+                            <span>{lab.distanceKm} km away</span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-3xl text-blue-600">EGP {lab.price}</div>
-                        <div className="text-gray-500">for this test</div>
+                        <div className="text-3xl text-blue-600">EGP {price ?? '—'}</div>
+                        <div className="text-gray-500">{priceLabel}</div>
                       </div>
                     </div>
 
@@ -333,13 +390,13 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
                     <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-200">
                       <div>
                         <div className="text-gray-500 mb-1">Accreditation</div>
-                        <div className="text-gray-900">{lab.accreditation}</div>
+                        <div className="text-gray-900">{lab.accreditation ?? '—'}</div>
                       </div>
                       <div>
                         <div className="text-gray-500 mb-1">Turnaround Time</div>
                         <div className="flex items-center gap-1 text-gray-900">
                           <Clock className="w-4 h-4" />
-                          {lab.turnaroundTime}
+                          {lab.turnaroundTime ?? '—'}
                         </div>
                       </div>
                     </div>
@@ -353,7 +410,7 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
                           </div>
                         )}
                         <div className="text-gray-600">
-                          {lab.timeSlots.length} slots available today
+                          {timeSlots.length} slots available today
                         </div>
                       </div>
                       <button
@@ -364,7 +421,8 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
                       </button>
                     </div>
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>

@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search, TestTube, Calendar, Home, Star, Shield, Activity, User, LayoutDashboard, LogOut, Menu, X } from 'lucide-react';
 import { MapPin, Clock } from 'lucide-react';
-import { labs } from '../data/labs';
 import type { Page, UserRole } from '../types';
+import { fetchPublicLabs, type PublicLabCard } from '../../lib/publicApi';
 
 interface LandingPageProps {
   onSearch: (query: string) => void;
@@ -10,12 +10,13 @@ interface LandingPageProps {
   userRole?: UserRole;
   currentUserLabel?: string;
   onLogout?: () => void;
-  onLabSelect?: (lab: any) => void;
+  onLabSelect?: (lab: PublicLabCard) => void;
 }
 
 export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, onLogout, onLabSelect }: LandingPageProps) {
   const [searchInput, setSearchInput] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [featuredLabs, setFeaturedLabs] = useState<PublicLabCard[]>([]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +25,20 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
     }
   };
 
-  const featuredLabs = labs;
+  useEffect(() => {
+    let isMounted = true;
+    fetchPublicLabs({ sort: 'rating', pageSize: 6 })
+      .then((res) => {
+        if (!isMounted) return;
+        setFeaturedLabs(res.items);
+      })
+      .catch(() => {
+        // keep empty state on failure
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -228,7 +242,7 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-50 rounded-xl flex items-center justify-center text-2xl sm:text-3xl group-hover:bg-blue-100 transition">
-                    {lab.image}
+                    {lab.imageEmoji ?? lab.name?.slice(0, 1)}
                   </div>
                   {lab.homeCollection && (
                     <div className="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded text-xs">
@@ -243,14 +257,14 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
                 <div className="flex items-center gap-2 mb-3 text-sm">
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-gray-900">{lab.rating}</span>
+                    <span className="text-gray-900">{lab.rating ?? '—'}</span>
                   </div>
                   <span className="text-gray-500">({lab.reviews})</span>
                 </div>
                 <div className="space-y-2 mb-4 text-gray-600 text-sm">
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate">{lab.distance} km away</span>
+                    <span className="truncate">{lab.distanceKm} km away</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <TestTube className="w-4 h-4 flex-shrink-0" />
@@ -258,13 +272,15 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 flex-shrink-0" />
-                    <span>{lab.turnaroundTime}</span>
+                    <span>{lab.turnaroundTime ?? '—'}</span>
                   </div>
                 </div>
                 <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
                   <div>
                     <div className="text-gray-500 text-xs sm:text-sm">Starting from</div>
-                    <div className="text-xl sm:text-2xl text-blue-600">EGP {lab.price}</div>
+                    <div className="text-xl sm:text-2xl text-blue-600">
+                      EGP {lab.startingFromEgp ?? '—'}
+                    </div>
                   </div>
                   <div className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg group-hover:bg-blue-700 transition text-sm">
                     View

@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Calendar, Clock, Home, MapPin, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Clock, Home, MapPin, CheckCircle } from 'lucide-react';
+import type { PublicLabCard, PublicTestResponse } from '../../lib/publicApi';
 
 interface BookingPageProps {
-  lab: any;
-  test?: any;
+  lab: (PublicLabCard & { timeSlots?: string[]; price?: number }) | null;
+  test?: PublicTestResponse | null;
+  isLoading?: boolean;
   onBack: () => void;
   onComplete: () => void;
 }
 
-export function BookingPage({ lab, test, onBack, onComplete }: BookingPageProps) {
+export function BookingPage({ lab, test, isLoading, onBack, onComplete }: BookingPageProps) {
   const [bookingType, setBookingType] = useState<'lab' | 'home'>('lab');
   const [selectedDate, setSelectedDate] = useState('2025-12-07');
   const [selectedTime, setSelectedTime] = useState('');
@@ -20,12 +22,22 @@ export function BookingPage({ lab, test, onBack, onComplete }: BookingPageProps)
     window.scrollTo(0, 0);
   }, []);
 
+  const testPrice = test?.priceEgp ?? null;
+
   const handleBooking = () => {
     setShowConfirmation(true);
     setTimeout(() => {
       onComplete();
     }, 2000);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p>Loading booking…</p>
+      </div>
+    );
+  }
 
   if (!lab) {
     return (
@@ -34,6 +46,8 @@ export function BookingPage({ lab, test, onBack, onComplete }: BookingPageProps)
       </div>
     );
   }
+
+  const basePrice = testPrice ?? lab.startingFromEgp ?? lab.price ?? 0;
 
   if (showConfirmation) {
     return (
@@ -83,7 +97,7 @@ export function BookingPage({ lab, test, onBack, onComplete }: BookingPageProps)
               <div className="text-gray-600">{test?.name || 'Complete Blood Count (CBC)'}</div>
             </div>
             <div className="text-right">
-              <div className="text-3xl text-blue-600">EGP {test?.price || lab.price}</div>
+              <div className="text-3xl text-blue-600">EGP {basePrice}</div>
             </div>
           </div>
         </div>
@@ -184,7 +198,7 @@ export function BookingPage({ lab, test, onBack, onComplete }: BookingPageProps)
           <div className="space-y-3 mb-6">
             <div className="flex justify-between">
               <span className="text-gray-600">Test Price</span>
-              <span className="text-gray-900">EGP {test?.price || lab.price}</span>
+              <span className="text-gray-900">EGP {basePrice}</span>
             </div>
             {bookingType === 'home' && (
               <div className="flex justify-between">
@@ -195,7 +209,7 @@ export function BookingPage({ lab, test, onBack, onComplete }: BookingPageProps)
             <div className="border-t pt-3 flex justify-between">
               <span className="text-gray-900">Total Amount</span>
               <span className="text-2xl text-blue-600">
-                EGP {(test?.price || lab.price) + (bookingType === 'home' ? 100 : 0)}
+                EGP {basePrice + (bookingType === 'home' ? 100 : 0)}
               </span>
             </div>
           </div>

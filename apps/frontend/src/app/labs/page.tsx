@@ -1,18 +1,10 @@
-"use client";
-
-import { useRouter, useSearchParams } from "next/navigation";
-import { LabComparison } from "../../teslty/components/LabComparison";
+import { Suspense } from "react";
+import LabsClient from "./LabsClient";
 
 export default function LabsPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const query = searchParams.get("q") ?? "";
-
   return (
-    <LabComparison
-      searchQuery={query}
-      onLabSelect={(lab) => router.push(`/labs/${lab.id}`)}
-      onBack={() => router.push("/")}
-    />
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50">Loading…</div>}>
+      <LabsClient />
+    </Suspense>
   );
 }

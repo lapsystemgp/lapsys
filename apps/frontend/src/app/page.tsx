@@ -31,7 +31,7 @@ export default function HomePage() {
         router.push('/labs');
         break;
       case 'lab-details':
-        router.push('/labs/1');
+        router.push('/labs');
         break;
       case 'booking':
         router.push('/booking');

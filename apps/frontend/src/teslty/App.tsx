@@ -8,13 +8,14 @@ import { LabDashboard } from './components/LabDashboard';
 import { LoginPage } from './components/LoginPage';
 import { ChatBot } from './components/ChatBot';
 import type { Page, UserRole } from './types';
+import type { PublicLabCard, PublicTestResponse } from '../lib/publicApi';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedLab, setSelectedLab] = useState<any>(null);
-  const [selectedTest, setSelectedTest] = useState<any>(null);
+  const [selectedLab, setSelectedLab] = useState<(PublicLabCard & { timeSlots?: string[]; price?: number }) | null>(null);
+  const [selectedTest, setSelectedTest] = useState<PublicTestResponse | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleSearch = (query: string) => {
@@ -22,8 +23,13 @@ export default function App() {
     setCurrentPage('labs');
   };
 
-  const handleLabSelect = (lab: any) => {
-    setSelectedLab(lab);
+  const handleLabSelect = (lab: PublicLabCard) => {
+    const slots = ['08:00', '09:30', '11:00', '13:00', '15:00', '16:30', '18:00'];
+    const stable = String(lab?.id ?? lab?.name ?? 'lab');
+    const seed = stable.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+    const count = 3 + (seed % 3);
+    const start = seed % (slots.length - count);
+    setSelectedLab({ ...lab, timeSlots: slots.slice(start, start + count) });
     setCurrentPage('lab-details');
   };
 
@@ -41,9 +47,38 @@ export default function App() {
     setCurrentPage('landing');
   };
 
-  const handleBookFromLabDetails = (lab: any, test: any) => {
+  const handleBookFromLabDetails = (
+    lab: PublicLabCard & { timeSlots?: string[]; price?: number },
+    test: {
+      id: string;
+      name: string;
+      category: string;
+      priceEgp: number;
+      description: string | null;
+      preparation: string | null;
+      turnaroundTime: string | null;
+      parametersCount: number | null;
+    },
+  ) => {
     setSelectedLab(lab);
-    setSelectedTest(test);
+    setSelectedTest({
+      id: test.id,
+      name: test.name,
+      category: test.category,
+      priceEgp: test.priceEgp,
+      description: test.description,
+      preparation: test.preparation,
+      turnaroundTime: test.turnaroundTime,
+      parametersCount: test.parametersCount,
+      lab: {
+        id: lab.id,
+        name: lab.name,
+        address: lab.address,
+        homeCollection: lab.homeCollection,
+        accreditation: lab.accreditation,
+        turnaroundTime: lab.turnaroundTime,
+      },
+    });
     setCurrentPage('booking');
   };
 
@@ -54,7 +89,15 @@ export default function App() {
       case 'labs':
         return <LabComparison searchQuery={searchQuery} onLabSelect={handleLabSelect} onBack={() => setCurrentPage('landing')} />;
       case 'lab-details':
-        return <LabDetailsPage lab={selectedLab} onBack={() => setCurrentPage('landing')} onBookTest={handleBookFromLabDetails} />;
+        return (
+          <LabDetailsPage
+            lab={selectedLab}
+            tests={[]}
+            timeSlots={selectedLab?.timeSlots ?? []}
+            onBack={() => setCurrentPage('landing')}
+            onBookTest={handleBookFromLabDetails}
+          />
+        );
       case 'booking':
         return <BookingPage lab={selectedLab} test={selectedTest} onBack={() => setCurrentPage('lab-details')} onComplete={() => setCurrentPage('user-dashboard')} />;
       case 'user-dashboard':

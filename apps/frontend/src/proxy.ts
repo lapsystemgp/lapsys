@@ -30,6 +30,10 @@ export function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
 
+    if (request.nextUrl.pathname.startsWith('/admin') && role !== 'Admin') {
+      return NextResponse.redirect(new URL('/unauthorized', request.url));
+    }
+
     return NextResponse.next();
   } catch {
     return NextResponse.redirect(new URL('/login', request.url));
@@ -37,5 +41,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/lab/:path*', '/patient/:path*', '/booking/:path*'],
+  matcher: ['/lab/:path*', '/patient/:path*', '/booking/:path*', '/admin/:path*'],
 };

@@ -5,6 +5,7 @@ export type Page =
   | 'booking'
   | 'user-dashboard'
   | 'lab-dashboard'
+  | 'admin-dashboard'
   | 'login';
 
-export type UserRole = 'patient' | 'lab' | null;
+export type UserRole = 'patient' | 'lab' | 'admin' | null;

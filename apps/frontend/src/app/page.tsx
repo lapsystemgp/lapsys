@@ -10,11 +10,19 @@ export default function HomePage() {
   const { user, logout } = useSession();
 
   const userRole: UserRole =
-    user?.role === 'Patient' ? 'patient' : user?.role === 'LabStaff' ? 'lab' : null;
+    user?.role === 'Patient'
+      ? 'patient'
+      : user?.role === 'LabStaff'
+        ? 'lab'
+        : user?.role === 'Admin'
+          ? 'admin'
+          : null;
 
   const userLabel =
     userRole === 'lab'
       ? user?.lab_profile?.lab_name || user?.email
+      : userRole === 'admin'
+        ? user?.email
       : user?.patient_profile?.full_name || user?.email;
 
   const handleLogout = async () => {
@@ -41,6 +49,9 @@ export default function HomePage() {
         break;
       case 'lab-dashboard':
         router.push('/lab/dashboard');
+        break;
+      case 'admin-dashboard':
+        router.push('/admin/dashboard');
         break;
       case 'login':
         router.push('/login');

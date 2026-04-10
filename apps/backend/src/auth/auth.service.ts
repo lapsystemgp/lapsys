@@ -105,6 +105,10 @@ export class AuthService {
       return role === Role.LabStaff;
     }
 
+    if (selectedRole === 'admin') {
+      return role === Role.Admin;
+    }
+
     return false;
   }
 

@@ -16,6 +16,8 @@ import { LabStorageService } from './api/lab-storage.service';
 import { FaqController } from './faq/faq.controller';
 import { FaqService } from './faq/faq.service';
 import { AuditLogService } from './common/services/audit-log.service';
+import { AdminController } from './admin/admin.controller';
+import { AdminService } from './admin/admin.service';
 
 @Module({
   imports: [AuthModule],
@@ -27,6 +29,7 @@ import { AuditLogService } from './common/services/audit-log.service';
     PublicTestsController,
     BookingsController,
     FaqController,
+    AdminController,
   ],
   providers: [
     AppService,
@@ -37,6 +40,7 @@ import { AuditLogService } from './common/services/audit-log.service';
     LabStorageService,
     FaqService,
     AuditLogService,
+    AdminService,
   ],
 })
 export class AppModule {}

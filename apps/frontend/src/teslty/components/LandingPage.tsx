@@ -58,7 +58,15 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
               {userRole ? (
                 <>
                   <button
-                    onClick={() => onNavigate(userRole === 'lab' ? 'lab-dashboard' : 'user-dashboard')}
+                    onClick={() =>
+                      onNavigate(
+                        userRole === 'lab'
+                          ? 'lab-dashboard'
+                          : userRole === 'admin'
+                            ? 'admin-dashboard'
+                            : 'user-dashboard',
+                      )
+                    }
                     className="flex items-center gap-2 px-3 lg:px-4 py-2 text-gray-600 hover:text-gray-900 text-sm lg:text-base"
                   >
                     <LayoutDashboard className="w-4 h-4 lg:w-5 lg:h-5" />
@@ -102,7 +110,16 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
               {userRole ? (
                 <>
                   <button
-                    onClick={() => { onNavigate(userRole === 'lab' ? 'lab-dashboard' : 'user-dashboard'); setMobileMenuOpen(false); }}
+                    onClick={() => {
+                      onNavigate(
+                        userRole === 'lab'
+                          ? 'lab-dashboard'
+                          : userRole === 'admin'
+                            ? 'admin-dashboard'
+                            : 'user-dashboard',
+                      );
+                      setMobileMenuOpen(false);
+                    }}
                     className="w-full flex items-center gap-2 px-4 py-3 text-gray-600 hover:text-gray-900 bg-gray-50 rounded-lg"
                   >
                     <LayoutDashboard className="w-5 h-5" />

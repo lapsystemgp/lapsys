@@ -4,10 +4,10 @@ import { API_BASE_URL } from '../../lib/api';
 import { useSession } from '../../components/SessionProvider';
 
 interface LoginPageProps {
-  onLogin: (role: 'patient' | 'lab') => void;
+  onLogin: (role: 'patient' | 'lab' | 'admin') => void;
   onBack: () => void;
   defaultMode?: 'login' | 'register';
-  onAuthenticated?: (params: { role: 'patient' | 'lab'; lab_onboarding_status?: string | null }) => void;
+  onAuthenticated?: (params: { role: 'patient' | 'lab' | 'admin'; lab_onboarding_status?: string | null }) => void;
 }
 
 export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthenticated }: LoginPageProps) {
@@ -17,7 +17,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
       process.env.NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS !== 'false');
 
   const [isSignup, setIsSignup] = useState(defaultMode === 'register');
-  const [userType, setUserType] = useState<'patient' | 'lab'>('patient');
+  const [userType, setUserType] = useState<'patient' | 'lab' | 'admin'>('patient');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -129,7 +129,12 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
         user?: { role?: string; lab_onboarding_status?: string | null };
       };
 
-      const role = data.user?.role === 'LabStaff' ? 'lab' : 'patient';
+      const role =
+        data.user?.role === 'LabStaff'
+          ? 'lab'
+          : data.user?.role === 'Admin'
+            ? 'admin'
+            : 'patient';
       const lab_onboarding_status = data.user?.lab_onboarding_status ?? null;
 
       await refresh();
@@ -180,7 +185,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
             </p>
 
             {/* User Type Selection */}
-            <div className="grid grid-cols-2 gap-2 mb-6 p-1 bg-gray-100 rounded-lg">
+            <div className={`grid gap-2 mb-6 p-1 bg-gray-100 rounded-lg ${isSignup ? 'grid-cols-2' : 'grid-cols-3'}`}>
               <button
                 onClick={() => setUserType('patient')}
                 className={`py-2 px-4 rounded-md transition ${
@@ -201,6 +206,18 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
               >
                 Lab
               </button>
+              {!isSignup && (
+                <button
+                  onClick={() => setUserType('admin')}
+                  className={`py-2 px-4 rounded-md transition ${
+                    userType === 'admin'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Admin
+                </button>
+              )}
             </div>
 
             {/* Form */}
@@ -318,7 +335,15 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
               <p className="text-gray-600">
                 {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}
                 <button
-                  onClick={() => setIsSignup(!isSignup)}
+                  onClick={() => {
+                    setIsSignup((prev) => {
+                      const next = !prev;
+                      if (next && userType === 'admin') {
+                        setUserType('patient');
+                      }
+                      return next;
+                    });
+                  }}
                   className="text-blue-600 hover:text-blue-700"
                 >
                   {isSignup ? 'Sign In' : 'Sign Up'}

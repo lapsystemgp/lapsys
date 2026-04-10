@@ -20,8 +20,8 @@ export class LoginDto {
   @ApiProperty({
     example: 'patient',
     description: 'The selected account type used during login',
-    enum: ['patient', 'lab'],
+    enum: ['patient', 'lab', 'admin'],
   })
-  @IsIn(['patient', 'lab'])
-  selectedRole: 'patient' | 'lab';
+  @IsIn(['patient', 'lab', 'admin'])
+  selectedRole: 'patient' | 'lab' | 'admin';
 }

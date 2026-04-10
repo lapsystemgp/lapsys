@@ -115,6 +115,21 @@ describe('AuthService', () => {
       const result = await service.validateUser(dto);
       expect(result).toBeNull();
     });
+
+    it('should return admin user when selected role is admin', async () => {
+      const dto = { email: 'admin@example.com', password: 'password123', selectedRole: 'admin' as const };
+      const password_hash = await bcrypt.hash(dto.password, 10);
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        id: 'admin-1',
+        email: dto.email,
+        password_hash,
+        role: Role.Admin,
+      });
+
+      const result = await service.validateUser(dto);
+      expect(result).not.toBeNull();
+      expect(result?.role).toBe(Role.Admin);
+    });
   });
 
   describe('login', () => {

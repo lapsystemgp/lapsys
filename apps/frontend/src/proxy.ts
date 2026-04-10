@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { decodeJwt } from 'jose';
 
-export function middleware(request: NextRequest) {
-  // Use edge computing logic (jose's minimal functions that work in edge runtime)
+export function proxy(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value;
 
   if (!token) {
@@ -32,12 +31,11 @@ export function middleware(request: NextRequest) {
     }
 
     return NextResponse.next();
-  } catch (error) {
+  } catch {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 }
 
-// Config to specify which paths the middleware should run on.
 export const config = {
   matcher: ['/lab/:path*', '/patient/:path*', '/booking/:path*'],
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL, ApiError } from "../../../lib/api";
 import { cancelPatientBooking } from "../../../lib/bookingsApi";
@@ -53,7 +53,7 @@ export default function PatientDashboardPage() {
   const [reviewDrafts, setReviewDrafts] = useState<Record<string, { rating: number; comment: string }>>({});
   const [submittingReviewId, setSubmittingReviewId] = useState<string | null>(null);
 
-  const loadWorkspace = async () => {
+  const loadWorkspace = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -73,11 +73,11 @@ export default function PatientDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     loadWorkspace();
-  }, []);
+  }, [loadWorkspace]);
 
   const allBookings = useMemo(() => {
     if (!workspace) return [];

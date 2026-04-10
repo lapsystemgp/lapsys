@@ -31,8 +31,11 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     try {
       const me = await apiFetch<CurrentUser>("/auth/me", { method: "GET" });
       setUser(me);
-    } catch (err: any) {
-      const status = typeof err?.status === "number" ? err.status : undefined;
+    } catch (err: unknown) {
+      const status =
+        typeof err === "object" && err !== null && "status" in err && typeof err.status === "number"
+          ? err.status
+          : undefined;
       if (status === 401) {
         setUser(null);
       }
@@ -67,4 +70,3 @@ export function useSession() {
   }
   return ctx;
 }
-

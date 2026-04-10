@@ -28,6 +28,16 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
 
   const { refresh } = useSession();
 
+  const normalizeEmail = (value: string) => value.trim().toLowerCase();
+
+  const readRuntimeErrorMessage = (value: unknown) => {
+    if (value instanceof Error) {
+      return value.message.trim();
+    }
+
+    return String(value ?? '').trim();
+  };
+
   const readErrorMessage = async (response: Response, fallback: string) => {
     try {
       const contentType = response.headers.get('content-type') ?? '';
@@ -61,7 +71,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({
-              email,
+              email: normalizeEmail(email),
               password,
               full_name: name || undefined,
             }),
@@ -84,7 +94,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({
-              email,
+              email: normalizeEmail(email),
               password,
               lab_name: name,
               address: labAddress,
@@ -103,7 +113,11 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          email: normalizeEmail(email),
+          password,
+          selectedRole: userType,
+        }),
       });
 
       if (!loginRes.ok) {
@@ -125,8 +139,8 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
       } else {
         onLogin(role);
       }
-    } catch (err: any) {
-      const rawMessage = String(err?.message || '').trim();
+    } catch (err: unknown) {
+      const rawMessage = readRuntimeErrorMessage(err);
       if (rawMessage.toLowerCase() === 'failed to fetch') {
         setError('Unable to reach the server. Please check that backend is running.');
       } else {
@@ -279,7 +293,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
               {isSignup && userType === 'lab' && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-blue-800">
-                    Your lab will be reviewed by our admin team before approval. You'll receive an email once your account is activated.
+                    Your lab will be reviewed by our admin team before approval. You&apos;ll receive an email once your account is activated.
                   </p>
                 </div>
               )}

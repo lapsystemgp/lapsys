@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 export type StoredLabFile = {
   fileName: string;
@@ -20,6 +19,33 @@ export type UploadedLabFile = {
 
 export interface LabFileStorageAdapter {
   saveResultFile(file: UploadedLabFile): Promise<StoredLabFile>;
+}
+
+type S3SendClient = {
+  send: (command: unknown) => Promise<unknown>;
+};
+
+type S3SdkModule = {
+  S3Client: new (config: {
+    region: string;
+    endpoint?: string;
+    forcePathStyle: boolean;
+    credentials: {
+      accessKeyId: string;
+      secretAccessKey: string;
+      sessionToken?: string;
+    };
+  }) => S3SendClient;
+  PutObjectCommand: new (input: {
+    Bucket: string;
+    Key: string;
+    Body: Buffer;
+    ContentType: string;
+  }) => unknown;
+};
+
+export function loadS3Sdk(): S3SdkModule {
+  return require('@aws-sdk/client-s3') as S3SdkModule;
 }
 
 class LocalDiskLabStorageAdapter implements LabFileStorageAdapter {
@@ -43,13 +69,14 @@ class LocalDiskLabStorageAdapter implements LabFileStorageAdapter {
 }
 
 class S3CompatibleLabStorageAdapter implements LabFileStorageAdapter {
-  private readonly s3Client: S3Client;
+  private readonly s3Client: S3SendClient;
+  private readonly PutObjectCommand: S3SdkModule['PutObjectCommand'];
   private readonly bucket: string;
   private readonly region: string;
   private readonly endpoint: string | undefined;
   private readonly publicBaseUrl: string | undefined;
 
-  constructor() {
+  constructor(s3SdkLoader: () => S3SdkModule = loadS3Sdk) {
     this.bucket = this.readRequiredEnv('LAB_S3_BUCKET');
     this.region = this.readRequiredEnv('LAB_S3_REGION');
     this.endpoint = process.env.LAB_S3_ENDPOINT?.trim() || undefined;
@@ -58,6 +85,7 @@ class S3CompatibleLabStorageAdapter implements LabFileStorageAdapter {
     const accessKeyId = this.readRequiredEnv('AWS_ACCESS_KEY_ID');
     const secretAccessKey = this.readRequiredEnv('AWS_SECRET_ACCESS_KEY');
     const sessionToken = process.env.AWS_SESSION_TOKEN?.trim() || undefined;
+    const { S3Client, PutObjectCommand } = s3SdkLoader();
 
     this.s3Client = new S3Client({
       region: this.region,
@@ -69,6 +97,7 @@ class S3CompatibleLabStorageAdapter implements LabFileStorageAdapter {
         ...(sessionToken ? { sessionToken } : {}),
       },
     });
+    this.PutObjectCommand = PutObjectCommand;
   }
 
   async saveResultFile(file: UploadedLabFile): Promise<StoredLabFile> {
@@ -77,7 +106,7 @@ class S3CompatibleLabStorageAdapter implements LabFileStorageAdapter {
     const objectKey = `results/${new Date().toISOString().slice(0, 10)}/${Date.now()}-${randomUUID()}-${safeBaseName}${ext}`;
 
     await this.s3Client.send(
-      new PutObjectCommand({
+      new this.PutObjectCommand({
         Bucket: this.bucket,
         Key: objectKey,
         Body: file.buffer,
@@ -125,10 +154,10 @@ class S3CompatibleLabStorageAdapter implements LabFileStorageAdapter {
 export class LabStorageService {
   private readonly adapter: LabFileStorageAdapter;
 
-  constructor() {
+  constructor(s3SdkLoader: () => S3SdkModule = loadS3Sdk) {
     this.adapter =
       process.env.LAB_STORAGE_DRIVER === 's3'
-        ? new S3CompatibleLabStorageAdapter()
+        ? new S3CompatibleLabStorageAdapter(s3SdkLoader)
         : new LocalDiskLabStorageAdapter();
   }
 

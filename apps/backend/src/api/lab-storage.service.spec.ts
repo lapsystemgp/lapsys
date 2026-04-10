@@ -1,4 +1,3 @@
-import { S3Client } from '@aws-sdk/client-s3';
 import { LabStorageService } from './lab-storage.service';
 
 describe('LabStorageService', () => {
@@ -38,9 +37,11 @@ describe('LabStorageService', () => {
     process.env.AWS_ACCESS_KEY_ID = 'key';
     process.env.AWS_SECRET_ACCESS_KEY = 'secret';
 
-    const sendSpy = jest.spyOn(S3Client.prototype, 'send').mockResolvedValue({} as never);
-
-    const service = new LabStorageService();
+    const sendMock = jest.fn().mockResolvedValue({});
+    const service = new LabStorageService(() => ({
+      S3Client: jest.fn().mockImplementation(() => ({ send: sendMock })),
+      PutObjectCommand: jest.fn().mockImplementation((input) => input),
+    }));
     const stored = await service.saveResultFile({
       originalname: 'cbc report.pdf',
       mimetype: 'application/pdf',
@@ -48,7 +49,7 @@ describe('LabStorageService', () => {
       buffer: Buffer.from('pdf-content'),
     });
 
-    expect(sendSpy).toHaveBeenCalledTimes(1);
+    expect(sendMock).toHaveBeenCalledTimes(1);
     expect(stored.fileName).toBe('cbc report.pdf');
     expect(stored.fileUrl.startsWith('https://cdn.example.com/lab-results/results/')).toBe(true);
     expect(stored.mimeType).toBe('application/pdf');

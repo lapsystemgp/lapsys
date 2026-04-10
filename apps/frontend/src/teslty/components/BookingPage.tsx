@@ -71,28 +71,30 @@ export function BookingPage({
     return Array.from(map.entries()).map(([key, label]) => ({ key, label }));
   }, [slots]);
 
-  useEffect(() => {
-    if (!selectedDate && dates.length > 0) {
-      setSelectedDate(dates[0].key);
+  const effectiveSelectedDate = useMemo(() => {
+    if (selectedDate && dates.some((date) => date.key === selectedDate)) {
+      return selectedDate;
     }
+
+    return dates[0]?.key ?? "";
   }, [dates, selectedDate]);
 
   const timeSlotsForDate = useMemo(
-    () => slots.filter((slot) => toDateKey(slot.startsAt) === selectedDate),
-    [selectedDate, slots],
+    () => slots.filter((slot) => toDateKey(slot.startsAt) === effectiveSelectedDate),
+    [effectiveSelectedDate, slots],
   );
 
-  useEffect(() => {
-    if (!selectedSlotId) return;
-    const stillAvailable = timeSlotsForDate.some((slot) => slot.id === selectedSlotId);
-    if (!stillAvailable) {
-      setSelectedSlotId("");
+  const effectiveSelectedSlotId = useMemo(() => {
+    if (selectedSlotId && timeSlotsForDate.some((slot) => slot.id === selectedSlotId)) {
+      return selectedSlotId;
     }
+
+    return "";
   }, [selectedSlotId, timeSlotsForDate]);
 
   const selectedSlot = useMemo(
-    () => slots.find((slot) => slot.id === selectedSlotId) ?? null,
-    [selectedSlotId, slots],
+    () => slots.find((slot) => slot.id === effectiveSelectedSlotId) ?? null,
+    [effectiveSelectedSlotId, slots],
   );
 
   if (isLoading) {
@@ -115,7 +117,7 @@ export function BookingPage({
 
   const handleBooking = async () => {
     setLocalError(null);
-    if (!selectedSlotId) {
+    if (!effectiveSelectedSlotId) {
       setLocalError("Please select a time slot.");
       return;
     }
@@ -126,7 +128,7 @@ export function BookingPage({
 
     try {
       await onSubmit({
-        slotId: selectedSlotId,
+        slotId: effectiveSelectedSlotId,
         bookingType: bookingType === "home" ? "HomeCollection" : "LabVisit",
         homeAddress: bookingType === "home" ? homeAddress.trim() : undefined,
       });
@@ -222,7 +224,7 @@ export function BookingPage({
                 key={date.key}
                 onClick={() => setSelectedDate(date.key)}
                 className={`p-4 rounded-lg border-2 transition ${
-                  selectedDate === date.key ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
+                  effectiveSelectedDate === date.key ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 <div className="text-gray-900">{date.label}</div>
@@ -247,7 +249,7 @@ export function BookingPage({
                 <div className="text-gray-900">{formatTime(slot.startsAt)}</div>
               </button>
             ))}
-            {selectedDate && timeSlotsForDate.length === 0 && (
+            {effectiveSelectedDate && timeSlotsForDate.length === 0 && (
               <p className="text-gray-600 col-span-4">No slots available for this date.</p>
             )}
           </div>
@@ -287,7 +289,7 @@ export function BookingPage({
           {(localError || errorMessage) && <p className="text-red-600 mb-4">{localError || errorMessage}</p>}
           <button
             onClick={handleBooking}
-            disabled={!selectedSlotId || !!isSubmitting}
+            disabled={!effectiveSelectedSlotId || !!isSubmitting}
             className="w-full py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Confirming..." : "Confirm Booking"}

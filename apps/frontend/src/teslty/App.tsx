@@ -7,7 +7,6 @@ import { useEffect } from 'react';
 export default function App() {
   useEffect(() => {
     if (process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
       console.warn('Deprecated component used: teslty/App.tsx. Use app routes instead.');
     }
   }, []);

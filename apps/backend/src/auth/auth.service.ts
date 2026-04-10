@@ -85,11 +85,27 @@ export class AuthService {
       where: { email: loginDto.email },
     });
 
-    if (user && (await bcrypt.compare(loginDto.password, user.password_hash))) {
+    if (
+      user &&
+      (await bcrypt.compare(loginDto.password, user.password_hash)) &&
+      this.matchesSelectedRole(user.role, loginDto.selectedRole)
+    ) {
       const { password_hash, ...result } = user;
       return result;
     }
     return null;
+  }
+
+  private matchesSelectedRole(role: Role, selectedRole: LoginDto['selectedRole']) {
+    if (selectedRole === 'patient') {
+      return role === Role.Patient;
+    }
+
+    if (selectedRole === 'lab') {
+      return role === Role.LabStaff;
+    }
+
+    return false;
   }
 
   async login(user: { id: string; email: string; role: Role }) {

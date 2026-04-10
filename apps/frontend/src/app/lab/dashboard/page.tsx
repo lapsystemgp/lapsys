@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError } from "../../../lib/api";
 import { setLabBookingStatus } from "../../../lib/bookingsApi";
@@ -54,7 +55,7 @@ export default function LabDashboardPage() {
   const [newSlot, setNewSlot] = useState({ startsAt: "", endsAt: "", capacity: "1" });
   const [uploadState, setUploadState] = useState<Record<string, { summary: string; file: File | null }>>({});
 
-  const loadWorkspace = async () => {
+  const loadWorkspace = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -73,11 +74,11 @@ export default function LabDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     loadWorkspace();
-  }, []);
+  }, [loadWorkspace]);
 
   const bookingsByStatus = useMemo(() => {
     const pending = workspace?.bookings.filter((booking) => booking.status === "Pending") ?? [];
@@ -224,7 +225,14 @@ export default function LabDashboardPage() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
+          <div className="space-y-2">
+            <button
+              onClick={() => router.push("/")}
+              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Home
+            </button>
             <h1 className="text-2xl text-gray-900">Lab Workspace</h1>
             <p className="text-gray-600">{workspace?.lab.name || user?.lab_profile?.lab_name || user?.email}</p>
           </div>

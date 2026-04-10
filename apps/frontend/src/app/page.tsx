@@ -52,7 +52,7 @@ export default function HomePage() {
 
   return (
     <LandingPage
-      onSearch={(query) => router.push(`/labs?q=${encodeURIComponent(query)}`)}
+      onSearch={(query) => router.push(`/labs?q=${encodeURIComponent(query.trim())}`)}
       onNavigate={handleNavigate}
       userRole={userRole}
       currentUserLabel={userLabel}

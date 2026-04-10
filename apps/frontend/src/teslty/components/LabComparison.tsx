@@ -12,7 +12,7 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
   const [sortBy, setSortBy] = useState<'price' | 'rating' | 'distance'>('price');
   const [showFilters, setShowFilters] = useState(false);
   const [homeCollectionOnly, setHomeCollectionOnly] = useState(false);
-  const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
   const [minRating, setMinRating] = useState(0);
   const [maxDistance, setMaxDistance] = useState(10);
   const [maxPrice, setMaxPrice] = useState(1000);
@@ -23,7 +23,6 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
   const requestKey = useMemo(
     () =>
       JSON.stringify({
-        searchQuery,
         localSearchQuery,
         sortBy,
         homeCollectionOnly,
@@ -32,7 +31,7 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
         maxPrice,
         selectedAccreditations,
       }),
-    [homeCollectionOnly, localSearchQuery, maxDistance, maxPrice, minRating, searchQuery, selectedAccreditations, sortBy],
+    [homeCollectionOnly, localSearchQuery, maxDistance, maxPrice, minRating, selectedAccreditations, sortBy],
   );
 
   const isLoading = lastResolvedKey !== '' && lastResolvedKey !== requestKey;
@@ -42,8 +41,14 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
     window.scrollTo(0, 0);
   }, []);
 
+  useEffect(() => {
+    setLocalSearchQuery(searchQuery);
+  }, [searchQuery]);
+
+  const effectiveSearchQuery = localSearchQuery.trim();
+
   const testInfo = {
-    name: searchQuery || 'Complete Blood Count (CBC)',
+    name: effectiveSearchQuery || 'All Available Tests',
     description: 'A complete blood count test measures several components of your blood including red blood cells, white blood cells, and platelets.',
     preparations: [
       'Fasting for 8-12 hours recommended',
@@ -57,8 +62,7 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
   useEffect(() => {
     let isMounted = true;
     fetchPublicLabs({
-      q: searchQuery || undefined,
-      labName: localSearchQuery || undefined,
+      q: effectiveSearchQuery || undefined,
       sort: sortBy,
       minRating: minRating > 0 ? minRating : undefined,
       maxDistanceKm: maxDistance < 10 ? maxDistance : undefined,
@@ -82,7 +86,7 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
     return () => {
       isMounted = false;
     };
-  }, [homeCollectionOnly, localSearchQuery, maxDistance, maxPrice, minRating, requestKey, searchQuery, selectedAccreditations, sortBy]);
+  }, [effectiveSearchQuery, homeCollectionOnly, maxDistance, maxPrice, minRating, requestKey, selectedAccreditations, sortBy]);
 
   const availableAccreditations = ['NABL', 'CAP', 'ISO', 'JCI'];
 
@@ -320,7 +324,7 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
                   type="text"
                   value={localSearchQuery}
                   onChange={(e) => setLocalSearchQuery(e.target.value)}
-                  placeholder="Search labs by name..."
+                  placeholder="Search labs or tests..."
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

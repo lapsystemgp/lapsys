@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+import { IsEmail, IsIn, IsNotEmpty, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginDto {
@@ -16,4 +16,12 @@ export class LoginDto {
   @IsNotEmpty()
   @MinLength(8)
   password: string;
+
+  @ApiProperty({
+    example: 'patient',
+    description: 'The selected account type used during login',
+    enum: ['patient', 'lab'],
+  })
+  @IsIn(['patient', 'lab'])
+  selectedRole: 'patient' | 'lab';
 }

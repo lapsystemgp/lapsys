@@ -70,12 +70,13 @@ describe('AuthService', () => {
 
   describe('validateUser', () => {
     it('should return user object if password matches', async () => {
-      const dto = { email: 'test@example.com', password: 'password123' };
+      const dto = { email: 'test@example.com', password: 'password123', selectedRole: 'patient' as const };
       const password_hash = await bcrypt.hash(dto.password, 10);
       mockPrismaService.user.findUnique.mockResolvedValue({
         id: '1',
         email: dto.email,
         password_hash,
+        role: Role.Patient,
       });
 
       const result = await service.validateUser(dto);
@@ -88,12 +89,27 @@ describe('AuthService', () => {
     });
 
     it('should return null if password mismatch', async () => {
-      const dto = { email: 'test@example.com', password: 'wrong' };
+      const dto = { email: 'test@example.com', password: 'wrong', selectedRole: 'patient' as const };
       const actual_password = 'correct';
       const password_hash = await bcrypt.hash(actual_password, 10);
       mockPrismaService.user.findUnique.mockResolvedValue({
         email: dto.email,
         password_hash,
+        role: Role.Patient,
+      });
+
+      const result = await service.validateUser(dto);
+      expect(result).toBeNull();
+    });
+
+    it('should return null when the selected role does not match the account role', async () => {
+      const dto = { email: 'lab@example.com', password: 'password123', selectedRole: 'patient' as const };
+      const password_hash = await bcrypt.hash(dto.password, 10);
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        id: '1',
+        email: dto.email,
+        password_hash,
+        role: Role.LabStaff,
       });
 
       const result = await service.validateUser(dto);

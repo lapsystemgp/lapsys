@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Building2, CheckCircle2, Clock3, PauseCircle, Search, XCircle } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Building2, CheckCircle2, Clock3, PauseCircle, Search, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError } from "../../../lib/api";
@@ -13,6 +13,7 @@ import {
 import { useSession } from "../../../components/SessionProvider";
 
 type StatusFilter = "All" | AdminLabOnboardingStatus;
+type ReadinessFilter = "All" | "Ready" | "NeedsSetup";
 
 function statusClasses(status: AdminLabOnboardingStatus) {
   if (status === "Active") return "bg-green-100 text-green-700";
@@ -31,6 +32,30 @@ function formatDate(value: string) {
   });
 }
 
+function readApiErrorMessage(err: unknown, fallback: string) {
+  if (err instanceof ApiError && err.bodyText) {
+    try {
+      const parsed = JSON.parse(err.bodyText) as { message?: string | string[] };
+      if (Array.isArray(parsed.message)) {
+        return parsed.message.join(", ");
+      }
+      if (typeof parsed.message === "string" && parsed.message.trim()) {
+        return parsed.message;
+      }
+    } catch {
+      if (err.bodyText.trim()) {
+        return err.bodyText.trim();
+      }
+    }
+  }
+
+  if (err instanceof Error && err.message.trim()) {
+    return err.message;
+  }
+
+  return fallback;
+}
+
 const statusFilters: StatusFilter[] = ["All", "PendingReview", "Active", "Rejected", "Suspended"];
 
 export default function AdminDashboardPage() {
@@ -42,6 +67,7 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("All");
+  const [readinessFilter, setReadinessFilter] = useState<ReadinessFilter>("All");
   const [updatingLabId, setUpdatingLabId] = useState<string | null>(null);
 
   const loadWorkspace = useCallback(async () => {
@@ -74,6 +100,9 @@ export default function AdminDashboardPage() {
 
     return (workspace?.labs ?? []).filter((lab) => {
       const matchesStatus = statusFilter === "All" || lab.onboardingStatus === statusFilter;
+      const matchesReadiness =
+        readinessFilter === "All" ||
+        (readinessFilter === "Ready" ? lab.onboardingReadiness.isReady : !lab.onboardingReadiness.isReady);
       const matchesQuery =
         normalizedQuery.length === 0 ||
         lab.labName.toLowerCase().includes(normalizedQuery) ||
@@ -81,9 +110,9 @@ export default function AdminDashboardPage() {
         lab.address.toLowerCase().includes(normalizedQuery) ||
         lab.accreditation.toLowerCase().includes(normalizedQuery);
 
-      return matchesStatus && matchesQuery;
+      return matchesStatus && matchesReadiness && matchesQuery;
     });
-  }, [searchQuery, statusFilter, workspace?.labs]);
+  }, [readinessFilter, searchQuery, statusFilter, workspace?.labs]);
 
   const handleLogout = async () => {
     await logout();
@@ -99,8 +128,8 @@ export default function AdminDashboardPage() {
     try {
       await setAdminLabOnboardingStatus(labProfileId, status);
       await loadWorkspace();
-    } catch {
-      setError("Could not update lab status.");
+    } catch (err) {
+      setError(readApiErrorMessage(err, "Could not update lab status."));
     } finally {
       setUpdatingLabId(null);
     }
@@ -145,6 +174,8 @@ export default function AdminDashboardPage() {
               <StatCard icon={<CheckCircle2 className="h-5 w-5 text-green-600" />} label="Active Labs" value={workspace.stats.activeLabs} />
               <StatCard icon={<XCircle className="h-5 w-5 text-red-600" />} label="Rejected Labs" value={workspace.stats.rejectedLabs} />
               <StatCard icon={<PauseCircle className="h-5 w-5 text-slate-600" />} label="Suspended Labs" value={workspace.stats.suspendedLabs} />
+              <StatCard icon={<CheckCircle2 className="h-5 w-5 text-emerald-600" />} label="Ready Pending Labs" value={workspace.stats.readyPendingLabs} />
+              <StatCard icon={<AlertTriangle className="h-5 w-5 text-orange-600" />} label="Needs Setup" value={workspace.stats.incompleteLabs} />
             </section>
 
             <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -178,6 +209,22 @@ export default function AdminDashboardPage() {
                     }`}
                   >
                     {item === "All" ? "All Statuses" : item}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mb-4 flex flex-wrap gap-2">
+                {(["All", "Ready", "NeedsSetup"] as ReadinessFilter[]).map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => setReadinessFilter(item)}
+                    className={`rounded-full px-4 py-2 text-sm ${
+                      readinessFilter === item
+                        ? "bg-slate-900 text-white"
+                        : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    {item === "All" ? "All Readiness" : item === "Ready" ? "Ready for Activation" : "Needs Setup"}
                   </button>
                 ))}
               </div>
@@ -221,10 +268,45 @@ export default function AdminDashboardPage() {
                         />
                       </div>
 
+                      <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                        <div className="mb-2 flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm text-slate-500">Onboarding Readiness</p>
+                            <p className="text-slate-900">
+                              {lab.onboardingReadiness.completedRequirements}/{lab.onboardingReadiness.totalRequirements} requirements completed
+                            </p>
+                          </div>
+                          <span
+                            className={`rounded-full px-3 py-1 text-sm ${
+                              lab.onboardingReadiness.isReady
+                                ? "bg-green-100 text-green-700"
+                                : "bg-orange-100 text-orange-700"
+                            }`}
+                          >
+                            {lab.onboardingReadiness.isReady ? "Ready" : "Needs Setup"}
+                          </span>
+                        </div>
+                        {lab.onboardingReadiness.missingRequirements.length > 0 ? (
+                          <div className="flex flex-wrap gap-2">
+                            {lab.onboardingReadiness.missingRequirements.map((item) => (
+                              <span
+                                key={item}
+                                className="rounded-full bg-white px-3 py-1 text-sm text-slate-700 border border-slate-200"
+                              >
+                                Missing: {item}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-slate-600">This lab has completed the minimum onboarding checklist.</p>
+                        )}
+                      </div>
+
                       <div className="mt-5 flex flex-wrap gap-2">
                         {lab.onboardingStatus !== "Active" && (
                           <ActionButton
-                            disabled={updatingLabId === lab.id}
+                            loading={updatingLabId === lab.id}
+                            disabled={!lab.onboardingReadiness.isReady}
                             onClick={() => handleStatusUpdate(lab.id, "Active")}
                             className="bg-green-600 text-white hover:bg-green-700"
                           >
@@ -233,7 +315,8 @@ export default function AdminDashboardPage() {
                         )}
                         {lab.onboardingStatus !== "Rejected" && (
                           <ActionButton
-                            disabled={updatingLabId === lab.id}
+                            loading={updatingLabId === lab.id}
+                            disabled={false}
                             onClick={() => handleStatusUpdate(lab.id, "Rejected")}
                             className="border border-red-300 text-red-700 hover:bg-red-50"
                           >
@@ -242,7 +325,8 @@ export default function AdminDashboardPage() {
                         )}
                         {lab.onboardingStatus !== "Suspended" && (
                           <ActionButton
-                            disabled={updatingLabId === lab.id}
+                            loading={updatingLabId === lab.id}
+                            disabled={false}
                             onClick={() => handleStatusUpdate(lab.id, "Suspended")}
                             className="border border-slate-300 text-slate-700 hover:bg-slate-100"
                           >
@@ -294,21 +378,23 @@ function InfoBlock({ label, value }: { label: string; value: string }) {
 function ActionButton({
   children,
   className,
+  loading,
   disabled,
   onClick,
 }: {
   children: React.ReactNode;
   className: string;
+  loading: boolean;
   disabled: boolean;
   onClick: () => void;
 }) {
   return (
     <button
-      disabled={disabled}
+      disabled={disabled || loading}
       onClick={onClick}
       className={`rounded-lg px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
     >
-      {disabled ? "Updating..." : children}
+      {loading ? "Updating..." : children}
     </button>
   );
 }

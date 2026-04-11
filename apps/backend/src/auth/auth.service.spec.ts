@@ -60,6 +60,35 @@ describe('AuthService', () => {
       expect(mockPrismaService.user.create).toHaveBeenCalled();
     });
 
+    it('should normalize email casing during lab registration', async () => {
+      const dto = {
+        email: 'Lab@Example.com',
+        password: 'password123',
+        lab_name: 'Alpha Lab',
+        address: 'Cairo',
+      };
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      mockPrismaService.user.create.mockResolvedValue({
+        id: '1',
+        email: 'lab@example.com',
+        role: Role.LabStaff,
+        created_at: new Date(),
+      });
+
+      await service.registerLab(dto);
+
+      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { email: 'lab@example.com' },
+      });
+      expect(mockPrismaService.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            email: 'lab@example.com',
+          }),
+        }),
+      );
+    });
+
     it('should throw ConflictException if email exists', async () => {
       const dto = { email: 'exist@example.com', password: 'password123' };
       mockPrismaService.user.findUnique.mockResolvedValue({ email: dto.email });

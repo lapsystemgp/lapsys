@@ -23,6 +23,9 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
   const [name, setName] = useState('');
   const [labAddress, setLabAddress] = useState('');
   const [labPhone, setLabPhone] = useState('');
+  const [labAccreditation, setLabAccreditation] = useState('');
+  const [labTurnaroundTime, setLabTurnaroundTime] = useState('');
+  const [labHomeCollection, setLabHomeCollection] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -99,6 +102,9 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
               lab_name: name,
               address: labAddress,
               phone: labPhone || undefined,
+              accreditation: labAccreditation.trim() || undefined,
+              turnaround_time: labTurnaroundTime.trim() || undefined,
+              home_collection: labHomeCollection,
             }),
           });
 
@@ -268,6 +274,47 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
                 </div>
               )}
 
+              {isSignup && userType === 'lab' && (
+                <div>
+                  <label className="block text-gray-700 mb-2">Accreditation (Optional)</label>
+                  <input
+                    type="text"
+                    value={labAccreditation}
+                    onChange={(e) => setLabAccreditation(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="NABL, CAP, ISO..."
+                  />
+                </div>
+              )}
+
+              {isSignup && userType === 'lab' && (
+                <div>
+                  <label className="block text-gray-700 mb-2">Turnaround Time (Optional)</label>
+                  <input
+                    type="text"
+                    value={labTurnaroundTime}
+                    onChange={(e) => setLabTurnaroundTime(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="24 hours"
+                  />
+                </div>
+              )}
+
+              {isSignup && userType === 'lab' && (
+                <label className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={labHomeCollection}
+                    onChange={(e) => setLabHomeCollection(e.target.checked)}
+                    className="h-4 w-4 rounded text-blue-600"
+                  />
+                  <div>
+                    <p className="text-gray-900">Enable home collection</p>
+                    <p className="text-sm text-gray-500">You can still change availability later from the lab dashboard.</p>
+                  </div>
+                </label>
+              )}
+
               <div>
                 <label className="block text-gray-700 mb-2">Email Address</label>
                 <div className="relative">
@@ -311,6 +358,9 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-blue-800">
                     Your lab will be reviewed by our admin team before approval. You&apos;ll receive an email once your account is activated.
+                  </p>
+                  <p className="mt-2 text-sm text-blue-700">
+                    Labs with phone, accreditation, turnaround time, tests, and active schedule slots are ready for faster activation.
                   </p>
                 </div>
               )}

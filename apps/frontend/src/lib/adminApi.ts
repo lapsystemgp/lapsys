@@ -13,6 +13,8 @@ export type AdminWorkspaceResponse = {
     activeLabs: number;
     rejectedLabs: number;
     suspendedLabs: number;
+    readyPendingLabs: number;
+    incompleteLabs: number;
   };
   labs: Array<{
     id: string;
@@ -29,6 +31,12 @@ export type AdminWorkspaceResponse = {
     testsCount: number;
     bookingsCount: number;
     scheduleSlotsCount: number;
+    onboardingReadiness: {
+      isReady: boolean;
+      completedRequirements: number;
+      totalRequirements: number;
+      missingRequirements: string[];
+    };
     createdAt: string;
     updatedAt: string;
   }>;

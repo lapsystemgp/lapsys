@@ -14,6 +14,14 @@ describe('AdminService', () => {
       findUnique: jest.fn(),
       update: jest.fn(),
     },
+    labTest: {
+      groupBy: jest.fn(),
+      count: jest.fn(),
+    },
+    labScheduleSlot: {
+      groupBy: jest.fn(),
+      count: jest.fn(),
+    },
   } as any;
 
   const auditLogMock = { log: jest.fn() } as unknown as AuditLogService;
@@ -39,6 +47,8 @@ describe('AdminService', () => {
       .mockResolvedValueOnce(2)
       .mockResolvedValueOnce(1)
       .mockResolvedValueOnce(0);
+    prismaMock.labTest.groupBy.mockResolvedValue([{ lab_profile_id: 'lab-1', _count: { _all: 7 } }]);
+    prismaMock.labScheduleSlot.groupBy.mockResolvedValue([{ lab_profile_id: 'lab-1', _count: { _all: 4 } }]);
     prismaMock.labProfile.findMany.mockResolvedValue([
       {
         id: 'lab-1',
@@ -62,6 +72,8 @@ describe('AdminService', () => {
 
     expect(result.stats.totalLabs).toBe(4);
     expect(result.stats.pendingLabs).toBe(1);
+    expect(result.stats.readyPendingLabs).toBe(1);
+    expect(result.stats.incompleteLabs).toBe(0);
     expect(result.labs[0]).toEqual(
       expect.objectContaining({
         id: 'lab-1',
@@ -69,6 +81,10 @@ describe('AdminService', () => {
         email: 'alpha@example.com',
         onboardingStatus: LabOnboardingStatus.PendingReview,
         testsCount: 7,
+        onboardingReadiness: expect.objectContaining({
+          isReady: true,
+          completedRequirements: 5,
+        }),
       }),
     );
   });
@@ -78,9 +94,14 @@ describe('AdminService', () => {
     prismaMock.labProfile.findUnique.mockResolvedValue({
       id: 'lab-1',
       lab_name: 'Alpha Lab',
+      phone: '+20 10 0000 0000',
+      accreditation: 'CAP',
+      turnaround_time: '24 hours',
       onboarding_status: LabOnboardingStatus.PendingReview,
       user: { email: 'alpha@example.com' },
     });
+    prismaMock.labTest.count.mockResolvedValue(3);
+    prismaMock.labScheduleSlot.count.mockResolvedValue(2);
     prismaMock.labProfile.update.mockResolvedValue({
       id: 'lab-1',
       lab_name: 'Alpha Lab',
@@ -100,6 +121,27 @@ describe('AdminService', () => {
       }),
     );
     expect(result.onboardingStatus).toBe(LabOnboardingStatus.Active);
+  });
+
+  it('blocks activation when lab onboarding is incomplete', async () => {
+    prismaMock.user.findUnique.mockResolvedValue({ id: 'admin-1', role: Role.Admin });
+    prismaMock.labProfile.findUnique.mockResolvedValue({
+      id: 'lab-1',
+      lab_name: 'Alpha Lab',
+      phone: null,
+      accreditation: '',
+      turnaround_time: null,
+      onboarding_status: LabOnboardingStatus.PendingReview,
+      user: { email: 'alpha@example.com' },
+    });
+    prismaMock.labTest.count.mockResolvedValue(0);
+    prismaMock.labScheduleSlot.count.mockResolvedValue(0);
+
+    await expect(
+      service.setLabOnboardingStatus('admin-1', 'lab-1', {
+        status: LabOnboardingStatus.Active,
+      }),
+    ).rejects.toThrow('Lab is not ready for activation');
   });
 
   it('throws when updating a missing lab', async () => {

@@ -2,6 +2,12 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { decodeJwt } from 'jose';
 
+function toUnauthorizedReason(labStatus: unknown) {
+  if (labStatus === 'Rejected') return 'rejected';
+  if (labStatus === 'Suspended') return 'suspended';
+  return 'pending_review';
+}
+
 export function proxy(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value;
 
@@ -19,7 +25,9 @@ export function proxy(request: NextRequest) {
     }
 
     if (request.nextUrl.pathname.startsWith('/lab') && role === 'LabStaff' && labStatus !== 'Active') {
-      return NextResponse.redirect(new URL('/unauthorized?reason=pending_review', request.url));
+      return NextResponse.redirect(
+        new URL(`/unauthorized?reason=${toUnauthorizedReason(labStatus)}`, request.url),
+      );
     }
 
     if (request.nextUrl.pathname.startsWith('/patient') && role !== 'Patient') {

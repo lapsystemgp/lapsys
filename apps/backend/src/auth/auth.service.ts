@@ -15,8 +15,9 @@ export class AuthService {
   ) {}
 
   async registerPatient(registerDto: PatientRegisterDto) {
+    const normalizedEmail = this.normalizeEmail(registerDto.email);
     const existingUser = await this.prisma.user.findUnique({
-      where: { email: registerDto.email },
+      where: { email: normalizedEmail },
     });
 
     if (existingUser) {
@@ -28,7 +29,7 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
-        email: registerDto.email,
+        email: normalizedEmail,
         password_hash,
         role: Role.Patient,
         patient_profile: {
@@ -46,8 +47,9 @@ export class AuthService {
   }
 
   async registerLab(registerDto: LabRegisterDto) {
+    const normalizedEmail = this.normalizeEmail(registerDto.email);
     const existingUser = await this.prisma.user.findUnique({
-      where: { email: registerDto.email },
+      where: { email: normalizedEmail },
     });
 
     if (existingUser) {
@@ -59,17 +61,17 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
-        email: registerDto.email,
+        email: normalizedEmail,
         password_hash,
         role: Role.LabStaff,
         lab_profile: {
           create: {
-            lab_name: registerDto.lab_name,
-            address: registerDto.address,
-            phone: registerDto.phone,
+            lab_name: registerDto.lab_name.trim(),
+            address: registerDto.address.trim(),
+            phone: registerDto.phone?.trim() || null,
             home_collection: registerDto.home_collection ?? false,
-            accreditation: registerDto.accreditation,
-            turnaround_time: registerDto.turnaround_time,
+            accreditation: registerDto.accreditation?.trim() || null,
+            turnaround_time: registerDto.turnaround_time?.trim() || null,
             onboarding_status: LabOnboardingStatus.PendingReview,
           },
         },
@@ -81,8 +83,9 @@ export class AuthService {
   }
 
   async validateUser(loginDto: LoginDto) {
+    const normalizedEmail = this.normalizeEmail(loginDto.email);
     const user = await this.prisma.user.findUnique({
-      where: { email: loginDto.email },
+      where: { email: normalizedEmail },
     });
 
     if (
@@ -110,6 +113,10 @@ export class AuthService {
     }
 
     return false;
+  }
+
+  private normalizeEmail(email: string) {
+    return email.trim().toLowerCase();
   }
 
   async login(user: { id: string; email: string; role: Role }) {

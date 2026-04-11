@@ -3,6 +3,12 @@
 import { useRouter } from "next/navigation";
 import { LoginPage } from "../../../teslty/components/LoginPage";
 
+function labUnauthorizedReason(status?: string | null) {
+  if (status === "Rejected") return "rejected";
+  if (status === "Suspended") return "suspended";
+  return "pending_review";
+}
+
 export default function LoginRoute() {
   const router = useRouter();
 
@@ -12,7 +18,7 @@ export default function LoginRoute() {
       onBack={() => router.push("/")}
       onAuthenticated={({ role, lab_onboarding_status }) => {
         if (role === "lab" && lab_onboarding_status !== "Active") {
-          router.push("/unauthorized?reason=pending_review");
+          router.push(`/unauthorized?reason=${labUnauthorizedReason(lab_onboarding_status)}`);
           return;
         }
         if (role === "admin") {

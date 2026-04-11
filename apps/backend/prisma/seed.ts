@@ -348,6 +348,25 @@ async function main() {
     },
   });
 
+  await prisma.user.create({
+    data: {
+      email: "rejectedlab@testly.com",
+      password_hash: passwordHash,
+      role: Role.LabStaff,
+      lab_profile: {
+        create: {
+          lab_name: "Rejected Lab Example",
+          phone: "+20 11 8888 8888",
+          address: "Alexandria, Egypt",
+          home_collection: false,
+          accreditation: "None",
+          turnaround_time: "72 hours",
+          onboarding_status: LabOnboardingStatus.Rejected,
+        },
+      },
+    },
+  });
+
   const labProfiles = [];
   for (let index = 0; index < labSeedData.length; index += 1) {
     const lab = labSeedData[index];
@@ -596,6 +615,39 @@ async function main() {
         status: BookingStatus.Completed,
         note: "Visit completed",
         actor_user_id: secondaryLab.profile.user_id,
+      },
+    ],
+  });
+
+  const failedScheduled = toDateWithTime(baseDate, -5, "11:00");
+  const failedBooking = await prisma.booking.create({
+    data: {
+      patient_profile_id: patientProfileId,
+      lab_profile_id: primaryLab.profile.id,
+      lab_test_id: primaryTest.id,
+      booking_type: BookingType.LabVisit,
+      status: BookingStatus.Cancelled,
+      scheduled_at: failedScheduled,
+      total_price_egp: primaryTest.price_egp,
+      payment_method: PaymentMethod.PayMobOnline,
+      payment_status: PaymentStatus.Failed,
+      payment_reference: "SEED-FAILED-PAYMOB",
+    },
+  });
+
+  await prisma.bookingStatusEvent.createMany({
+    data: [
+      {
+        booking_id: failedBooking.id,
+        status: BookingStatus.Pending,
+        note: "Booking initiated",
+        actor_user_id: patientUser.id,
+      },
+      {
+        booking_id: failedBooking.id,
+        status: BookingStatus.Cancelled,
+        note: "Payment failed, booking cancelled automatically",
+        actor_user_id: null,
       },
     ],
   });

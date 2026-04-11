@@ -50,6 +50,19 @@ enum BookingStatus {
   Completed
 }
 
+enum PaymentMethod {
+  Online
+  CashHomeCollection
+  CashLabVisit
+}
+
+enum PaymentStatus {
+  Pending
+  Paid
+  Failed
+  Refunded
+}
+
 enum ResultStatus {
   Pending
   Uploaded
@@ -142,6 +155,12 @@ model Booking {
   scheduled_at       DateTime
   home_address       String?
   total_price_egp    Int
+  payment_method         PaymentMethod  @default(Online)
+  payment_status         PaymentStatus  @default(Pending)
+  payment_reference      String?
+  payment_paid_at        DateTime?
+  payment_failed_at      DateTime?
+  payment_failure_reason String?
   created_at         DateTime      @default(now())
   updated_at         DateTime      @updatedAt
 

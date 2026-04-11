@@ -1,6 +1,12 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BookingStatus, BookingType, LabOnboardingStatus } from '@prisma/client';
+import {
+  BookingStatus,
+  BookingType,
+  LabOnboardingStatus,
+  PaymentMethod,
+  PaymentStatus,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { BookingsService } from './bookings.service';
 import { AuditLogService } from '../common/services/audit-log.service';
@@ -13,6 +19,12 @@ function bookingRecord(overrides?: Partial<any>) {
     scheduled_at: new Date('2026-04-01T10:00:00.000Z'),
     home_address: null,
     total_price_egp: 450,
+    payment_method: PaymentMethod.Online,
+    payment_status: PaymentStatus.Pending,
+    payment_reference: null,
+    payment_paid_at: null,
+    payment_failed_at: null,
+    payment_failure_reason: null,
     created_at: new Date('2026-03-28T10:00:00.000Z'),
     patient_profile: {
       id: 'patient-profile-1',
@@ -179,6 +191,7 @@ describe('BookingsService', () => {
       id: 'booking-1',
       status: BookingStatus.Pending,
       patient_profile_id: 'patient-profile-1',
+      payment_status: PaymentStatus.Pending,
     });
 
     const tx = {
@@ -211,10 +224,30 @@ describe('BookingsService', () => {
       id: 'booking-1',
       status: BookingStatus.Confirmed,
       lab_profile_id: 'lab-profile-1',
+      payment_method: PaymentMethod.Online,
+      payment_status: PaymentStatus.Paid,
     });
 
     await expect(
       service.setLabBookingStatus('lab-user-1', 'booking-1', BookingStatus.Rejected),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('blocks lab confirmation when online payment is not completed', async () => {
+    prismaMock.labProfile.findUnique.mockResolvedValue({
+      id: 'lab-profile-1',
+      onboarding_status: LabOnboardingStatus.Active,
+    });
+    prismaMock.booking.findUnique.mockResolvedValue({
+      id: 'booking-1',
+      status: BookingStatus.Pending,
+      lab_profile_id: 'lab-profile-1',
+      payment_method: PaymentMethod.Online,
+      payment_status: PaymentStatus.Pending,
+    });
+
+    await expect(
+      service.setLabBookingStatus('lab-user-1', 'booking-1', BookingStatus.Confirmed),
     ).rejects.toThrow(BadRequestException);
   });
 
@@ -227,6 +260,8 @@ describe('BookingsService', () => {
       id: 'booking-1',
       status: BookingStatus.Pending,
       lab_profile_id: 'lab-profile-1',
+      payment_method: PaymentMethod.Online,
+      payment_status: PaymentStatus.Pending,
     });
 
     const tx = {

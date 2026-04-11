@@ -8,6 +8,7 @@ import {
   createBooking,
   fetchBookingAvailability,
   type BookingAvailabilitySlot,
+  type PaymentMethod,
 } from "../../lib/bookingsApi";
 import {
   fetchPublicLabDetail,
@@ -78,6 +79,7 @@ export default function BookingClient() {
     slotId: string;
     bookingType: "LabVisit" | "HomeCollection";
     homeAddress?: string;
+    paymentMethod: PaymentMethod;
   }) => {
     if (!labId || !testId) return;
     setIsSubmitting(true);
@@ -90,6 +92,7 @@ export default function BookingClient() {
         slotId: payload.slotId,
         bookingType: payload.bookingType,
         homeAddress: payload.homeAddress,
+        paymentMethod: payload.paymentMethod,
       });
     } catch (error) {
       if (error instanceof ApiError) {

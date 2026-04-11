@@ -7,6 +7,12 @@ export type PatientWorkspaceBooking = {
   scheduledAt: string;
   totalPriceEgp: number;
   homeAddress: string | null;
+  paymentMethod: "Online" | "CashHomeCollection" | "CashLabVisit";
+  paymentStatus: "Pending" | "Paid" | "Failed" | "Refunded";
+  paymentReference: string | null;
+  paymentPaidAt: string | null;
+  paymentFailedAt: string | null;
+  paymentFailureReason: string | null;
   lab: { id: string; name: string; address: string };
   test: { id: string; name: string; priceEgp: number };
   timeline: Array<{ id: string; status: string; note: string | null; createdAt: string }>;

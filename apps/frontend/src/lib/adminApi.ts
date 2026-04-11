@@ -62,3 +62,26 @@ export async function setAdminLabOnboardingStatus(
     body: JSON.stringify({ status }),
   });
 }
+
+export type AdminPaymentRecord = {
+  bookingId: string;
+  bookingStatus: string;
+  bookingType: string;
+  scheduledAt: string;
+  totalPriceEgp: number;
+  paymentMethod: string;
+  paymentStatus: string;
+  paymentReference: string | null;
+  paymentPaidAt: string | null;
+  paymentFailedAt: string | null;
+  paymentFailureReason: string | null;
+  createdAt: string;
+  patientEmail: string;
+  patientName: string | null;
+  labName: string;
+  testName: string;
+};
+
+export async function fetchAdminRecentPayments() {
+  return await apiFetch<{ items: AdminPaymentRecord[] }>("/admin/payments/recent");
+}

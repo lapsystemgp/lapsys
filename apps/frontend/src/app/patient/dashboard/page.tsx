@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL, ApiError } from "../../../lib/api";
-import { cancelPatientBooking } from "../../../lib/bookingsApi";
+import { cancelPatientBooking, demoOnlinePayment } from "../../../lib/bookingsApi";
 import {
   fetchPatientWorkspace,
   submitPatientReview,
@@ -34,6 +34,21 @@ function bookingStatusClass(status: string) {
   return "bg-blue-100 text-blue-700";
 }
 
+function paymentStatusClass(status: string) {
+  if (status === "Paid") return "bg-emerald-100 text-emerald-800";
+  if (status === "Pending") return "bg-amber-100 text-amber-800";
+  if (status === "Failed") return "bg-red-100 text-red-800";
+  if (status === "Refunded") return "bg-slate-100 text-slate-700";
+  return "bg-gray-100 text-gray-700";
+}
+
+function formatPaymentMethod(method: string) {
+  if (method === "Online") return "Online (demo)";
+  if (method === "CashHomeCollection") return "Cash on collection";
+  if (method === "CashLabVisit") return "Cash at lab";
+  return method;
+}
+
 function resolveResultFileUrl(fileUrl: string) {
   if (/^https?:\/\//i.test(fileUrl)) return fileUrl;
   return `${API_BASE_URL}${fileUrl.startsWith("/") ? "" : "/"}${fileUrl}`;
@@ -52,6 +67,7 @@ export default function PatientDashboardPage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [reviewDrafts, setReviewDrafts] = useState<Record<string, { rating: number; comment: string }>>({});
   const [submittingReviewId, setSubmittingReviewId] = useState<string | null>(null);
+  const [demoPayBookingId, setDemoPayBookingId] = useState<string | null>(null);
 
   const loadWorkspace = useCallback(async () => {
     setLoading(true);
@@ -92,6 +108,19 @@ export default function PatientDashboardPage() {
       await loadWorkspace();
     } catch {
       setError("Could not cancel booking. Please try again.");
+    }
+  };
+
+  const handleDemoOnlinePayment = async (bookingId: string, outcome: "success" | "failure") => {
+    setDemoPayBookingId(bookingId);
+    setError(null);
+    try {
+      await demoOnlinePayment(bookingId, outcome);
+      await loadWorkspace();
+    } catch {
+      setError("Demo payment could not be completed.");
+    } finally {
+      setDemoPayBookingId(null);
     }
   };
 
@@ -219,6 +248,39 @@ export default function PatientDashboardPage() {
                           <p>{booking.homeAddress || booking.lab.address}</p>
                         </div>
                       </div>
+                      <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+                        <span className="text-gray-500">Payment</span>
+                        <span className="text-gray-800">{formatPaymentMethod(booking.paymentMethod)}</span>
+                        <span className={`px-2 py-0.5 rounded-full ${paymentStatusClass(booking.paymentStatus)}`}>
+                          {booking.paymentStatus}
+                        </span>
+                        {booking.paymentReference && (
+                          <span className="text-gray-500">Ref: {booking.paymentReference}</span>
+                        )}
+                      </div>
+                      {booking.paymentFailureReason && (
+                        <p className="mt-2 text-sm text-red-600">{booking.paymentFailureReason}</p>
+                      )}
+                      {booking.paymentMethod === "Online" &&
+                        booking.status === "Pending" &&
+                        (booking.paymentStatus === "Pending" || booking.paymentStatus === "Failed") && (
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <button
+                              onClick={() => handleDemoOnlinePayment(booking.id, "success")}
+                              disabled={demoPayBookingId === booking.id}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                            >
+                              {demoPayBookingId === booking.id ? "Processing..." : "Demo: pay successfully"}
+                            </button>
+                            <button
+                              onClick={() => handleDemoOnlinePayment(booking.id, "failure")}
+                              disabled={demoPayBookingId === booking.id}
+                              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                            >
+                              Demo: decline payment
+                            </button>
+                          </div>
+                        )}
                       {["Pending", "Confirmed"].includes(booking.status) && (
                         <div className="mt-4">
                           <button

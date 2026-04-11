@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError } from "../../../lib/api";
-import { setLabBookingStatus } from "../../../lib/bookingsApi";
+import { markCashCollected, setLabBookingStatus } from "../../../lib/bookingsApi";
 import {
   createLabTest,
   deleteLabTest,
@@ -54,6 +54,7 @@ export default function LabDashboardPage() {
   const [editingTest, setEditingTest] = useState({ name: "", category: "", priceEgp: "" });
   const [newSlot, setNewSlot] = useState({ startsAt: "", endsAt: "", capacity: "1" });
   const [uploadState, setUploadState] = useState<Record<string, { summary: string; file: File | null }>>({});
+  const [cashActionId, setCashActionId] = useState<string | null>(null);
 
   const loadWorkspace = useCallback(async () => {
     setLoading(true);
@@ -98,6 +99,26 @@ export default function LabDashboardPage() {
     } catch {
       setError("Could not update booking status.");
     }
+  };
+
+  const handleMarkCash = async (bookingId: string) => {
+    setCashActionId(bookingId);
+    setError(null);
+    try {
+      await markCashCollected(bookingId);
+      await loadWorkspace();
+    } catch {
+      setError("Could not record cash payment.");
+    } finally {
+      setCashActionId(null);
+    }
+  };
+
+  const formatPaymentMethod = (method: string) => {
+    if (method === "Online") return "Online (demo)";
+    if (method === "CashHomeCollection") return "Cash on collection";
+    if (method === "CashLabVisit") return "Cash at lab visit";
+    return method;
   };
 
   const handleCreateTest = async () => {
@@ -291,9 +312,28 @@ export default function LabDashboardPage() {
                         <p>EGP {booking.totalPriceEgp}</p>
                       </div>
                     </div>
+                    <div className="mt-3 rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-800">
+                      <span className="text-slate-500">Payment: </span>
+                      {formatPaymentMethod(booking.paymentMethod)} ·{" "}
+                      <span className="font-medium">{booking.paymentStatus}</span>
+                      {booking.paymentMethod === "Online" && booking.paymentStatus === "Paid" && (
+                        <span className="ml-2 text-emerald-700">(Prepaid — demo)</span>
+                      )}
+                      {(booking.paymentMethod === "CashHomeCollection" || booking.paymentMethod === "CashLabVisit") &&
+                        booking.paymentStatus === "Pending" && <span className="ml-2 text-amber-800">(Cash due)</span>}
+                      {booking.paymentReference && (
+                        <span className="ml-2 text-slate-600">Ref {booking.paymentReference}</span>
+                      )}
+                    </div>
                     {booking.status === "Pending" && (
-                      <div className="mt-4 flex gap-2">
-                        <button onClick={() => updateBookingStatus(booking.id, "Confirmed")} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <button
+                          onClick={() => updateBookingStatus(booking.id, "Confirmed")}
+                          disabled={
+                            booking.paymentMethod === "Online" && booking.paymentStatus !== "Paid"
+                          }
+                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        >
                           Confirm
                         </button>
                         <button onClick={() => updateBookingStatus(booking.id, "Rejected")} className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50">
@@ -301,6 +341,19 @@ export default function LabDashboardPage() {
                         </button>
                       </div>
                     )}
+                    {["Pending", "Confirmed"].includes(booking.status) &&
+                      (booking.paymentMethod === "CashHomeCollection" || booking.paymentMethod === "CashLabVisit") &&
+                      booking.paymentStatus === "Pending" && (
+                        <div className="mt-3">
+                          <button
+                            onClick={() => handleMarkCash(booking.id)}
+                            disabled={cashActionId === booking.id}
+                            className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50"
+                          >
+                            {cashActionId === booking.id ? "Recording..." : "Record cash received (demo)"}
+                          </button>
+                        </div>
+                      )}
                   </div>
                 ))}
               </div>

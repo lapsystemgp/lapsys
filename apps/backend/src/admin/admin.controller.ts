@@ -29,4 +29,9 @@ export class AdminController {
   ) {
     return this.adminService.setLabOnboardingStatus(req.user?.id ?? '', labProfileId, dto);
   }
+
+  @Get('payments/recent')
+  listRecentPayments(@Req() req: RequestWithUser) {
+    return this.adminService.listRecentPayments(req.user?.id ?? '');
+  }
 }

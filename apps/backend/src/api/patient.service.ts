@@ -62,6 +62,12 @@ export class PatientService {
       scheduledAt: booking.scheduled_at.toISOString(),
       totalPriceEgp: booking.total_price_egp,
       homeAddress: booking.home_address ?? null,
+      paymentMethod: booking.payment_method,
+      paymentStatus: booking.payment_status,
+      paymentReference: booking.payment_reference ?? null,
+      paymentPaidAt: booking.payment_paid_at ? booking.payment_paid_at.toISOString() : null,
+      paymentFailedAt: booking.payment_failed_at ? booking.payment_failed_at.toISOString() : null,
+      paymentFailureReason: booking.payment_failure_reason ?? null,
       lab: {
         id: booking.lab_profile.id,
         name: booking.lab_profile.lab_name,

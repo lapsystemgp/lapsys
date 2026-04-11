@@ -5,10 +5,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import {
   BookingStatus,
   BookingType,
   LabOnboardingStatus,
+  PaymentMethod,
+  PaymentStatus,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AvailabilityQueryDto } from './dto/availability-query.dto';
@@ -22,6 +25,12 @@ type BookingWithRelations = {
   scheduled_at: Date;
   home_address: string | null;
   total_price_egp: number;
+  payment_method: PaymentMethod;
+  payment_status: PaymentStatus;
+  payment_reference: string | null;
+  payment_paid_at: Date | null;
+  payment_failed_at: Date | null;
+  payment_failure_reason: string | null;
   created_at: Date;
   patient_profile: { id: string; full_name: string | null; phone: string | null; address: string | null };
   lab_profile: { id: string; lab_name: string; address: string; home_collection: boolean };
@@ -141,6 +150,14 @@ export class BookingsService {
       throw new BadRequestException('Home address is required for home collection');
     }
 
+    const paymentMethod = dto.paymentMethod ?? PaymentMethod.Online;
+    if (paymentMethod === PaymentMethod.CashHomeCollection && dto.bookingType !== BookingType.HomeCollection) {
+      throw new BadRequestException('Cash on home collection is only available for home collection bookings');
+    }
+    if (paymentMethod === PaymentMethod.CashLabVisit && dto.bookingType !== BookingType.LabVisit) {
+      throw new BadRequestException('Cash at lab visit is only available for lab visit bookings');
+    }
+
     const slot = await this.prisma.labScheduleSlot.findFirst({
       where: {
         id: dto.slotId,
@@ -190,6 +207,8 @@ export class BookingsService {
               ? normalizedAddress
               : patientProfile.address ?? null,
           total_price_egp: totalPrice,
+          payment_method: paymentMethod,
+          payment_status: PaymentStatus.Pending,
           schedule_slot_id: slot.id,
         },
         include: this.bookingInclude(),
@@ -216,6 +235,168 @@ export class BookingsService {
       patientUserId: userId,
       bookingType: response.bookingType,
       status: response.status,
+      paymentMethod: response.paymentMethod,
+      paymentStatus: response.paymentStatus,
+    });
+    return response;
+  }
+
+  /**
+   * Graduation demo: simulates an online payment gateway (no real charges).
+   */
+  async demoOnlinePayment(userId: string, bookingId: string, outcome: 'success' | 'failure') {
+    const patientProfile = await this.prisma.patientProfile.findUnique({
+      where: { user_id: userId },
+      select: { id: true },
+    });
+
+    if (!patientProfile) {
+      throw new ForbiddenException('Only patients can complete payment');
+    }
+
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      select: {
+        id: true,
+        patient_profile_id: true,
+        payment_method: true,
+        payment_status: true,
+        status: true,
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    if (booking.patient_profile_id !== patientProfile.id) {
+      throw new ForbiddenException('You can only pay for your own bookings');
+    }
+
+    if (booking.payment_method !== PaymentMethod.Online) {
+      throw new BadRequestException('This booking does not use online payment');
+    }
+
+    if (booking.status !== BookingStatus.Pending) {
+      throw new BadRequestException('Payment can only be completed while the booking is pending');
+    }
+
+    if (booking.payment_status === PaymentStatus.Paid) {
+      throw new BadRequestException('This booking is already paid');
+    }
+
+    if (booking.payment_status === PaymentStatus.Refunded) {
+      throw new BadRequestException('This booking was refunded and cannot be paid again');
+    }
+
+    const now = new Date();
+
+    const updated = await this.prisma.booking.update({
+      where: { id: booking.id },
+      data:
+        outcome === 'success'
+          ? {
+              payment_status: PaymentStatus.Paid,
+              payment_reference: `DEMO-PAY-${randomUUID()}`,
+              payment_paid_at: now,
+              payment_failed_at: null,
+              payment_failure_reason: null,
+            }
+          : {
+              payment_status: PaymentStatus.Failed,
+              payment_failed_at: now,
+              payment_failure_reason: 'Simulated gateway decline (demo only)',
+            },
+      include: this.bookingInclude(),
+    });
+
+    const response = this.toBookingResponse(updated as BookingWithRelations);
+    this.auditLogService.log(
+      outcome === 'success' ? 'booking.payment.demo_succeeded' : 'booking.payment.demo_failed',
+      {
+        bookingId: response.id,
+        patientUserId: userId,
+        paymentStatus: response.paymentStatus,
+      },
+    );
+    return response;
+  }
+
+  async markCashCollected(userId: string, bookingId: string) {
+    const labProfile = await this.prisma.labProfile.findUnique({
+      where: { user_id: userId },
+      select: { id: true, onboarding_status: true },
+    });
+
+    if (!labProfile) {
+      throw new ForbiddenException('Only lab staff can record cash collection');
+    }
+
+    if (labProfile.onboarding_status !== LabOnboardingStatus.Active) {
+      throw new ForbiddenException('Lab account is not active');
+    }
+
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      select: {
+        id: true,
+        lab_profile_id: true,
+        payment_method: true,
+        payment_status: true,
+        status: true,
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    if (booking.lab_profile_id !== labProfile.id) {
+      throw new ForbiddenException('You can only update your own lab bookings');
+    }
+
+    if (
+      booking.payment_method !== PaymentMethod.CashHomeCollection &&
+      booking.payment_method !== PaymentMethod.CashLabVisit
+    ) {
+      throw new BadRequestException('Cash collection applies only to cash payment bookings');
+    }
+
+    if (booking.payment_status === PaymentStatus.Paid) {
+      return this.toBookingResponse(
+        (await this.prisma.booking.findUniqueOrThrow({
+          where: { id: booking.id },
+          include: this.bookingInclude(),
+        })) as BookingWithRelations,
+      );
+    }
+
+    if (booking.payment_status !== PaymentStatus.Pending) {
+      throw new BadRequestException('Cash cannot be recorded for this payment state');
+    }
+
+    if (
+      booking.status !== BookingStatus.Pending &&
+      booking.status !== BookingStatus.Confirmed
+    ) {
+      throw new BadRequestException('Cash can only be recorded for active bookings');
+    }
+
+    const now = new Date();
+    const updated = await this.prisma.booking.update({
+      where: { id: booking.id },
+      data: {
+        payment_status: PaymentStatus.Paid,
+        payment_reference: `DEMO-CASH-${now.getTime()}`,
+        payment_paid_at: now,
+      },
+      include: this.bookingInclude(),
+    });
+
+    const response = this.toBookingResponse(updated as BookingWithRelations);
+    this.auditLogService.log('booking.payment.cash_marked_collected', {
+      bookingId: response.id,
+      labUserId: userId,
     });
     return response;
   }
@@ -270,7 +451,7 @@ export class BookingsService {
 
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
-      select: { id: true, status: true, patient_profile_id: true },
+      select: { id: true, status: true, patient_profile_id: true, payment_status: true },
     });
 
     if (!booking) {
@@ -288,12 +469,16 @@ export class BookingsService {
       throw new BadRequestException('Booking cannot be cancelled in its current status');
     }
 
+    const refundPayment =
+      booking.payment_status === PaymentStatus.Paid ? PaymentStatus.Refunded : undefined;
+
     const updated = await this.prisma.$transaction(async (tx: any) => {
       const record = await tx.booking.update({
         where: { id: booking.id },
         data: {
           status: BookingStatus.Cancelled,
           schedule_slot_id: null,
+          ...(refundPayment !== undefined ? { payment_status: refundPayment } : {}),
         },
         include: this.bookingInclude(),
       });
@@ -345,7 +530,13 @@ export class BookingsService {
 
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
-      select: { id: true, status: true, lab_profile_id: true },
+      select: {
+        id: true,
+        status: true,
+        lab_profile_id: true,
+        payment_method: true,
+        payment_status: true,
+      },
     });
 
     if (!booking) {
@@ -358,6 +549,16 @@ export class BookingsService {
 
     if (booking.status !== BookingStatus.Pending) {
       throw new BadRequestException('Only pending bookings can be updated by lab');
+    }
+
+    if (
+      status === BookingStatus.Confirmed &&
+      booking.payment_method === PaymentMethod.Online &&
+      booking.payment_status !== PaymentStatus.Paid
+    ) {
+      throw new BadRequestException(
+        'Online payment must be completed before the lab can confirm this booking',
+      );
     }
 
     const updated = await this.prisma.$transaction(async (tx: any) => {
@@ -389,6 +590,7 @@ export class BookingsService {
       bookingId: response.id,
       labUserId: userId,
       status: response.status,
+      paymentStatus: response.paymentStatus,
     });
     return response;
   }
@@ -414,6 +616,12 @@ export class BookingsService {
       scheduledAt: booking.scheduled_at.toISOString(),
       homeAddress: booking.home_address ?? null,
       totalPriceEgp: booking.total_price_egp,
+      paymentMethod: booking.payment_method,
+      paymentStatus: booking.payment_status,
+      paymentReference: booking.payment_reference ?? null,
+      paymentPaidAt: booking.payment_paid_at ? booking.payment_paid_at.toISOString() : null,
+      paymentFailedAt: booking.payment_failed_at ? booking.payment_failed_at.toISOString() : null,
+      paymentFailureReason: booking.payment_failure_reason ?? null,
       createdAt: booking.created_at.toISOString(),
       patient: {
         id: booking.patient_profile.id,

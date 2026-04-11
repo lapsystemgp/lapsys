@@ -9,6 +9,12 @@ export type LabWorkspaceResponse = {
     scheduledAt: string;
     homeAddress: string | null;
     totalPriceEgp: number;
+    paymentMethod: "Online" | "CashHomeCollection" | "CashLabVisit";
+    paymentStatus: "Pending" | "Paid" | "Failed" | "Refunded";
+    paymentReference: string | null;
+    paymentPaidAt: string | null;
+    paymentFailedAt: string | null;
+    paymentFailureReason: string | null;
     patient: { id: string; fullName: string | null; phone: string | null };
     test: { id: string; name: string; priceEgp: number };
   }>;

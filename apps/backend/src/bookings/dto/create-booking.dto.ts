@@ -1,4 +1,4 @@
-import { BookingType } from '@prisma/client';
+import { BookingType, PaymentMethod } from '@prisma/client';
 import { IsEnum, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class CreateBookingDto {
@@ -13,6 +13,10 @@ export class CreateBookingDto {
 
   @IsEnum(BookingType)
   bookingType!: BookingType;
+
+  @IsOptional()
+  @IsEnum(PaymentMethod)
+  paymentMethod?: PaymentMethod;
 
   @IsOptional()
   @IsString()

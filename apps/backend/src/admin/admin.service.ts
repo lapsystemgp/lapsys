@@ -117,6 +117,62 @@ export class AdminService {
     };
   }
 
+  async listRecentPayments(userId: string, limit?: number) {
+    await this.assertAdmin(userId);
+
+    const take = Math.min(Math.max(limit ?? 60, 1), 200);
+
+    const rows = await this.prisma.booking.findMany({
+      take,
+      orderBy: { created_at: 'desc' },
+      select: {
+        id: true,
+        status: true,
+        booking_type: true,
+        scheduled_at: true,
+        total_price_egp: true,
+        payment_method: true,
+        payment_status: true,
+        payment_reference: true,
+        payment_paid_at: true,
+        payment_failed_at: true,
+        payment_failure_reason: true,
+        created_at: true,
+        patient_profile: {
+          select: {
+            full_name: true,
+            user: { select: { email: true } },
+          },
+        },
+        lab_profile: {
+          select: { lab_name: true },
+        },
+        lab_test: { select: { name: true } },
+      },
+    });
+
+    return {
+      items: rows.map((row) => ({
+        bookingId: row.id,
+        bookingStatus: row.status,
+        bookingType: row.booking_type,
+        scheduledAt: row.scheduled_at.toISOString(),
+        totalPriceEgp: row.total_price_egp,
+        paymentMethod: row.payment_method,
+        paymentStatus: row.payment_status,
+        paymentReference: row.payment_reference ?? null,
+        paymentPaidAt: row.payment_paid_at ? row.payment_paid_at.toISOString() : null,
+        paymentFailedAt: row.payment_failed_at ? row.payment_failed_at.toISOString() : null,
+        paymentFailureReason: row.payment_failure_reason ?? null,
+        createdAt: row.created_at.toISOString(),
+        patientEmail: row.patient_profile.user.email,
+        patientName: row.patient_profile.full_name ?? null,
+        labName: row.lab_profile.lab_name,
+        testName: row.lab_test.name,
+      })),
+    };
+  }
+
   async setLabOnboardingStatus(
     userId: string,
     labProfileId: string,

@@ -2,6 +2,8 @@ import { apiFetch } from "./api";
 
 export type BookingStatus = "Pending" | "Confirmed" | "Rejected" | "Cancelled" | "Completed";
 export type BookingType = "LabVisit" | "HomeCollection";
+export type PaymentMethod = "Online" | "CashHomeCollection" | "CashLabVisit";
+export type PaymentStatus = "Pending" | "Paid" | "Failed" | "Refunded";
 
 export type BookingAvailabilitySlot = {
   id: string;
@@ -16,6 +18,12 @@ export type BookingItem = {
   scheduledAt: string;
   homeAddress: string | null;
   totalPriceEgp: number;
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
+  paymentReference: string | null;
+  paymentPaidAt: string | null;
+  paymentFailedAt: string | null;
+  paymentFailureReason: string | null;
   createdAt: string;
   patient: {
     id: string;
@@ -67,11 +75,26 @@ export async function createBooking(input: {
   slotId: string;
   bookingType: BookingType;
   homeAddress?: string;
+  paymentMethod?: PaymentMethod;
 }) {
   return await apiFetch<BookingItem>("/bookings", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
+  });
+}
+
+export async function demoOnlinePayment(bookingId: string, outcome: "success" | "failure") {
+  return await apiFetch<BookingItem>(`/bookings/${encodeURIComponent(bookingId)}/demo-online-payment`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ outcome }),
+  });
+}
+
+export async function markCashCollected(bookingId: string) {
+  return await apiFetch<BookingItem>(`/bookings/${encodeURIComponent(bookingId)}/mark-cash-collected`, {
+    method: "PATCH",
   });
 }
 

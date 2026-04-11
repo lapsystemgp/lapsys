@@ -17,6 +17,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { AvailabilityQueryDto } from './dto/availability-query.dto';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { DemoOnlinePaymentDto } from './dto/demo-online-payment.dto';
 import { LabBookingStatusDto } from './dto/lab-booking-status.dto';
 
 type RequestWithUser = {
@@ -50,6 +51,23 @@ export class BookingsController {
   @Roles(Role.Patient)
   cancelByPatient(@Req() req: RequestWithUser, @Param('bookingId') bookingId: string) {
     return this.bookingsService.cancelByPatient(req.user?.id ?? '', bookingId);
+  }
+
+  @Post(':bookingId/demo-online-payment')
+  @Roles(Role.Patient)
+  demoOnlinePayment(
+    @Req() req: RequestWithUser,
+    @Param('bookingId') bookingId: string,
+    @Body() dto: DemoOnlinePaymentDto,
+  ) {
+    return this.bookingsService.demoOnlinePayment(req.user?.id ?? '', bookingId, dto.outcome);
+  }
+
+  @Patch(':bookingId/mark-cash-collected')
+  @Roles(Role.LabStaff)
+  @UseGuards(LabActiveGuard)
+  markCashCollected(@Req() req: RequestWithUser, @Param('bookingId') bookingId: string) {
+    return this.bookingsService.markCashCollected(req.user?.id ?? '', bookingId);
   }
 
   @Get('lab')

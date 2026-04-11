@@ -1,4 +1,14 @@
-import { PrismaClient, BookingStatus, BookingType, LabOnboardingStatus, ResultStatus, ReviewStatus, Role } from "@prisma/client";
+import {
+  PrismaClient,
+  BookingStatus,
+  BookingType,
+  LabOnboardingStatus,
+  PaymentMethod,
+  PaymentStatus,
+  ResultStatus,
+  ReviewStatus,
+  Role,
+} from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -341,6 +351,10 @@ async function main() {
       status: BookingStatus.Confirmed,
       scheduled_at: bookingOneSlot?.starts_at ?? toDateWithTime(baseDate, 2, "10:00"),
       total_price_egp: primaryTest.price_egp,
+      payment_method: PaymentMethod.CashLabVisit,
+      payment_status: PaymentStatus.Paid,
+      payment_reference: "SEED-DEMO-CASH-LAB",
+      payment_paid_at: new Date(),
       schedule_slot_id: bookingOneSlot?.id,
     },
   });
@@ -355,6 +369,8 @@ async function main() {
       scheduled_at: bookingTwoSlot?.starts_at ?? toDateWithTime(baseDate, 3, "14:00"),
       home_address: "28 El Nozha Street, Apartment 3C, Heliopolis, Cairo",
       total_price_egp: secondaryTest.price_egp + 100,
+      payment_method: PaymentMethod.CashHomeCollection,
+      payment_status: PaymentStatus.Pending,
       schedule_slot_id: bookingTwoSlot?.id,
     },
   });

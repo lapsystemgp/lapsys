@@ -5,9 +5,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError } from "../../../lib/api";
 import {
+  fetchAdminRecentPayments,
   fetchAdminWorkspace,
   setAdminLabOnboardingStatus,
   type AdminLabOnboardingStatus,
+  type AdminPaymentRecord,
   type AdminWorkspaceResponse,
 } from "../../../lib/adminApi";
 import { useSession } from "../../../components/SessionProvider";
@@ -63,6 +65,7 @@ export default function AdminDashboardPage() {
   const { user, logout } = useSession();
 
   const [workspace, setWorkspace] = useState<AdminWorkspaceResponse | null>(null);
+  const [paymentRows, setPaymentRows] = useState<AdminPaymentRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -74,8 +77,9 @@ export default function AdminDashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetchAdminWorkspace();
+      const [response, payments] = await Promise.all([fetchAdminWorkspace(), fetchAdminRecentPayments()]);
       setWorkspace(response);
+      setPaymentRows(payments.items);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         router.push("/login");
@@ -176,6 +180,55 @@ export default function AdminDashboardPage() {
               <StatCard icon={<PauseCircle className="h-5 w-5 text-slate-600" />} label="Suspended Labs" value={workspace.stats.suspendedLabs} />
               <StatCard icon={<CheckCircle2 className="h-5 w-5 text-emerald-600" />} label="Ready Pending Labs" value={workspace.stats.readyPendingLabs} />
               <StatCard icon={<AlertTriangle className="h-5 w-5 text-orange-600" />} label="Needs Setup" value={workspace.stats.incompleteLabs} />
+            </section>
+
+            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h2 className="text-lg text-slate-900 mb-1">Payment audit (demo gateway)</h2>
+              <p className="text-sm text-slate-600 mb-4">
+                Recent bookings with payment method, status, and references. No real processor is connected.
+              </p>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-left text-sm text-slate-800">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-500">
+                      <th className="py-2 pr-4 font-medium">Created</th>
+                      <th className="py-2 pr-4 font-medium">Patient</th>
+                      <th className="py-2 pr-4 font-medium">Lab / test</th>
+                      <th className="py-2 pr-4 font-medium">Method</th>
+                      <th className="py-2 pr-4 font-medium">Pay status</th>
+                      <th className="py-2 pr-4 font-medium">Amount</th>
+                      <th className="py-2 font-medium">Reference</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paymentRows.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-6 text-center text-slate-600">
+                          No booking records yet.
+                        </td>
+                      </tr>
+                    ) : (
+                      paymentRows.map((row) => (
+                        <tr key={row.bookingId} className="border-b border-slate-100">
+                          <td className="py-2 pr-4 whitespace-nowrap">{formatDate(row.createdAt)}</td>
+                          <td className="py-2 pr-4">
+                            <div>{row.patientEmail}</div>
+                            {row.patientName && <div className="text-slate-500">{row.patientName}</div>}
+                          </td>
+                          <td className="py-2 pr-4">
+                            <div>{row.labName}</div>
+                            <div className="text-slate-500">{row.testName}</div>
+                          </td>
+                          <td className="py-2 pr-4">{row.paymentMethod}</td>
+                          <td className="py-2 pr-4">{row.paymentStatus}</td>
+                          <td className="py-2 pr-4">EGP {row.totalPriceEgp}</td>
+                          <td className="py-2 font-mono text-xs text-slate-600">{row.paymentReference ?? "—"}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </section>
 
             <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

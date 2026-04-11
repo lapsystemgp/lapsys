@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle, Clock, Home, MapPin } from "lucide-react";
+import type { PaymentMethod } from "../../lib/bookingsApi";
 import type { PublicLabCard, PublicTestResponse } from "../../lib/publicApi";
 
 type DisplaySlot = {
@@ -21,6 +22,7 @@ interface BookingPageProps {
     slotId: string;
     bookingType: "LabVisit" | "HomeCollection";
     homeAddress?: string;
+    paymentMethod: PaymentMethod;
   }) => Promise<void>;
 }
 
@@ -53,6 +55,7 @@ export function BookingPage({
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlotId, setSelectedSlotId] = useState("");
   const [homeAddress, setHomeAddress] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("Online");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -97,6 +100,15 @@ export function BookingPage({
     [effectiveSelectedSlotId, slots],
   );
 
+  useEffect(() => {
+    if (bookingType === "home" && paymentMethod === "CashLabVisit") {
+      setPaymentMethod("Online");
+    }
+    if (bookingType === "lab" && paymentMethod === "CashHomeCollection") {
+      setPaymentMethod("Online");
+    }
+  }, [bookingType, paymentMethod]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -131,28 +143,43 @@ export function BookingPage({
         slotId: effectiveSelectedSlotId,
         bookingType: bookingType === "home" ? "HomeCollection" : "LabVisit",
         homeAddress: bookingType === "home" ? homeAddress.trim() : undefined,
+        paymentMethod,
       });
       setShowConfirmation(true);
-      setTimeout(() => onComplete(), 1200);
+      setTimeout(() => onComplete(), 1600);
     } catch {
       // Parent handles API error state.
     }
   };
 
   if (showConfirmation && selectedSlot) {
+    const onlineFlow = paymentMethod === "Online";
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
-          <h2 className="text-2xl text-gray-900 mb-2">Booking Confirmed!</h2>
+          <h2 className="text-2xl text-gray-900 mb-2">{onlineFlow ? "Booking received" : "Booking request sent"}</h2>
+          <p className="text-gray-600 mb-4 text-sm">
+            {onlineFlow
+              ? "Use the demo payment buttons on your patient dashboard so the lab can confirm this booking."
+              : "Pay in cash when the sample is collected or when you visit the lab, depending on your choice below."}
+          </p>
           <div className="bg-blue-50 rounded-lg p-4 text-left">
             <div className="text-gray-900 mb-2">{lab.name}</div>
             <div className="text-gray-600">
               {formatDay(selectedSlot.startsAt)} at {formatTime(selectedSlot.startsAt)}
             </div>
             <div className="text-gray-600">{bookingType === "home" ? "Home Collection" : "Lab Visit"}</div>
+            <div className="text-gray-700 mt-2 text-sm">
+              Payment:{" "}
+              {paymentMethod === "Online"
+                ? "Card / online (demo)"
+                : paymentMethod === "CashHomeCollection"
+                  ? "Cash on home collection"
+                  : "Cash at lab visit"}
+            </div>
           </div>
         </div>
       </div>
@@ -255,6 +282,50 @@ export function BookingPage({
           </div>
         </div>
 
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+          <h3 className="text-lg text-gray-900 mb-4">Payment</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            This project uses a simulated payment gateway for online payments — no real charges are made.
+          </p>
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={() => setPaymentMethod("Online")}
+              className={`w-full text-left p-4 rounded-lg border-2 transition ${
+                paymentMethod === "Online" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <div className="text-gray-900 font-medium">Pay online (demo)</div>
+              <div className="text-gray-600 text-sm">Simulated card payment — complete from your dashboard after booking.</div>
+            </button>
+            {bookingType === "home" ? (
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("CashHomeCollection")}
+                className={`w-full text-left p-4 rounded-lg border-2 transition ${
+                  paymentMethod === "CashHomeCollection"
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="text-gray-900 font-medium">Cash on home sample collection</div>
+                <div className="text-gray-600 text-sm">Pay the collector when the sample is taken.</div>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("CashLabVisit")}
+                className={`w-full text-left p-4 rounded-lg border-2 transition ${
+                  paymentMethod === "CashLabVisit" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="text-gray-900 font-medium">Cash at lab visit</div>
+                <div className="text-gray-600 text-sm">Pay at the reception desk when you attend.</div>
+              </button>
+            )}
+          </div>
+        </div>
+
         {bookingType === "home" && (
           <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
             <h3 className="text-lg text-gray-900 mb-4">Home Address</h3>
@@ -284,6 +355,16 @@ export function BookingPage({
             <div className="border-t pt-3 flex justify-between">
               <span className="text-gray-900">Total Amount</span>
               <span className="text-2xl text-blue-600">EGP {basePrice + (bookingType === "home" ? 100 : 0)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">Payment method</span>
+              <span className="text-gray-900">
+                {paymentMethod === "Online"
+                  ? "Online (demo)"
+                  : paymentMethod === "CashHomeCollection"
+                    ? "Cash on collection"
+                    : "Cash at lab"}
+              </span>
             </div>
           </div>
           {(localError || errorMessage) && <p className="text-red-600 mb-4">{localError || errorMessage}</p>}

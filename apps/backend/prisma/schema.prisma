@@ -170,12 +170,78 @@ model Booking {
   status_events   BookingStatusEvent[]
   result_file     ResultFile?
   result_summary  ResultSummary?
+  result_panels   ResultPanel[]
   review          Review?
   schedule_slot_id String?           @unique
   schedule_slot   LabScheduleSlot?   @relation(fields: [schedule_slot_id], references: [id])
 
   @@index([lab_profile_id, scheduled_at])
   @@index([patient_profile_id, scheduled_at])
+}
+
+/// Canonical analyte for cross-lab trending (one patient-centered code, many raw names).
+model CanonicalMarker {
+  id           String   @id @default(uuid())
+  code         String   @unique
+  display_name String
+  category     String?
+  default_unit String?
+  loinc_code   String?
+  created_at   DateTime @default(now())
+
+  aliases       MarkerAlias[]
+  observations  ResultObservation[]
+
+  @@index([category])
+}
+
+/// Maps normalized raw names from lab reports to a canonical marker.
+model MarkerAlias {
+  id                   String   @id @default(uuid())
+  canonical_marker_id  String
+  alias_normalized     String   @unique
+
+  canonical_marker CanonicalMarker @relation(fields: [canonical_marker_id], references: [id], onDelete: Cascade)
+
+  @@index([canonical_marker_id])
+}
+
+/// A logical panel (e.g. chemistry, thyroid) under one booking; holds structured observations.
+model ResultPanel {
+  id          String   @id @default(uuid())
+  booking_id  String
+  name        String?
+  test_date   DateTime
+  sort_order  Int      @default(0)
+
+  booking       Booking             @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+  observations ResultObservation[]
+
+  @@index([booking_id])
+  @@index([booking_id, test_date])
+}
+
+model ResultObservation {
+  id                      String   @id @default(uuid())
+  panel_id                String
+  canonical_marker_id     String?
+  raw_name                String
+  value_numeric           Decimal? @db.Decimal(18, 6)
+  value_text              String?
+  unit                    String?
+  ref_low                 Decimal? @db.Decimal(18, 6)
+  ref_high                Decimal? @db.Decimal(18, 6)
+  ref_text                String?
+  value_in_canonical_unit Decimal? @db.Decimal(18, 6)
+  comparable_unit         String?
+  is_comparable           Boolean  @default(true)
+  comparability_note      String?
+
+  panel             ResultPanel      @relation(fields: [panel_id], references: [id], onDelete: Cascade)
+  canonical_marker  CanonicalMarker? @relation(fields: [canonical_marker_id], references: [id], onDelete: SetNull)
+
+  @@index([panel_id])
+  @@index([canonical_marker_id])
 }
 
 model BookingStatusEvent {

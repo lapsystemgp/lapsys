@@ -13,8 +13,10 @@ import {
   fetchLabWorkspace,
   setLabResultStatus,
   updateLabTest,
+  type LabStructuredPanelInput,
   type LabWorkspaceResponse,
   uploadLabResult,
+  upsertLabStructuredResults,
 } from "../../../lib/labApi";
 import { useSession } from "../../../components/SessionProvider";
 
@@ -54,6 +56,8 @@ export default function LabDashboardPage() {
   const [editingTest, setEditingTest] = useState({ name: "", category: "", priceEgp: "" });
   const [newSlot, setNewSlot] = useState({ startsAt: "", endsAt: "", capacity: "1" });
   const [uploadState, setUploadState] = useState<Record<string, { summary: string; file: File | null }>>({});
+  const [structuredJsonByBooking, setStructuredJsonByBooking] = useState<Record<string, string>>({});
+  const [structuredSubmittingId, setStructuredSubmittingId] = useState<string | null>(null);
   const [cashActionId, setCashActionId] = useState<string | null>(null);
 
   const loadWorkspace = useCallback(async () => {
@@ -226,6 +230,46 @@ export default function LabDashboardPage() {
       await loadWorkspace();
     } catch {
       setError("Could not upload result.");
+    }
+  };
+
+  const defaultStructuredTemplate = (scheduledAt: string) =>
+    JSON.stringify(
+      {
+        panels: [
+          {
+            name: "Chemistry",
+            testDate: scheduledAt,
+            observations: [
+              { name: "Fasting glucose", canonicalCode: "GLUCOSE_FASTING", value: 95, unit: "mg/dL", refLow: 70, refHigh: 100 },
+              { name: "HbA1c", canonicalCode: "HBA1C", value: 5.2, unit: "%", refLow: 4, refHigh: 5.6 },
+            ],
+          },
+        ],
+      },
+      null,
+      2,
+    );
+
+  const handleSaveStructured = async (bookingId: string) => {
+    const raw = structuredJsonByBooking[bookingId]?.trim();
+    if (!raw) {
+      setError("Paste structured JSON before saving.");
+      return;
+    }
+    setStructuredSubmittingId(bookingId);
+    setError(null);
+    try {
+      const parsed = JSON.parse(raw) as { panels?: unknown };
+      if (!parsed.panels || !Array.isArray(parsed.panels)) {
+        throw new Error("Invalid shape");
+      }
+      await upsertLabStructuredResults(bookingId, parsed.panels as LabStructuredPanelInput[]);
+      await loadWorkspace();
+    } catch {
+      setError("Structured JSON must match { panels: [...] } and upload the PDF first.");
+    } finally {
+      setStructuredSubmittingId(null);
     }
   };
 
@@ -444,10 +488,12 @@ export default function LabDashboardPage() {
                   .filter((booking) => booking.status === "Confirmed" || booking.status === "Completed")
                   .map((booking) => {
                     const state = uploadState[booking.id] ?? { summary: "", file: null };
+                    const structuredDraft =
+                      structuredJsonByBooking[booking.id] ?? defaultStructuredTemplate(booking.scheduledAt);
                     return (
-                      <div key={booking.id} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                      <div key={booking.id} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-4">
                         <h2 className="text-lg text-gray-900">{booking.test.name}</h2>
-                        <p className="text-sm text-gray-600 mb-3">Patient: {booking.patient.fullName || "Patient"}</p>
+                        <p className="text-sm text-gray-600">Patient: {booking.patient.fullName || "Patient"}</p>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <input
                             type="file"
@@ -480,6 +526,44 @@ export default function LabDashboardPage() {
                           >
                             Mark Delivered
                           </button>
+                        </div>
+
+                        <div className="border-t border-gray-100 pt-4">
+                          <p className="text-sm font-medium text-gray-900 mb-2">Structured results (after PDF upload)</p>
+                          <p className="text-xs text-gray-600 mb-2">
+                            Optional JSON for longitudinal charts. Canonical codes include GLUCOSE_FASTING, HBA1C, TSH,
+                            FT4, CREATININE.
+                          </p>
+                          <textarea
+                            value={structuredJsonByBooking[booking.id] ?? structuredDraft}
+                            onChange={(event) =>
+                              setStructuredJsonByBooking((prev) => ({ ...prev, [booking.id]: event.target.value }))
+                            }
+                            rows={12}
+                            className="w-full font-mono text-xs px-3 py-2 border border-gray-300 rounded-lg"
+                          />
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setStructuredJsonByBooking((prev) => ({
+                                  ...prev,
+                                  [booking.id]: defaultStructuredTemplate(booking.scheduledAt),
+                                }))
+                              }
+                              className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+                            >
+                              Reset template
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSaveStructured(booking.id)}
+                              disabled={structuredSubmittingId === booking.id}
+                              className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 text-sm"
+                            >
+                              {structuredSubmittingId === booking.id ? "Saving..." : "Save structured results"}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     );

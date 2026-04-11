@@ -130,3 +130,29 @@ export async function setLabResultStatus(bookingId: string, status: "Pending" | 
     body: JSON.stringify({ status }),
   });
 }
+
+export type LabStructuredPanelInput = {
+  name?: string;
+  testDate: string;
+  observations: Array<{
+    name: string;
+    canonicalCode?: string;
+    value?: number;
+    valueText?: string;
+    unit?: string;
+    refLow?: number;
+    refHigh?: number;
+    refText?: string;
+  }>;
+};
+
+export async function upsertLabStructuredResults(bookingId: string, panels: LabStructuredPanelInput[]) {
+  return await apiFetch<{ bookingId: string; panelCount: number; observationCount: number }>(
+    `/lab/results/${encodeURIComponent(bookingId)}/structured`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ panels }),
+    },
+  );
+}

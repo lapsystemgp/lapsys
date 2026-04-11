@@ -1,4 +1,5 @@
 import {
+  Prisma,
   PrismaClient,
   BookingStatus,
   BookingType,
@@ -196,12 +197,105 @@ function addMinutes(date: Date, minutes: number) {
   return new Date(date.getTime() + minutes * 60 * 1000);
 }
 
+async function seedCanonicalMarkers() {
+  const markers = [
+    {
+      code: "GLUCOSE_FASTING",
+      display_name: "Fasting glucose",
+      category: "chemistry",
+      default_unit: "mg/dL",
+    },
+    {
+      code: "GLUCOSE_RANDOM",
+      display_name: "Random glucose",
+      category: "chemistry",
+      default_unit: "mg/dL",
+    },
+    {
+      code: "HBA1C",
+      display_name: "HbA1c",
+      category: "diabetes",
+      default_unit: "%",
+    },
+    {
+      code: "TSH",
+      display_name: "TSH",
+      category: "thyroid",
+      default_unit: "mIU/L",
+    },
+    {
+      code: "FT4",
+      display_name: "Free T4",
+      category: "thyroid",
+      default_unit: "pmol/L",
+    },
+    {
+      code: "FT3",
+      display_name: "Free T3",
+      category: "thyroid",
+      default_unit: "pmol/L",
+    },
+    {
+      code: "CREATININE",
+      display_name: "Creatinine",
+      category: "chemistry",
+      default_unit: "mg/dL",
+    },
+  ];
+
+  for (const m of markers) {
+    await prisma.canonicalMarker.upsert({
+      where: { code: m.code },
+      create: {
+        code: m.code,
+        display_name: m.display_name,
+        category: m.category,
+        default_unit: m.default_unit,
+      },
+      update: {
+        display_name: m.display_name,
+        category: m.category,
+        default_unit: m.default_unit,
+      },
+    });
+  }
+
+  const glucose = await prisma.canonicalMarker.findUniqueOrThrow({
+    where: { code: "GLUCOSE_FASTING" },
+  });
+  const hba1c = await prisma.canonicalMarker.findUniqueOrThrow({
+    where: { code: "HBA1C" },
+  });
+  const tsh = await prisma.canonicalMarker.findUniqueOrThrow({
+    where: { code: "TSH" },
+  });
+
+  const aliases: Array<{ canonical_marker_id: string; alias_normalized: string }> = [
+    { canonical_marker_id: glucose.id, alias_normalized: "fasting glucose" },
+    { canonical_marker_id: glucose.id, alias_normalized: "fasting blood sugar" },
+    { canonical_marker_id: glucose.id, alias_normalized: "fbs" },
+    { canonical_marker_id: hba1c.id, alias_normalized: "glycated hemoglobin" },
+    { canonical_marker_id: hba1c.id, alias_normalized: "hba1c" },
+    { canonical_marker_id: tsh.id, alias_normalized: "thyroid stimulating hormone" },
+  ];
+
+  for (const row of aliases) {
+    await prisma.markerAlias.upsert({
+      where: { alias_normalized: row.alias_normalized },
+      create: row,
+      update: { canonical_marker_id: row.canonical_marker_id },
+    });
+  }
+}
+
 async function main() {
   await prisma.bookingStatusEvent.deleteMany();
   await prisma.review.deleteMany();
   await prisma.resultSummary.deleteMany();
   await prisma.resultFile.deleteMany();
   await prisma.booking.deleteMany();
+  await prisma.markerAlias.deleteMany();
+  await prisma.canonicalMarker.deleteMany();
   await prisma.labScheduleSlot.deleteMany();
   await prisma.labTest.deleteMany();
   await prisma.patientProfile.deleteMany();
@@ -303,6 +397,8 @@ async function main() {
       })),
     });
   }
+
+  await seedCanonicalMarkers();
 
   const baseDate = new Date();
   const scheduleSlots = [];
@@ -418,6 +514,132 @@ async function main() {
         hemoglobin: "13.4 g/dL",
         wbc: "6.1 x10^9/L",
         platelets: "250 x10^9/L",
+      },
+    },
+  });
+
+  const glucoseMarker = await prisma.canonicalMarker.findUniqueOrThrow({
+    where: { code: "GLUCOSE_FASTING" },
+  });
+  const hba1cMarker = await prisma.canonicalMarker.findUniqueOrThrow({
+    where: { code: "HBA1C" },
+  });
+
+  await prisma.resultPanel.create({
+    data: {
+      booking_id: bookingOne.id,
+      name: "Metabolic panel",
+      test_date: bookingOne.scheduled_at,
+      sort_order: 0,
+      observations: {
+        create: [
+          {
+            canonical_marker_id: glucoseMarker.id,
+            raw_name: "Fasting glucose",
+            value_numeric: new Prisma.Decimal(102),
+            unit: "mg/dL",
+            ref_low: new Prisma.Decimal(70),
+            ref_high: new Prisma.Decimal(100),
+            value_in_canonical_unit: new Prisma.Decimal(102),
+            comparable_unit: "mg/dL",
+            is_comparable: true,
+          },
+          {
+            canonical_marker_id: hba1cMarker.id,
+            raw_name: "HbA1c",
+            value_numeric: new Prisma.Decimal(5.4),
+            unit: "%",
+            ref_low: new Prisma.Decimal(4),
+            ref_high: new Prisma.Decimal(5.6),
+            value_in_canonical_unit: new Prisma.Decimal(5.4),
+            comparable_unit: "%",
+            is_comparable: true,
+          },
+        ],
+      },
+    },
+  });
+
+  const pastScheduled = toDateWithTime(baseDate, -200, "09:00");
+  const bookingPast = await prisma.booking.create({
+    data: {
+      patient_profile_id: patientProfileId,
+      lab_profile_id: secondaryLab.profile.id,
+      lab_test_id: secondaryTest.id,
+      booking_type: BookingType.LabVisit,
+      status: BookingStatus.Completed,
+      scheduled_at: pastScheduled,
+      total_price_egp: secondaryTest.price_egp,
+      payment_method: PaymentMethod.CashLabVisit,
+      payment_status: PaymentStatus.Paid,
+      payment_reference: "SEED-HISTORY-LAB",
+      payment_paid_at: pastScheduled,
+    },
+  });
+
+  await prisma.bookingStatusEvent.createMany({
+    data: [
+      {
+        booking_id: bookingPast.id,
+        status: BookingStatus.Pending,
+        note: "Booking created",
+        actor_user_id: patientUser.id,
+      },
+      {
+        booking_id: bookingPast.id,
+        status: BookingStatus.Confirmed,
+        note: "Lab confirmed booking",
+        actor_user_id: secondaryLab.profile.user_id,
+      },
+      {
+        booking_id: bookingPast.id,
+        status: BookingStatus.Completed,
+        note: "Visit completed",
+        actor_user_id: secondaryLab.profile.user_id,
+      },
+    ],
+  });
+
+  await prisma.resultFile.create({
+    data: {
+      booking_id: bookingPast.id,
+      status: ResultStatus.Delivered,
+      file_name: "follow-up-metabolic.pdf",
+      file_url: "https://example.com/results/follow-up-metabolic.pdf",
+      mime_type: "application/pdf",
+      size_bytes: 198_000,
+      uploaded_by_user_id: secondaryLab.profile.user_id,
+    },
+  });
+
+  await prisma.resultSummary.create({
+    data: {
+      booking_id: bookingPast.id,
+      summary: "Structured demo: prior glucose in mmol/L for cross-lab trending.",
+    },
+  });
+
+  await prisma.resultPanel.create({
+    data: {
+      booking_id: bookingPast.id,
+      name: "Chemistry",
+      test_date: addMinutes(pastScheduled, 60 * 6),
+      sort_order: 0,
+      observations: {
+        create: [
+          {
+            canonical_marker_id: glucoseMarker.id,
+            raw_name: "Glucose",
+            value_numeric: new Prisma.Decimal("5.4"),
+            unit: "mmol/L",
+            ref_low: new Prisma.Decimal("3.9"),
+            ref_high: new Prisma.Decimal("5.5"),
+            value_in_canonical_unit: new Prisma.Decimal("5.4").mul(new Prisma.Decimal(18)),
+            comparable_unit: "mg/dL",
+            is_comparable: true,
+            comparability_note: "Converted from mmol/L to mg/dL.",
+          },
+        ],
       },
     },
   });

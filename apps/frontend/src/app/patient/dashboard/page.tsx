@@ -12,8 +12,9 @@ import {
   type PatientWorkspaceResponse,
 } from "../../../lib/patientApi";
 import { useSession } from "../../../components/SessionProvider";
+import { HealthTrendsPanel } from "../../../components/patient/HealthTrendsPanel";
 
-type Tab = "bookings" | "results" | "profile";
+type Tab = "bookings" | "results" | "trends" | "profile";
 
 function formatDateTime(value: string) {
   const date = new Date(value);
@@ -198,6 +199,9 @@ export default function PatientDashboardPage() {
           <button onClick={() => setTab("results")} className={`px-4 py-2 rounded-lg ${tab === "results" ? "bg-blue-600 text-white" : "bg-white border border-gray-200"}`}>
             Results
           </button>
+          <button onClick={() => setTab("trends")} className={`px-4 py-2 rounded-lg ${tab === "trends" ? "bg-blue-600 text-white" : "bg-white border border-gray-200"}`}>
+            Trends
+          </button>
           <button onClick={() => setTab("profile")} className={`px-4 py-2 rounded-lg ${tab === "profile" ? "bg-blue-600 text-white" : "bg-white border border-gray-200"}`}>
             Profile
           </button>
@@ -297,6 +301,8 @@ export default function PatientDashboardPage() {
               </div>
             )}
 
+            {tab === "trends" && <HealthTrendsPanel onUnauthorized={() => router.push("/login")} />}
+
             {tab === "results" && (
               <div className="space-y-4">
                 {workspace.results.length === 0 ? (
@@ -310,13 +316,22 @@ export default function PatientDashboardPage() {
 
                     return (
                       <div key={result.bookingId} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                        <div className="flex justify-between items-start mb-4">
+                        <div className="flex justify-between items-start mb-4 gap-3 flex-wrap">
                           <div>
                             <h2 className="text-lg text-gray-900">{result.testName}</h2>
                             <p className="text-gray-600">{result.labName}</p>
                             <p className="text-sm text-gray-500">{formatDateTime(result.scheduledAt)}</p>
                           </div>
-                          <span className={`px-3 py-1 rounded-full ${bookingStatusClass(result.resultStatus)}`}>{result.resultStatus}</span>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className={`px-3 py-1 rounded-full ${bookingStatusClass(result.resultStatus)}`}>{result.resultStatus}</span>
+                            {result.hasStructuredData ? (
+                              <span className="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-800">
+                                Structured data · {result.structuredObservationCount} values
+                              </span>
+                            ) : (
+                              <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">PDF only</span>
+                            )}
+                          </div>
                         </div>
 
                         {result.summary && (

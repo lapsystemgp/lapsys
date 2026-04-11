@@ -49,6 +49,11 @@ export class PatientService {
         result_summary: {
           select: { summary: true, highlights: true },
         },
+        result_panels: {
+          select: {
+            _count: { select: { observations: true } },
+          },
+        },
         review: {
           select: { id: true, rating: true, comment: true, status: true, created_at: true },
         },
@@ -88,13 +93,22 @@ export class PatientService {
 
     const results = bookings
       .filter((booking) => !!booking.result_file || !!booking.result_summary)
-      .map((booking) => ({
+      .map((booking) => {
+        const structuredObservationCount = booking.result_panels.reduce(
+          (sum, panel) => sum + panel._count.observations,
+          0,
+        );
+        const hasStructuredData = structuredObservationCount > 0;
+
+        return {
         bookingId: booking.id,
         bookingStatus: booking.status,
         scheduledAt: booking.scheduled_at.toISOString(),
         labName: booking.lab_profile.lab_name,
         testName: booking.lab_test.name,
         resultStatus: booking.result_file?.status ?? ResultStatus.Pending,
+        hasStructuredData,
+        structuredObservationCount,
         file: booking.result_file
           ? {
               id: booking.result_file.id,
@@ -121,7 +135,8 @@ export class PatientService {
             }
           : null,
         canReview: !booking.review && !!booking.result_file,
-      }));
+      };
+      });
 
     return {
       profile: {

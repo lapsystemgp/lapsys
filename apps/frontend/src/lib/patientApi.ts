@@ -25,6 +25,8 @@ export type PatientWorkspaceResult = {
   labName: string;
   testName: string;
   resultStatus: "Pending" | "Uploaded" | "Delivered";
+  hasStructuredData: boolean;
+  structuredObservationCount: number;
   file: {
     id: string;
     fileName: string;
@@ -63,6 +65,38 @@ export type PatientWorkspaceResponse = {
 
 export async function fetchPatientWorkspace() {
   return await apiFetch<PatientWorkspaceResponse>("/patient/workspace");
+}
+
+export type HealthProfileRange = "3m" | "6m" | "12m" | "all";
+
+export type PatientHealthProfileResponse = {
+  range: HealthProfileRange;
+  hasStructuredData: boolean;
+  series: Array<{
+    canonicalCode: string;
+    displayName: string;
+    chartUnit: string;
+    category: string | null;
+    points: Array<{
+      testDate: string;
+      value: number;
+      comparable: boolean;
+      comparabilityNote: string | null;
+      bookingId: string;
+      labName: string;
+    }>;
+  }>;
+  pdfOnlyBookings: Array<{
+    bookingId: string;
+    scheduledAt: string;
+    labName: string;
+    testName: string;
+  }>;
+};
+
+export async function fetchPatientHealthProfile(range: HealthProfileRange = "12m") {
+  const params = new URLSearchParams({ range });
+  return await apiFetch<PatientHealthProfileResponse>(`/patient/health-profile?${params.toString()}`);
 }
 
 export async function updatePatientProfile(input: {

@@ -18,6 +18,8 @@ import { FaqService } from './faq/faq.service';
 import { AuditLogService } from './common/services/audit-log.service';
 import { AdminController } from './admin/admin.controller';
 import { AdminService } from './admin/admin.service';
+import { ClinicalNormalizationService } from './api/clinical-normalization.service';
+import { StructuredResultsService } from './api/structured-results.service';
 
 @Module({
   imports: [AuthModule],
@@ -41,6 +43,8 @@ import { AdminService } from './admin/admin.service';
     FaqService,
     AuditLogService,
     AdminService,
+    ClinicalNormalizationService,
+    StructuredResultsService,
   ],
 })
 export class AppModule {}

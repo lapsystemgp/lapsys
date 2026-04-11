@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Req,
   UploadedFile,
   UseGuards,
@@ -24,7 +25,9 @@ import { CreateScheduleSlotDto } from './dto/create-schedule-slot.dto';
 import { UpdateScheduleSlotDto } from './dto/update-schedule-slot.dto';
 import { UploadResultDto } from './dto/upload-result.dto';
 import { SetResultStatusDto } from './dto/set-result-status.dto';
+import { UpsertStructuredResultDto } from './dto/upsert-structured-result.dto';
 import { UploadedLabFile } from './lab-storage.service';
+import { StructuredResultsService } from './structured-results.service';
 
 type RequestWithUser = {
   user?: { id?: string };
@@ -33,7 +36,10 @@ type RequestWithUser = {
 @Controller('lab')
 @UseGuards(JwtAuthGuard, RolesGuard, LabActiveGuard)
 export class LabController {
-  constructor(private readonly labService: LabService) {}
+  constructor(
+    private readonly labService: LabService,
+    private readonly structuredResultsService: StructuredResultsService,
+  ) {}
 
   @Get('workspace')
   @Roles(Role.LabStaff)
@@ -105,5 +111,15 @@ export class LabController {
     @Body() dto: SetResultStatusDto,
   ) {
     return this.labService.setResultStatus(req.user?.id ?? '', bookingId, dto);
+  }
+
+  @Put('results/:bookingId/structured')
+  @Roles(Role.LabStaff)
+  upsertStructuredResults(
+    @Req() req: RequestWithUser,
+    @Param('bookingId') bookingId: string,
+    @Body() dto: UpsertStructuredResultDto,
+  ) {
+    return this.structuredResultsService.upsertStructuredResults(req.user?.id ?? '', bookingId, dto);
   }
 }

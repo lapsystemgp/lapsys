@@ -8,6 +8,7 @@ import { ResultStatus, ReviewStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdatePatientProfileDto } from './dto/update-patient-profile.dto';
 import { CreateReviewDto } from './dto/create-review.dto';
+import { normalizeResultHighlights } from './result-highlights.util';
 
 @Injectable()
 export class PatientService {
@@ -122,7 +123,7 @@ export class PatientService {
         summary: booking.result_summary
           ? {
               summary: booking.result_summary.summary,
-              highlights: booking.result_summary.highlights ?? null,
+              highlights: normalizeResultHighlights(booking.result_summary.highlights),
             }
           : null,
         review: booking.review

@@ -37,7 +37,14 @@ export type PatientWorkspaceResult = {
   } | null;
   summary: {
     summary: string;
-    highlights: unknown;
+    highlights: {
+      items: Array<{
+        key: string;
+        label: string;
+        value: string;
+        kind: "key_value" | "text" | "structured";
+      }>;
+    };
   } | null;
   review: {
     id: string;
@@ -72,23 +79,40 @@ export async function fetchPatientWorkspace() {
 
 export type HealthProfileRange = "3m" | "6m" | "12m" | "all";
 
+export type HealthProfileGroupBy = "analyte" | "lab_test";
+
+export type HealthProfileSeries = {
+  canonicalCode: string;
+  displayName: string;
+  chartUnit: string;
+  category: string | null;
+  labTestName: string | null;
+  trend: {
+    direction: "increasing" | "decreasing" | "stable" | "insufficient_data";
+    narrative: string;
+    qualitativeNote: string | null;
+  };
+  points: Array<{
+    testDate: string;
+    value: number;
+    comparable: boolean;
+    comparabilityNote: string | null;
+    bookingId: string;
+    labName: string;
+    labTestName: string;
+    refLow: number | null;
+    refHigh: number | null;
+    abnormal: boolean | null;
+  }>;
+};
+
 export type PatientHealthProfileResponse = {
   range: HealthProfileRange;
+  groupBy: HealthProfileGroupBy;
   hasStructuredData: boolean;
-  series: Array<{
-    canonicalCode: string;
-    displayName: string;
-    chartUnit: string;
-    category: string | null;
-    points: Array<{
-      testDate: string;
-      value: number;
-      comparable: boolean;
-      comparabilityNote: string | null;
-      bookingId: string;
-      labName: string;
-    }>;
-  }>;
+  disclaimer: string;
+  series: HealthProfileSeries[];
+  labTestGroups: Array<{ labTestName: string; series: HealthProfileSeries[] }>;
   pdfOnlyBookings: Array<{
     bookingId: string;
     scheduledAt: string;
@@ -97,8 +121,11 @@ export type PatientHealthProfileResponse = {
   }>;
 };
 
-export async function fetchPatientHealthProfile(range: HealthProfileRange = "12m") {
-  const params = new URLSearchParams({ range });
+export async function fetchPatientHealthProfile(
+  range: HealthProfileRange = "12m",
+  groupBy: HealthProfileGroupBy = "analyte",
+) {
+  const params = new URLSearchParams({ range, groupBy });
   return await apiFetch<PatientHealthProfileResponse>(`/patient/health-profile?${params.toString()}`);
 }
 

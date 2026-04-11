@@ -165,4 +165,25 @@ export class ClinicalNormalizationService {
       note: null,
     };
   }
+
+  /** Convert reported reference bounds using the same unit rules as {@link toCanonicalValue}. */
+  referenceRangeToCanonical(
+    marker: CanonicalMarkerRow,
+    refLow: Prisma.Decimal | null,
+    refHigh: Prisma.Decimal | null,
+    unit: string | null | undefined,
+  ): { low: number | null; high: number | null } {
+    let low: number | null = null;
+    let high: number | null = null;
+    if (refLow !== null) {
+      low = Number(this.toCanonicalValue(marker, Number(refLow.toString()), unit).value.toString());
+    }
+    if (refHigh !== null) {
+      high = Number(this.toCanonicalValue(marker, Number(refHigh.toString()), unit).value.toString());
+    }
+    if (low !== null && high !== null && low > high) {
+      return { low: high, high: low };
+    }
+    return { low, high };
+  }
 }

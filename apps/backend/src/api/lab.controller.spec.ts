@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { LabController } from './lab.controller';
 import { LabService } from './lab.service';
+import { StructuredResultsService } from './structured-results.service';
+import { LabPatientContextService } from './lab-patient-context.service';
 
 describe('LabController', () => {
   let controller: LabController;
@@ -21,6 +23,18 @@ describe('LabController', () => {
             deactivateScheduleSlot: jest.fn(),
             uploadResult: jest.fn(),
             setResultStatus: jest.fn(),
+          },
+        },
+        {
+          provide: StructuredResultsService,
+          useValue: {
+            upsertStructuredResults: jest.fn(),
+          },
+        },
+        {
+          provide: LabPatientContextService,
+          useValue: {
+            getPatientContext: jest.fn(),
           },
         },
       ],

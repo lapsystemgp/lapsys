@@ -342,9 +342,27 @@ export default function PatientDashboardPage() {
                         </div>
 
                         {result.summary && (
-                          <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                            <p className="text-sm text-gray-500 mb-1">Summary</p>
-                            <p className="text-gray-800">{result.summary.summary}</p>
+                          <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-100 space-y-3">
+                            <div>
+                              <p className="text-sm text-gray-500 mb-1">Summary</p>
+                              <p className="text-gray-800">{result.summary.summary}</p>
+                            </div>
+                            {result.summary.highlights.items.length > 0 && (
+                              <div>
+                                <p className="text-sm text-gray-500 mb-2">Highlighted results</p>
+                                <ul className="grid gap-2 sm:grid-cols-2">
+                                  {result.summary.highlights.items.map((item) => (
+                                    <li
+                                      key={`${result.bookingId}-${item.key}`}
+                                      className="rounded-lg bg-white/80 border border-blue-100 px-3 py-2 text-sm"
+                                    >
+                                      <p className="text-gray-500 text-xs uppercase tracking-wide">{item.label}</p>
+                                      <p className="text-gray-900 font-medium">{item.value}</p>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
                           </div>
                         )}
 

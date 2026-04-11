@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PatientController } from './patient.controller';
 import { PatientService } from './patient.service';
+import { StructuredResultsService } from './structured-results.service';
 
 describe('PatientController', () => {
   let controller: PatientController;
@@ -15,6 +16,12 @@ describe('PatientController', () => {
             getWorkspace: jest.fn(),
             updateProfile: jest.fn(),
             createReview: jest.fn(),
+          },
+        },
+        {
+          provide: StructuredResultsService,
+          useValue: {
+            getHealthProfile: jest.fn(),
           },
         },
       ],

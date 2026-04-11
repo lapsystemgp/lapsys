@@ -31,12 +31,21 @@ export class PatientController {
 
   @Get('health-profile')
   @Roles(Role.Patient)
-  getHealthProfile(@Req() req: RequestWithUser, @Query('range') range?: string) {
+  getHealthProfile(
+    @Req() req: RequestWithUser,
+    @Query('range') range?: string,
+    @Query('groupBy') groupBy?: string,
+  ) {
     const allowed: HealthProfileRange[] = ['3m', '6m', '12m', 'all'];
     const resolved = allowed.includes(range as HealthProfileRange)
       ? (range as HealthProfileRange)
       : '12m';
-    return this.structuredResultsService.getHealthProfile(req.user?.id ?? '', resolved);
+    const resolvedGroupBy = groupBy === 'lab_test' ? 'lab_test' : 'analyte';
+    return this.structuredResultsService.getHealthProfile(
+      req.user?.id ?? '',
+      resolved,
+      resolvedGroupBy,
+    );
   }
 
   @Patch('profile')

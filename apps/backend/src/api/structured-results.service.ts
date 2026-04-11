@@ -11,6 +11,87 @@ import { UpsertStructuredResultDto } from './dto/upsert-structured-result.dto';
 
 export type HealthProfileRange = '3m' | '6m' | '12m' | 'all';
 
+export type HealthProfileGroupBy = 'analyte' | 'lab_test';
+
+type TrendDirection = 'increasing' | 'decreasing' | 'stable' | 'insufficient_data';
+
+type HealthPoint = {
+  testDate: string;
+  value: number;
+  comparable: boolean;
+  comparabilityNote: string | null;
+  bookingId: string;
+  labName: string;
+  labTestName: string;
+  refLow: number | null;
+  refHigh: number | null;
+  abnormal: boolean | null;
+};
+
+type HealthSeries = {
+  canonicalCode: string;
+  displayName: string;
+  chartUnit: string;
+  category: string | null;
+  labTestName: string | null;
+  trend: {
+    direction: TrendDirection;
+    narrative: string;
+    qualitativeNote: string | null;
+  };
+  points: HealthPoint[];
+};
+
+function computeTrend(points: HealthPoint[]): {
+  direction: TrendDirection;
+  narrative: string;
+  qualitativeNote: string | null;
+} {
+  const sorted = [...points].sort(
+    (a, b) => new Date(a.testDate).getTime() - new Date(b.testDate).getTime(),
+  );
+  if (sorted.length < 2) {
+    return {
+      direction: 'insufficient_data',
+      narrative: 'Not enough measurements in this period to describe a trend.',
+      qualitativeNote: null,
+    };
+  }
+
+  const first = sorted[0].value;
+  const last = sorted[sorted.length - 1].value;
+  const denom = Math.max(Math.abs(first), 1e-9);
+  const rel = (last - first) / denom;
+  let direction: Exclude<TrendDirection, 'insufficient_data'>;
+  if (Math.abs(rel) < 0.02) {
+    direction = 'stable';
+  } else if (last > first) {
+    direction = 'increasing';
+  } else {
+    direction = 'decreasing';
+  }
+
+  const narrative =
+    direction === 'stable'
+      ? 'Values are similar at the start and end of this period.'
+      : direction === 'increasing'
+        ? 'The latest value is higher than earlier in this period.'
+        : 'The latest value is lower than earlier in this period.';
+
+  const firstAb = sorted[0].abnormal;
+  const lastAb = sorted[sorted.length - 1].abnormal;
+  let qualitativeNote: string | null = null;
+  if (firstAb === true && lastAb === false) {
+    qualitativeNote =
+      'The most recent point is within the reference limits copied from the lab report. This is informational only—not medical advice.';
+  } else if (firstAb === false && lastAb === true) {
+    qualitativeNote =
+      'The most recent point is outside the reference limits copied from the lab report. Discuss with your clinician if you have concerns.';
+  }
+
+  return { direction, narrative, qualitativeNote };
+}
+
 @Injectable()
 export class StructuredResultsService {
   constructor(
@@ -152,7 +233,11 @@ export class StructuredResultsService {
     };
   }
 
-  async getHealthProfile(userId: string, range: HealthProfileRange) {
+  async getHealthProfile(
+    userId: string,
+    range: HealthProfileRange,
+    groupBy: HealthProfileGroupBy = 'analyte',
+  ) {
     const patientProfile = await this.prisma.patientProfile.findUnique({
       where: { user_id: userId },
       select: { id: true },
@@ -186,6 +271,7 @@ export class StructuredResultsService {
       include: {
         canonical_marker: {
           select: {
+            id: true,
             code: true,
             display_name: true,
             category: true,
@@ -199,6 +285,7 @@ export class StructuredResultsService {
               select: {
                 id: true,
                 lab_profile: { select: { lab_name: true } },
+                lab_test: { select: { name: true } },
               },
             },
           },
@@ -207,47 +294,71 @@ export class StructuredResultsService {
       orderBy: [{ panel: { test_date: 'asc' } }, { raw_name: 'asc' }],
     });
 
-    const seriesMap = new Map<
-      string,
-      {
-        canonicalCode: string;
-        displayName: string;
-        chartUnit: string;
-        category: string | null;
-        points: Array<{
-          testDate: string;
-          value: number;
-          comparable: boolean;
-          comparabilityNote: string | null;
-          bookingId: string;
-          labName: string;
-        }>;
-      }
-    >();
+    const seriesMap = new Map<string, HealthSeries>();
 
     for (const row of observations) {
       if (!row.canonical_marker || !row.value_in_canonical_unit) continue;
       const code = row.canonical_marker.code;
+      const labTestName = row.panel.booking.lab_test.name;
+      const mapKey =
+        groupBy === 'lab_test' ? `${labTestName}::${code}` : code;
+
       const unit = row.comparable_unit ?? row.canonical_marker.default_unit ?? '';
-      if (!seriesMap.has(code)) {
-        seriesMap.set(code, {
+      const refCanon = this.clinicalNormalization.referenceRangeToCanonical(
+        row.canonical_marker,
+        row.ref_low,
+        row.ref_high,
+        row.unit,
+      );
+
+      const valueNum = Number(row.value_in_canonical_unit.toString());
+      let abnormal: boolean | null = null;
+      if (refCanon.low !== null || refCanon.high !== null) {
+        const below = refCanon.low !== null && valueNum < refCanon.low;
+        const above = refCanon.high !== null && valueNum > refCanon.high;
+        abnormal = below || above;
+      }
+
+      if (!seriesMap.has(mapKey)) {
+        seriesMap.set(mapKey, {
           canonicalCode: code,
           displayName: row.canonical_marker.display_name,
           chartUnit: unit,
           category: row.canonical_marker.category ?? null,
+          labTestName: groupBy === 'lab_test' ? labTestName : null,
+          trend: {
+            direction: 'insufficient_data',
+            narrative: '',
+            qualitativeNote: null,
+          },
           points: [],
         });
       }
-      const series = seriesMap.get(code)!;
+      const series = seriesMap.get(mapKey)!;
       series.points.push({
         testDate: row.panel.test_date.toISOString(),
-        value: Number(row.value_in_canonical_unit.toString()),
+        value: valueNum,
         comparable: row.is_comparable,
         comparabilityNote: row.comparability_note ?? null,
         bookingId: row.panel.booking.id,
         labName: row.panel.booking.lab_profile.lab_name,
+        labTestName,
+        refLow: refCanon.low,
+        refHigh: refCanon.high,
+        abnormal,
       });
     }
+
+    const seriesList: HealthSeries[] = Array.from(seriesMap.values())
+      .map((s) => ({
+        ...s,
+        trend: computeTrend(s.points),
+      }))
+      .sort((a, b) => {
+        const byTest = (a.labTestName ?? '').localeCompare(b.labTestName ?? '');
+        if (byTest !== 0) return byTest;
+        return a.displayName.localeCompare(b.displayName);
+      });
 
     const pdfOnlyBookings = await this.prisma.booking.findMany({
       where: {
@@ -263,11 +374,41 @@ export class StructuredResultsService {
       },
     });
 
+    const disclaimer =
+      'Trends and reference bands are based on structured data entered from your reports. They are not a substitute for clinical interpretation.';
+
+    if (groupBy === 'lab_test') {
+      const byTest = new Map<string, HealthSeries[]>();
+      for (const s of seriesList) {
+        const name = s.labTestName ?? 'Other';
+        if (!byTest.has(name)) byTest.set(name, []);
+        byTest.get(name)!.push(s);
+      }
+      const labTestGroups = Array.from(byTest.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([labTestName, series]) => ({ labTestName, series }));
+
+      return {
+        range,
+        groupBy,
+        labTestGroups,
+        series: [] as HealthSeries[],
+        pdfOnlyBookings: pdfOnlyBookings.map((b) => ({
+          bookingId: b.id,
+          scheduledAt: b.scheduled_at.toISOString(),
+          labName: b.lab_profile.lab_name,
+          testName: b.lab_test.name,
+        })),
+        hasStructuredData: structuredInRange > 0,
+        disclaimer,
+      };
+    }
+
     return {
       range,
-      series: Array.from(seriesMap.values()).sort((a, b) =>
-        a.displayName.localeCompare(b.displayName),
-      ),
+      groupBy,
+      series: seriesList,
+      labTestGroups: [] as Array<{ labTestName: string; series: HealthSeries[] }>,
       pdfOnlyBookings: pdfOnlyBookings.map((b) => ({
         bookingId: b.id,
         scheduledAt: b.scheduled_at.toISOString(),
@@ -275,6 +416,7 @@ export class StructuredResultsService {
         testName: b.lab_test.name,
       })),
       hasStructuredData: structuredInRange > 0,
+      disclaimer,
     };
   }
 

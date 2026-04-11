@@ -156,3 +156,60 @@ export async function upsertLabStructuredResults(bookingId: string, panels: LabS
     },
   );
 }
+
+export type LabPatientContextResponse = {
+  lab: { id: string; name: string };
+  patientProfileId: string;
+  demographics: {
+    fullName: string;
+    phone: string;
+    address: string;
+    email: string;
+  };
+  patientSharing: "SAME_LAB_ONLY" | "FULL_HISTORY_AUTHORIZED";
+  effectiveScopeForThisLab: "same_lab" | "full_history";
+  privacyNotice: string;
+  priorBookings: Array<{
+    bookingId: string;
+    scheduledAt: string;
+    status: string;
+    testName: string;
+    labId: string;
+    labName: string;
+    isThisLab: boolean;
+    hasResult: boolean;
+    summaryPreview: string | null;
+    structuredSummary: Array<{
+      displayName: string;
+      code: string | null;
+      value: string;
+      unit: string | null;
+      testDate: string;
+    }>;
+    pdfAvailable: boolean;
+    pdfUrl: string | null;
+  }>;
+  recurringTestsSummary: string[];
+  trendSummary: Array<{
+    canonicalCode: string;
+    displayName: string;
+    chartUnit: string;
+    category: string | null;
+    points: Array<{
+      testDate: string;
+      value: number;
+      bookingId: string;
+      labName: string;
+    }>;
+  }>;
+};
+
+export async function fetchLabPatientContext(params: { bookingId: string } | { patientProfileId: string }) {
+  const search = new URLSearchParams();
+  if ("bookingId" in params) {
+    search.set("bookingId", params.bookingId);
+  } else {
+    search.set("patientProfileId", params.patientProfileId);
+  }
+  return await apiFetch<LabPatientContextResponse>(`/lab/patient-context?${search.toString()}`);
+}

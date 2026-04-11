@@ -49,12 +49,15 @@ export type PatientWorkspaceResult = {
   canReview: boolean;
 };
 
+export type LabHistorySharing = "SAME_LAB_ONLY" | "FULL_HISTORY_AUTHORIZED";
+
 export type PatientWorkspaceResponse = {
   profile: {
     fullName: string;
     phone: string;
     address: string;
     email: string;
+    labHistorySharing: LabHistorySharing;
   };
   bookings: {
     upcoming: PatientWorkspaceBooking[];
@@ -103,8 +106,14 @@ export async function updatePatientProfile(input: {
   fullName?: string;
   phone?: string;
   address?: string;
+  labHistorySharing?: LabHistorySharing;
 }) {
-  return await apiFetch<{ fullName: string; phone: string; address: string }>("/patient/profile", {
+  return await apiFetch<{
+    fullName: string;
+    phone: string;
+    address: string;
+    labHistorySharing: LabHistorySharing;
+  }>("/patient/profile", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),

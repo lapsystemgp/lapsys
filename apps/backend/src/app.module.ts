@@ -20,6 +20,7 @@ import { AdminController } from './admin/admin.controller';
 import { AdminService } from './admin/admin.service';
 import { ClinicalNormalizationService } from './api/clinical-normalization.service';
 import { StructuredResultsService } from './api/structured-results.service';
+import { LabPatientContextService } from './api/lab-patient-context.service';
 
 @Module({
   imports: [AuthModule],
@@ -45,6 +46,7 @@ import { StructuredResultsService } from './api/structured-results.service';
     AdminService,
     ClinicalNormalizationService,
     StructuredResultsService,
+    LabPatientContextService,
   ],
 })
 export class AppModule {}

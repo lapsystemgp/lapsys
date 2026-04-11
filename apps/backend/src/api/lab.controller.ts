@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   Req,
   UploadedFile,
   UseGuards,
@@ -28,6 +29,7 @@ import { SetResultStatusDto } from './dto/set-result-status.dto';
 import { UpsertStructuredResultDto } from './dto/upsert-structured-result.dto';
 import { UploadedLabFile } from './lab-storage.service';
 import { StructuredResultsService } from './structured-results.service';
+import { LabPatientContextService } from './lab-patient-context.service';
 
 type RequestWithUser = {
   user?: { id?: string };
@@ -39,12 +41,26 @@ export class LabController {
   constructor(
     private readonly labService: LabService,
     private readonly structuredResultsService: StructuredResultsService,
+    private readonly labPatientContextService: LabPatientContextService,
   ) {}
 
   @Get('workspace')
   @Roles(Role.LabStaff)
   getWorkspace(@Req() req: RequestWithUser) {
     return this.labService.getWorkspace(req.user?.id ?? '');
+  }
+
+  @Get('patient-context')
+  @Roles(Role.LabStaff)
+  getPatientContext(
+    @Req() req: RequestWithUser,
+    @Query('bookingId') bookingId?: string,
+    @Query('patientProfileId') patientProfileId?: string,
+  ) {
+    return this.labPatientContextService.getContext(req.user?.id ?? '', {
+      bookingId: bookingId?.trim() || undefined,
+      patientProfileId: patientProfileId?.trim() || undefined,
+    });
   }
 
   @Post('tests')

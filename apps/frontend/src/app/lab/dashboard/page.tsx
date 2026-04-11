@@ -3,16 +3,18 @@
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ApiError } from "../../../lib/api";
+import { API_BASE_URL, ApiError } from "../../../lib/api";
 import { markCashCollected, setLabBookingStatus } from "../../../lib/bookingsApi";
 import {
   createLabTest,
   deleteLabTest,
   createScheduleSlot,
   deactivateScheduleSlot,
+  fetchLabPatientContext,
   fetchLabWorkspace,
   setLabResultStatus,
   updateLabTest,
+  type LabPatientContextResponse,
   type LabStructuredPanelInput,
   type LabWorkspaceResponse,
   uploadLabResult,
@@ -31,6 +33,11 @@ function formatDateTime(value: string) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function resolveLabPdfUrl(fileUrl: string) {
+  if (/^https?:\/\//i.test(fileUrl)) return fileUrl;
+  return `${API_BASE_URL}${fileUrl.startsWith("/") ? "" : "/"}${fileUrl}`;
 }
 
 function statusClass(status: string) {
@@ -59,6 +66,10 @@ export default function LabDashboardPage() {
   const [structuredJsonByBooking, setStructuredJsonByBooking] = useState<Record<string, string>>({});
   const [structuredSubmittingId, setStructuredSubmittingId] = useState<string | null>(null);
   const [cashActionId, setCashActionId] = useState<string | null>(null);
+
+  const [patientContext, setPatientContext] = useState<LabPatientContextResponse | null>(null);
+  const [patientContextLoading, setPatientContextLoading] = useState(false);
+  const [patientContextError, setPatientContextError] = useState<string | null>(null);
 
   const loadWorkspace = useCallback(async () => {
     setLoading(true);
@@ -273,6 +284,26 @@ export default function LabDashboardPage() {
     }
   };
 
+  const openPatientContext = async (bookingId: string) => {
+    setPatientContextError(null);
+    setPatientContextLoading(true);
+    setPatientContext(null);
+    try {
+      const data = await fetchLabPatientContext({ bookingId });
+      setPatientContext(data);
+    } catch {
+      setPatientContextError("Could not load patient context.");
+    } finally {
+      setPatientContextLoading(false);
+    }
+  };
+
+  const closePatientContext = () => {
+    setPatientContext(null);
+    setPatientContextError(null);
+    setPatientContextLoading(false);
+  };
+
   const handleDeliverResult = async (bookingId: string) => {
     try {
       await setLabResultStatus(bookingId, "Delivered");
@@ -398,6 +429,15 @@ export default function LabDashboardPage() {
                           </button>
                         </div>
                       )}
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <button
+                        type="button"
+                        onClick={() => openPatientContext(booking.id)}
+                        className="px-4 py-2 border border-blue-300 text-blue-900 rounded-lg hover:bg-blue-50 text-sm font-medium"
+                      >
+                        Patient history & context
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -526,6 +566,13 @@ export default function LabDashboardPage() {
                           >
                             Mark Delivered
                           </button>
+                          <button
+                            type="button"
+                            onClick={() => openPatientContext(booking.id)}
+                            className="px-4 py-2 border border-blue-300 text-blue-900 rounded-lg hover:bg-blue-50 text-sm font-medium md:col-span-3"
+                          >
+                            Patient history & context
+                          </button>
                         </div>
 
                         <div className="border-t border-gray-100 pt-4">
@@ -633,6 +680,148 @@ export default function LabDashboardPage() {
           </>
         )}
       </main>
+
+      {(patientContextLoading || patientContext !== null || patientContextError !== null) && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/40 z-40"
+            onClick={closePatientContext}
+            onKeyDown={(e) => e.key === "Escape" && closePatientContext()}
+            role="presentation"
+            aria-hidden
+          />
+          <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-white shadow-2xl overflow-y-auto border-l border-gray-200 flex flex-col">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Patient context</h2>
+              <button
+                type="button"
+                onClick={closePatientContext}
+                className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Close
+              </button>
+            </div>
+            <div className="p-6 space-y-6 flex-1">
+              {patientContextLoading && <p className="text-gray-600">Loading…</p>}
+              {patientContextError && <p className="text-red-600">{patientContextError}</p>}
+              {patientContext && !patientContextLoading && (
+                <>
+                  <p className="text-sm text-gray-700 bg-slate-50 border border-slate-200 rounded-lg p-3">{patientContext.privacyNotice}</p>
+                  <p className="text-xs text-gray-500">
+                    Patient sharing setting:{" "}
+                    <span className="font-medium text-gray-800">
+                      {patientContext.patientSharing === "FULL_HISTORY_AUTHORIZED"
+                        ? "Broader history authorized"
+                        : "Same lab only"}
+                    </span>{" "}
+                    · Effective view:{" "}
+                    <span className="font-medium text-gray-800">
+                      {patientContext.effectiveScopeForThisLab === "full_history" ? "Cross-lab summaries" : "This lab only"}
+                    </span>
+                  </p>
+
+                  <section>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-2">Demographics</h3>
+                    <ul className="text-sm text-gray-700 space-y-1">
+                      <li>
+                        <span className="text-gray-500">Name:</span> {patientContext.demographics.fullName || "—"}
+                      </li>
+                      <li>
+                        <span className="text-gray-500">Phone:</span> {patientContext.demographics.phone || "—"}
+                      </li>
+                      <li>
+                        <span className="text-gray-500">Email:</span> {patientContext.demographics.email || "—"}
+                      </li>
+                      <li>
+                        <span className="text-gray-500">Address:</span> {patientContext.demographics.address || "—"}
+                      </li>
+                    </ul>
+                  </section>
+
+                  {patientContext.recurringTestsSummary.length > 0 && (
+                    <section>
+                      <h3 className="text-sm font-semibold text-gray-900 mb-2">Recurring tests (signal)</h3>
+                      <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                        {patientContext.recurringTestsSummary.map((line) => (
+                          <li key={line}>{line}</li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
+
+                  {patientContext.trendSummary.length > 0 && (
+                    <section>
+                      <h3 className="text-sm font-semibold text-gray-900 mb-2">Recent trend summary (12 months)</h3>
+                      <div className="space-y-3">
+                        {patientContext.trendSummary.map((series) => (
+                          <div key={series.canonicalCode} className="border border-gray-100 rounded-lg p-3 text-sm">
+                            <p className="font-medium text-gray-900">
+                              {series.displayName}{" "}
+                              <span className="text-gray-500 font-normal">({series.chartUnit})</span>
+                            </p>
+                            <ul className="mt-2 space-y-1 text-gray-700">
+                              {series.points.map((pt) => (
+                                <li key={`${pt.bookingId}-${pt.testDate}`}>
+                                  {new Date(pt.testDate).toLocaleDateString("en-GB")}: {pt.value.toFixed(2)} · {pt.labName}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  <section>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-2">Prior bookings & results</h3>
+                    <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-1">
+                      {patientContext.priorBookings.map((row) => (
+                        <div key={row.bookingId} className="border border-gray-200 rounded-lg p-3 text-sm">
+                          <div className="flex flex-wrap justify-between gap-2">
+                            <span className="font-medium text-gray-900">{row.testName}</span>
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${statusClass(row.status)}`}>{row.status}</span>
+                          </div>
+                          <p className="text-gray-500 text-xs mt-1">
+                            {formatDateTime(row.scheduledAt)} · {row.labName}
+                            {!row.isThisLab && (
+                              <span className="ml-2 text-amber-800 bg-amber-50 px-1 rounded">Other lab</span>
+                            )}
+                          </p>
+                          {row.summaryPreview && (
+                            <p className="text-gray-700 mt-2 line-clamp-3">{row.summaryPreview}</p>
+                          )}
+                          {row.structuredSummary.length > 0 && (
+                            <ul className="mt-2 space-y-1 text-xs text-gray-800">
+                              {row.structuredSummary.map((obs, idx) => (
+                                <li key={`${row.bookingId}-obs-${idx}`}>
+                                  {obs.displayName}: {obs.value} {obs.unit ?? ""}{" "}
+                                  <span className="text-gray-500">
+                                    ({new Date(obs.testDate).toLocaleDateString("en-GB")})
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          {row.pdfAvailable && row.pdfUrl && (
+                            <a
+                              href={resolveLabPdfUrl(row.pdfUrl)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-block mt-2 text-blue-600 hover:underline"
+                            >
+                              Open PDF (your lab)
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                </>
+              )}
+            </div>
+          </aside>
+        </>
+      )}
     </div>
   );
 }

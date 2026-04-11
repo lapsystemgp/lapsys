@@ -8,6 +8,7 @@ import {
   fetchPatientWorkspace,
   submitPatientReview,
   updatePatientProfile,
+  type LabHistorySharing,
   type PatientWorkspaceResult,
   type PatientWorkspaceResponse,
 } from "../../../lib/patientApi";
@@ -64,7 +65,12 @@ export default function PatientDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [profileForm, setProfileForm] = useState({ fullName: "", phone: "", address: "" });
+  const [profileForm, setProfileForm] = useState<{
+    fullName: string;
+    phone: string;
+    address: string;
+    labHistorySharing: LabHistorySharing;
+  }>({ fullName: "", phone: "", address: "", labHistorySharing: "SAME_LAB_ONLY" });
   const [savingProfile, setSavingProfile] = useState(false);
   const [reviewDrafts, setReviewDrafts] = useState<Record<string, { rating: number; comment: string }>>({});
   const [submittingReviewId, setSubmittingReviewId] = useState<string | null>(null);
@@ -80,6 +86,7 @@ export default function PatientDashboardPage() {
         fullName: response.profile.fullName,
         phone: response.profile.phone,
         address: response.profile.address,
+        labHistorySharing: response.profile.labHistorySharing ?? "SAME_LAB_ONLY",
       });
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
@@ -445,6 +452,30 @@ export default function PatientDashboardPage() {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                       rows={3}
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">What labs can see (longitudinal care)</label>
+                    <select
+                      value={profileForm.labHistorySharing}
+                      onChange={(event) =>
+                        setProfileForm((prev) => ({
+                          ...prev,
+                          labHistorySharing: event.target.value as LabHistorySharing,
+                        }))
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900"
+                    >
+                      <option value="SAME_LAB_ONLY">
+                        Same lab only — each lab sees only visits and results from that lab (default)
+                      </option>
+                      <option value="FULL_HISTORY_AUTHORIZED">
+                        Broader history — labs you book with may see structured results from other labs (not their PDFs)
+                      </option>
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Official documents always stay with the lab that uploaded them. This setting only affects
+                      structured history and summaries labs use for context.
+                    </p>
                   </div>
                   <button
                     onClick={handleSaveProfile}

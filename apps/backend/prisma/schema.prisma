@@ -75,12 +75,21 @@ enum ReviewStatus {
   Rejected
 }
 
+/// What labs may see when the patient has an existing booking relationship with that lab.
+enum LabHistorySharing {
+  /// Only bookings and results from this lab (default, privacy-first).
+  SAME_LAB_ONLY
+  /// Patient opted in: labs with any booking may see cross-lab structured summaries and history (not other labs' PDFs).
+  FULL_HISTORY_AUTHORIZED
+}
+
 model PatientProfile {
   id         String   @id @default(uuid())
   user_id    String   @unique
   full_name  String?
   phone      String?
   address    String?
+  lab_history_sharing LabHistorySharing @default(SAME_LAB_ONLY)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 

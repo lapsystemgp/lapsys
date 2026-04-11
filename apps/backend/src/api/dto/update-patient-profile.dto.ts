@@ -1,4 +1,5 @@
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { LabHistorySharing } from '@prisma/client';
+import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class UpdatePatientProfileDto {
   @IsOptional()
@@ -15,4 +16,8 @@ export class UpdatePatientProfileDto {
   @IsString()
   @MaxLength(300)
   address?: string;
+
+  @IsOptional()
+  @IsEnum(LabHistorySharing)
+  labHistorySharing?: LabHistorySharing;
 }

@@ -144,6 +144,7 @@ export class PatientService {
         phone: patientProfile.phone ?? '',
         address: patientProfile.address ?? '',
         email: patientProfile.user.email,
+        labHistorySharing: patientProfile.lab_history_sharing,
       },
       bookings: {
         upcoming: mappedBookings.filter((booking) => new Date(booking.scheduledAt).getTime() >= now.getTime()),
@@ -169,14 +170,16 @@ export class PatientService {
         ...(dto.fullName !== undefined ? { full_name: dto.fullName.trim() } : {}),
         ...(dto.phone !== undefined ? { phone: dto.phone.trim() } : {}),
         ...(dto.address !== undefined ? { address: dto.address.trim() } : {}),
+        ...(dto.labHistorySharing !== undefined ? { lab_history_sharing: dto.labHistorySharing } : {}),
       },
-      select: { full_name: true, phone: true, address: true },
+      select: { full_name: true, phone: true, address: true, lab_history_sharing: true },
     });
 
     return {
       fullName: updated.full_name ?? '',
       phone: updated.phone ?? '',
       address: updated.address ?? '',
+      labHistorySharing: updated.lab_history_sharing,
     };
   }
 

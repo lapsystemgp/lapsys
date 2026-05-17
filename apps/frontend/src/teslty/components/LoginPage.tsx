@@ -62,7 +62,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault();
     setError(null);
     setLoading(true);

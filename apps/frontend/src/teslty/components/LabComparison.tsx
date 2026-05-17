@@ -107,7 +107,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect,
     return () => {
       isMounted = false;
     };
-  }, [effectiveSearchQuery, homeCollectionOnly, maxDistance, maxPrice, minRating, requestKey, selectedAccreditations, sortBy]);
+  }, [effectiveSearchQuery, homeCollectionOnly, maxDistance, maxPrice, minRating, requestKey, selectedAccreditations, sortBy, userLocation]);
 
   const availableAccreditations = ['NABL', 'CAP', 'ISO', 'JCI'];
 

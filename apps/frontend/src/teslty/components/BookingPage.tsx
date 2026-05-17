@@ -101,13 +101,10 @@ export function BookingPage({
     [effectiveSelectedSlotId, slots],
   );
 
-  useEffect(() => {
-    if (bookingType === "home" && paymentMethod === "CashLabVisit") {
-      setPaymentMethod("Online");
-    }
-    if (bookingType === "lab" && paymentMethod === "CashHomeCollection") {
-      setPaymentMethod("Online");
-    }
+  const effectivePaymentMethod = useMemo<PaymentMethod>(() => {
+    if (bookingType === "home" && paymentMethod === "CashLabVisit") return "Online";
+    if (bookingType === "lab" && paymentMethod === "CashHomeCollection") return "Online";
+    return paymentMethod;
   }, [bookingType, paymentMethod]);
 
   if (isLoading) {
@@ -144,7 +141,7 @@ export function BookingPage({
         slotId: effectiveSelectedSlotId,
         bookingType: bookingType === "home" ? "HomeCollection" : "LabVisit",
         homeAddress: bookingType === "home" ? homeAddress.trim() : undefined,
-        paymentMethod,
+        paymentMethod: effectivePaymentMethod,
       });
       setShowConfirmation(true);
       setTimeout(() => onComplete(), 1600);
@@ -154,7 +151,7 @@ export function BookingPage({
   };
 
   if (showConfirmation && selectedSlot) {
-    const onlineFlow = paymentMethod === "Online";
+    const onlineFlow = effectivePaymentMethod === "Online";
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
@@ -175,9 +172,9 @@ export function BookingPage({
             <div className="text-gray-600">{bookingType === "home" ? "Home Collection" : "Lab Visit"}</div>
             <div className="text-gray-700 mt-2 text-sm">
               Payment:{" "}
-              {paymentMethod === "Online"
+              {effectivePaymentMethod === "Online"
                 ? "Card / online (demo)"
-                : paymentMethod === "CashHomeCollection"
+                : effectivePaymentMethod === "CashHomeCollection"
                   ? "Cash on home collection"
                   : "Cash at lab visit"}
             </div>
@@ -301,7 +298,7 @@ export function BookingPage({
               type="button"
               onClick={() => setPaymentMethod("Online")}
               className={`w-full text-left p-4 rounded-lg border-2 transition ${
-                paymentMethod === "Online" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
+                effectivePaymentMethod === "Online" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
               }`}
             >
               <div className="text-gray-900 font-medium">Pay online (demo)</div>
@@ -312,7 +309,7 @@ export function BookingPage({
                 type="button"
                 onClick={() => setPaymentMethod("CashHomeCollection")}
                 className={`w-full text-left p-4 rounded-lg border-2 transition ${
-                  paymentMethod === "CashHomeCollection"
+                  effectivePaymentMethod === "CashHomeCollection"
                     ? "border-blue-600 bg-blue-50"
                     : "border-gray-200 hover:border-gray-300"
                 }`}
@@ -325,7 +322,7 @@ export function BookingPage({
                 type="button"
                 onClick={() => setPaymentMethod("CashLabVisit")}
                 className={`w-full text-left p-4 rounded-lg border-2 transition ${
-                  paymentMethod === "CashLabVisit" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
+                  effectivePaymentMethod === "CashLabVisit" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 <div className="text-gray-900 font-medium">Cash at lab visit</div>
@@ -368,9 +365,9 @@ export function BookingPage({
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Payment method</span>
               <span className="text-gray-900">
-                {paymentMethod === "Online"
+                {effectivePaymentMethod === "Online"
                   ? "Online (demo)"
-                  : paymentMethod === "CashHomeCollection"
+                  : effectivePaymentMethod === "CashHomeCollection"
                     ? "Cash on collection"
                     : "Cash at lab"}
               </span>

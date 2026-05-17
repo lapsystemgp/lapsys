@@ -5,7 +5,7 @@ import type { Page, UserRole } from '../types';
 import { fetchPublicLabs, type PublicLabCard } from '../../lib/publicApi';
 
 interface LandingPageProps {
-  onSearch: (query: string) => void;
+  onSearch: (query: string, sort?: 'price' | 'rating' | 'distance') => void;
   onNavigate: (page: Page) => void;
   userRole?: UserRole;
   currentUserLabel?: string;
@@ -20,9 +20,7 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchInput.trim()) {
-      onSearch(searchInput);
-    }
+    onSearch(searchInput);
   };
 
   useEffect(() => {
@@ -193,6 +191,31 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
                   {term}
                 </button>
               ))}
+            </div>
+
+            {/* Browse by criteria */}
+            <div className="mt-3 sm:mt-4 flex flex-wrap gap-2 sm:gap-3 justify-center">
+              <span className="text-gray-500 text-sm sm:text-base">Browse by:</span>
+              <button
+                onClick={() => onSearch('', 'distance')}
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-blue-200 rounded-full text-blue-700 hover:bg-blue-50 text-sm sm:text-base"
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                Nearest
+              </button>
+              <button
+                onClick={() => onSearch('', 'price')}
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-blue-200 rounded-full text-blue-700 hover:bg-blue-50 text-sm sm:text-base"
+              >
+                Best Price
+              </button>
+              <button
+                onClick={() => onSearch('', 'rating')}
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-blue-200 rounded-full text-blue-700 hover:bg-blue-50 text-sm sm:text-base"
+              >
+                <Star className="w-3.5 h-3.5" />
+                Top Rated
+              </button>
             </div>
           </div>
         </div>

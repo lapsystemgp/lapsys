@@ -108,6 +108,8 @@ model LabProfile {
   turnaround_time   String?
   home_collection   Boolean             @default(false)
   onboarding_status LabOnboardingStatus @default(PendingReview)
+  latitude          Float?
+  longitude         Float?
   rating_average    Float?
   review_count      Int                 @default(0)
   created_at        DateTime            @default(now())

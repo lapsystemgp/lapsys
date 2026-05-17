@@ -5,12 +5,13 @@ import { Breadcrumb } from '../../components/Breadcrumb';
 
 interface LabComparisonProps {
   searchQuery: string;
+  initialSort?: 'price' | 'rating' | 'distance';
   onLabSelect: (lab: PublicLabCard) => void;
   onBack: () => void;
 }
 
-export function LabComparison({ searchQuery, onLabSelect, onBack }: LabComparisonProps) {
-  const [sortBy, setSortBy] = useState<'price' | 'rating' | 'distance'>('price');
+export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect, onBack }: LabComparisonProps) {
+  const [sortBy, setSortBy] = useState<'price' | 'rating' | 'distance'>(initialSort);
   const [showFilters, setShowFilters] = useState(false);
   const [homeCollectionOnly, setHomeCollectionOnly] = useState(false);
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
@@ -20,6 +21,22 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
   const [selectedAccreditations, setSelectedAccreditations] = useState<string[]>([]);
   const [labs, setLabs] = useState<PublicLabCard[]>([]);
   const [lastResolvedKey, setLastResolvedKey] = useState<string>('');
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationStatus, setLocationStatus] = useState<'idle' | 'requesting' | 'denied'>('idle');
+
+  useEffect(() => {
+    if (sortBy !== 'distance' || userLocation || locationStatus !== 'idle') return;
+    if (!navigator.geolocation) { setLocationStatus('denied'); return; }
+    setLocationStatus('requesting');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationStatus('idle');
+      },
+      () => setLocationStatus('denied'),
+      { timeout: 10000 },
+    );
+  }, [sortBy, userLocation, locationStatus]);
 
   const requestKey = useMemo(
     () =>
@@ -31,8 +48,9 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
         maxDistance,
         maxPrice,
         selectedAccreditations,
+        userLocation,
       }),
-    [homeCollectionOnly, localSearchQuery, maxDistance, maxPrice, minRating, selectedAccreditations, sortBy],
+    [homeCollectionOnly, localSearchQuery, maxDistance, maxPrice, minRating, selectedAccreditations, sortBy, userLocation],
   );
 
   const isLoading = lastResolvedKey !== '' && lastResolvedKey !== requestKey;
@@ -70,6 +88,8 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
       maxPriceEgp: maxPrice < 1000 ? maxPrice : undefined,
       homeCollection: homeCollectionOnly ? true : undefined,
       accreditations: selectedAccreditations.length > 0 ? selectedAccreditations : undefined,
+      userLat: userLocation?.lat,
+      userLng: userLocation?.lng,
       page: 1,
       pageSize: 50,
     })
@@ -331,6 +351,20 @@ export function LabComparison({ searchQuery, onLabSelect, onBack }: LabCompariso
                 />
               </div>
             </div>
+
+            {/* Location status banners */}
+            {sortBy === 'distance' && locationStatus === 'requesting' && (
+              <div className="flex items-center gap-2 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm mb-4">
+                <MapPin className="w-4 h-4 animate-pulse flex-shrink-0" />
+                Getting your location to sort by nearest…
+              </div>
+            )}
+            {sortBy === 'distance' && locationStatus === 'denied' && (
+              <div className="flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm mb-4">
+                <MapPin className="w-4 h-4 flex-shrink-0" />
+                Location access denied — showing approximate distances instead. Allow location in your browser to sort by actual distance.
+              </div>
+            )}
 
             {/* Lab Cards */}
             <div className="space-y-4">

@@ -63,7 +63,13 @@ export default function HomePage() {
 
   return (
     <LandingPage
-      onSearch={(query) => router.push(`/labs?q=${encodeURIComponent(query.trim())}`)}
+      onSearch={(query, sort) => {
+        const params = new URLSearchParams();
+        if (query.trim()) params.set('q', query.trim());
+        if (sort && sort !== 'price') params.set('sort', sort);
+        const qs = params.toString();
+        router.push(`/labs${qs ? `?${qs}` : ''}`);
+      }}
       onNavigate={handleNavigate}
       userRole={userRole}
       currentUserLabel={userLabel}

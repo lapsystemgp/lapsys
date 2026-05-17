@@ -1,7 +1,7 @@
 import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
 import { LabOnboardingStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { clampFloat, clampInt, parseBoolean, parseCsv, placeholderDistanceKm } from './public-utils';
+import { clampFloat, clampInt, haversineKm, parseBoolean, parseCsv, placeholderDistanceKm } from './public-utils';
 
 type PublicLabCard = {
   id: string;
@@ -59,6 +59,9 @@ export class PublicLabsController {
     const sort = (query.sort ?? 'price').toLowerCase();
     const minRating = clampFloat(query.minRating, { min: 0, max: 5, defaultValue: 0 });
     const maxDistanceKm = clampFloat(query.maxDistanceKm, { min: 0.5, max: 50, defaultValue: 50 });
+    const userLat = clampFloat(query.userLat, { min: -90, max: 90, defaultValue: NaN });
+    const userLng = clampFloat(query.userLng, { min: -180, max: 180, defaultValue: NaN });
+    const hasUserLocation = Number.isFinite(userLat) && Number.isFinite(userLng);
     const maxPriceEgp = clampInt(query.maxPriceEgp, { min: 0, max: 100_000, defaultValue: 100_000 });
 
     const homeCollection = parseBoolean(query.homeCollection);
@@ -80,7 +83,7 @@ export class PublicLabsController {
 
     const baseLabs = await this.prisma.labProfile.findMany({
       where: baseLabWhere,
-      select: { id: true, lab_name: true, address: true, accreditation: true, turnaround_time: true, home_collection: true, rating_average: true, review_count: true },
+      select: { id: true, lab_name: true, address: true, accreditation: true, turnaround_time: true, home_collection: true, rating_average: true, review_count: true, latitude: true, longitude: true },
     });
 
     if (baseLabs.length === 0) {
@@ -149,7 +152,10 @@ export class PublicLabsController {
 
     const cards: PublicLabCard[] = allowedLabs
       .map((lab) => {
-        const distanceKm = placeholderDistanceKm(lab.id);
+        const distanceKm =
+          hasUserLocation && lab.latitude != null && lab.longitude != null
+            ? haversineKm(userLat, userLng, lab.latitude, lab.longitude)
+            : placeholderDistanceKm(lab.id);
         const starting = startingMinPrice.get(lab.id);
         const startingFromEgp = starting?.minPrice ?? null;
         const testsAvailable = starting?.testsCount ?? 0;

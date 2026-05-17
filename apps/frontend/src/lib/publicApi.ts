@@ -74,6 +74,8 @@ export async function fetchPublicLabs(params: {
   maxPriceEgp?: number;
   homeCollection?: boolean;
   accreditations?: string[];
+  userLat?: number;
+  userLng?: number;
   page?: number;
   pageSize?: number;
 }) {
@@ -87,6 +89,8 @@ export async function fetchPublicLabs(params: {
       maxPriceEgp: params.maxPriceEgp,
       homeCollection: params.homeCollection,
       accreditations: params.accreditations?.join(","),
+      userLat: params.userLat,
+      userLng: params.userLng,
       page: params.page,
       pageSize: params.pageSize,
     })}`,

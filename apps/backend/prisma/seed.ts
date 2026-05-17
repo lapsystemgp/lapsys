@@ -629,7 +629,7 @@ async function main() {
       status: BookingStatus.Cancelled,
       scheduled_at: failedScheduled,
       total_price_egp: primaryTest.price_egp,
-      payment_method: PaymentMethod.PayMobOnline,
+      payment_method: PaymentMethod.Online,
       payment_status: PaymentStatus.Failed,
       payment_reference: "SEED-FAILED-PAYMOB",
     },

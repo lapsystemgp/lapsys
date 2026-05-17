@@ -56,7 +56,7 @@ import { LabPatientContextService } from './api/lab-patient-context.service';
     BookingsService,
     PatientService,
     LabService,
-    LabStorageService,
+    { provide: LabStorageService, useFactory: () => new LabStorageService() },
     FaqService,
     AuditLogService,
     AdminService,

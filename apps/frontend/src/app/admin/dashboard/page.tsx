@@ -3,6 +3,7 @@
 import { AlertTriangle, ArrowLeft, Building2, CheckCircle2, Clock3, PauseCircle, Search, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Breadcrumb } from "../../../components/Breadcrumb";
 import { ApiError } from "../../../lib/api";
 import {
   fetchAdminRecentPayments,
@@ -166,6 +167,7 @@ export default function AdminDashboardPage() {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-8">
+        <Breadcrumb items={[{ label: "Admin Dashboard" }]} className="mb-6" />
         {error && <p className="mb-4 text-red-600">{error}</p>}
 
         {loading || !workspace ? (

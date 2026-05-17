@@ -3,6 +3,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Breadcrumb } from "../../../components/Breadcrumb";
 import { API_BASE_URL, ApiError } from "../../../lib/api";
 import { markCashCollected, setLabBookingStatus } from "../../../lib/bookingsApi";
 import {
@@ -339,6 +340,7 @@ export default function LabDashboardPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
+        <Breadcrumb items={[{ label: "Lab Dashboard" }]} className="mb-6" />
         <div className="flex gap-2 mb-6 flex-wrap">
           {(["bookings", "tests", "results", "schedule", "analytics"] as Tab[]).map((item) => (
             <button

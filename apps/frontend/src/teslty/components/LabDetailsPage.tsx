@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, MapPin, Star, Clock, Home, Phone, Mail, Award, Calendar } from 'lucide-react';
 import type { PublicLabCard } from '../../lib/publicApi';
+import { Breadcrumb } from '../../components/Breadcrumb';
 
 type LabDetailsTest = {
   id: string;
@@ -57,6 +58,10 @@ export function LabDetailsPage({ lab, tests, isLoading, timeSlots, onBack, onBoo
       {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <Breadcrumb
+            items={[{ label: "Labs", href: "/labs" }, { label: lab.name }]}
+            className="mb-3"
+          />
           <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4">
             <ArrowLeft className="w-5 h-5" />
             Back to Home

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle, Clock, Home, MapPin } from "lucide-react";
 import type { PaymentMethod } from "../../lib/bookingsApi";
 import type { PublicLabCard, PublicTestResponse } from "../../lib/publicApi";
+import { Breadcrumb } from "../../components/Breadcrumb";
 
 type DisplaySlot = {
   id: string;
@@ -190,6 +191,14 @@ export function BookingPage({
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <Breadcrumb
+            items={[
+              { label: "Labs", href: "/labs" },
+              ...(lab ? [{ label: lab.name, href: `/labs/${lab.id}` }] : []),
+              { label: "Book Appointment" },
+            ]}
+            className="mb-3"
+          />
           <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4">
             <ArrowLeft className="w-5 h-5" />
             Back to Lab Details

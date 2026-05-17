@@ -3,6 +3,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Breadcrumb } from "../../../components/Breadcrumb";
 import { API_BASE_URL, ApiError } from "../../../lib/api";
 import { cancelPatientBooking, demoOnlinePayment } from "../../../lib/bookingsApi";
 import {
@@ -209,6 +210,7 @@ export default function PatientDashboardPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
+        <Breadcrumb items={[{ label: "Patient Dashboard" }]} className="mb-6" />
         <div className="flex gap-2 mb-6">
           <button onClick={() => setTab("bookings")} className={`px-4 py-2 rounded-lg ${tab === "bookings" ? "bg-blue-600 text-white" : "bg-white border border-gray-200"}`}>
             Bookings

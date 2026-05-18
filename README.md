@@ -2,21 +2,13 @@
 
 ## Prerequisites
 - Node.js + npm
-- Docker (for Postgres)
 
 ## 1) Install dependencies
 ```bash
 npm install
 ```
 
-## 2) Start Postgres
-```bash
-npm run db:up
-```
-
-## 3) Configure backend environment variables
-Prisma needs `DATABASE_URL` to connect to Postgres.
-
+## 2) Configure backend environment variables
 Create `apps/backend/.env` from the example:
 ```bash
 cp apps/backend/.env.example apps/backend/.env
@@ -26,9 +18,27 @@ On Windows (PowerShell):
 Copy-Item apps\\backend\\.env.example apps\\backend\\.env
 ```
 
-## 4) Create tables + seed demo data
+Then update `apps/backend/.env` with your Neon database URL:
+```env
+DATABASE_URL="postgresql://user:password@ep-xxx.region.aws.neon.tech/neondb?sslmode=require"
+JWT_SECRET="your-super-secure-jwt-secret-key"
+```
+
+> Get your connection string from the [Neon dashboard](https://console.neon.tech). Use the **pooled** connection string.
+
+## 3) Push schema to database
 ```bash
-npm run db:reset
+cd apps/backend && npx prisma migrate deploy
+```
+
+Or for a fresh database with no migration history:
+```bash
+cd apps/backend && npx prisma db push
+```
+
+## 4) Seed demo data
+```bash
+npm run db:seed
 ```
 
 ## 5) Run the app (backend + frontend)
@@ -43,7 +53,7 @@ npm run dev
 
 ## Demo Accounts & QA Scenarios (Password: `password123`)
 
-After running `npm run db:reset`, your database will be seeded with comprehensive demo data to test different user journeys. 
+After running `npm run db:seed`, your database will be seeded with comprehensive demo data to test different user journeys.
 
 ### 1. Admin Flow
 - **Login**: `admin@testly.com`
@@ -67,11 +77,6 @@ After running `npm run db:reset`, your database will be seeded with comprehensiv
   - **Search & Book**: Go to `/` and search for "Blood" to filter active labs. Proceed to book a home collection or a clinic visit.
   - **Result History**: Navigate to `/patient` (Patient Dashboard) then click on **My Results**. The system is seeded with a historical structured CBC exam snippet comparing past vs current glucose values.
   - **Payment Handling**: The patient history includes a simulated failed/cancelled booking due to a failed PayMob online payment, which you can observe in the bookings list.
-
-## Stop Postgres
-```bash
-npm run db:down
-```
 
 ## (Optional) Frontend API base URL
 By default the frontend uses `http://localhost:3001`. To override, create `apps/frontend/.env.local` using `apps/frontend/.env.local.example`.

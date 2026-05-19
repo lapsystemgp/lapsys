@@ -146,38 +146,35 @@ export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect,
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Breadcrumb items={[{ label: "Labs" }]} className="mb-3" />
-          <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4">
-            <ArrowLeft className="w-5 h-5" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <Breadcrumb items={[{ label: "Labs" }]} className="mb-2" />
+          <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150 mb-2">
+            <ArrowLeft className="w-4 h-4" />
             Back to Home
           </button>
-          <h1 className="text-2xl text-gray-900">
-            {testInfo.name}
-          </h1>
-          <p className="text-gray-600 mt-2">{testInfo.description}</p>
+          <h1 className="text-xl text-gray-900">{testInfo.name}</h1>
+          <p className="text-gray-500 text-sm mt-0.5">{testInfo.description}</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Test Information Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
-              <h2 className="text-xl text-gray-900 mb-4">Test Preparation</h2>
-              <ul className="space-y-3 mb-6">
+            <div className="bg-white rounded-xl shadow-sm p-5 sticky top-[72px]">
+              <h2 className="text-base font-medium text-gray-900 mb-3">Test Preparation</h2>
+              <ul className="space-y-2 mb-4">
                 {testInfo.preparations.map((prep, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2"></div>
+                  <li key={index} className="flex items-start gap-2 text-sm">
+                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 shrink-0"></div>
                     <span className="text-gray-700">{prep}</span>
                   </li>
                 ))}
               </ul>
-              
-              <h2 className="text-xl text-gray-900 mb-4">Commonly Detects</h2>
-              <div className="flex flex-wrap gap-2">
+              <h2 className="text-base font-medium text-gray-900 mb-2">Commonly Detects</h2>
+              <div className="flex flex-wrap gap-1.5">
                 {testInfo.commonlyDetects.map((item, index) => (
-                  <span key={index} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full">
+                  <span key={index} className="px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded-full text-sm">
                     {item}
                   </span>
                 ))}
@@ -187,12 +184,12 @@ export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect,
 
           {/* Labs List */}
           <div className="lg:col-span-2">
-            <div className="mb-6">
-              <h2 className="text-xl text-gray-900 mb-2">Available Labs</h2>
-              <p className="text-gray-600">Click on a lab name to view full details and all available tests</p>
+            <div className="mb-4">
+              <h2 className="text-base font-medium text-gray-900 mb-0.5">Available Labs</h2>
+              <p className="text-sm text-gray-500">Click on a lab name to view full details and all available tests</p>
             </div>
             {/* Filters and Sort */}
-            <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+            <div className="bg-white rounded-xl shadow-sm p-3 mb-4">
               <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                 <div className="flex items-center gap-4">
                   <button
@@ -367,19 +364,30 @@ export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect,
             )}
 
             {/* Lab Cards */}
-            <div className="space-y-4">
-              {lastResolvedKey === '' ? (
-                <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-                  <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl text-gray-900 mb-2">Loading labs…</h3>
-                  <p className="text-gray-600">Fetching real-time availability and pricing.</p>
-                </div>
-              ) : isLoading && labs.length === 0 ? (
-                <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-                  <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl text-gray-900 mb-2">Updating results…</h3>
-                  <p className="text-gray-600">Applying your filters.</p>
-                </div>
+            <div className="space-y-3">
+              {lastResolvedKey === '' || (isLoading && labs.length === 0) ? (
+                <>
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className={`bg-white rounded-xl shadow-sm p-5 animate-slide-up ${i === 1 ? 'animation-delay-100' : i === 2 ? 'animation-delay-200' : ''}`}>
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1 space-y-2">
+                          <div className="skeleton h-5 w-48 rounded" />
+                          <div className="skeleton h-4 w-32 rounded" />
+                        </div>
+                        <div className="skeleton h-8 w-20 rounded" />
+                      </div>
+                      <div className="skeleton h-4 w-64 mb-3 rounded" />
+                      <div className="grid grid-cols-2 gap-3 mb-3 pb-3 border-b border-gray-100">
+                        <div className="skeleton h-4 w-24 rounded" />
+                        <div className="skeleton h-4 w-24 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="skeleton h-4 w-40 rounded" />
+                        <div className="skeleton h-9 w-24 rounded-lg" />
+                      </div>
+                    </div>
+                  ))}
+                </>
               ) : labs.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-sm p-12 text-center">
                   <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -394,17 +402,17 @@ export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect,
                   const priceLabel = lab.priceForQueryEgp ? 'for this test' : 'starting from';
                   const timeSlots = getPlaceholderTimeSlots(lab.id);
                   return (
-                  <div key={lab.id} className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition">
-                    <div className="flex items-start justify-between mb-4">
+                  <div key={lab.id} className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                    <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <button 
+                        <button
                           onClick={() => onLabSelect(lab)}
-                          className="text-xl text-blue-600 hover:text-blue-700 mb-2 flex items-center gap-2"
+                          className="text-lg text-blue-600 hover:text-blue-700 mb-1.5 flex items-center gap-2"
                         >
                           {lab.name}
-                          <Info className="w-5 h-5" />
+                          <Info className="w-4 h-4" />
                         </button>
-                        <div className="flex items-center gap-4 text-gray-600">
+                        <div className="flex items-center gap-4 text-gray-600 text-sm">
                           <div className="flex items-center gap-1">
                             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                             <span>{lab.rating ?? '—'}</span>
@@ -417,23 +425,23 @@ export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect,
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-3xl text-blue-600">EGP {price ?? '—'}</div>
-                        <div className="text-gray-500">{priceLabel}</div>
+                        <div className="text-2xl text-blue-600">EGP {price ?? '—'}</div>
+                        <div className="text-gray-500 text-sm">{priceLabel}</div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-gray-600 mb-4">
+                    <div className="flex items-center gap-2 text-gray-600 text-sm mb-3">
                       <MapPin className="w-4 h-4" />
                       <span>{lab.address}</span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-200">
+                    <div className="grid grid-cols-2 gap-3 mb-3 pb-3 border-b border-gray-200 text-sm">
                       <div>
-                        <div className="text-gray-500 mb-1">Accreditation</div>
+                        <div className="text-gray-500 mb-0.5">Accreditation</div>
                         <div className="text-gray-900">{lab.accreditation ?? '—'}</div>
                       </div>
                       <div>
-                        <div className="text-gray-500 mb-1">Turnaround Time</div>
+                        <div className="text-gray-500 mb-0.5">Turnaround Time</div>
                         <div className="flex items-center gap-1 text-gray-900">
                           <Clock className="w-4 h-4" />
                           {lab.turnaroundTime ?? '—'}
@@ -442,20 +450,20 @@ export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect,
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-4 text-sm">
                         {lab.homeCollection && (
                           <div className="flex items-center gap-1 text-green-600">
                             <Home className="w-4 h-4" />
-                            <span>Home Collection Available</span>
+                            <span>Home Collection</span>
                           </div>
                         )}
                         <div className="text-gray-600">
-                          {timeSlots.length} slots available today
+                          {timeSlots.length} slots today
                         </div>
                       </div>
                       <button
                         onClick={() => onLabSelect(lab)}
-                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                       >
                         Book Now
                       </button>

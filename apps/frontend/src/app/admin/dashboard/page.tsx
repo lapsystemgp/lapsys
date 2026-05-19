@@ -27,6 +27,7 @@ import {
   type AdminWorkspaceResponse,
 } from "../../../lib/adminApi";
 import { useSession } from "../../../components/SessionProvider";
+import { useToast } from "../../../components/ToastProvider";
 
 type Tab = "labApprovals" | "userManagement" | "allBookings" | "analytics" | "security";
 
@@ -56,10 +57,10 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const { logout } = useSession();
 
+  const toast = useToast();
   const [workspace, setWorkspace] = useState<AdminWorkspaceResponse | null>(null);
   const [paymentRows, setPaymentRows] = useState<AdminPaymentRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("labApprovals");
   const [labStatusFilter, setLabStatusFilter] = useState<"All" | AdminLabOnboardingStatus>("All");
   const [labSearch, setLabSearch] = useState("");
@@ -71,7 +72,6 @@ export default function AdminDashboardPage() {
 
   const loadWorkspace = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
       const [response, payments] = await Promise.all([fetchAdminWorkspace(), fetchAdminRecentPayments()]);
       setWorkspace(response);
@@ -79,11 +79,11 @@ export default function AdminDashboardPage() {
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) { router.push("/login"); return; }
       if (err instanceof ApiError && err.status === 403) { router.push("/unauthorized"); return; }
-      setError("Unable to load admin workspace.");
+      toast.error("Unable to load admin workspace.");
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [router, toast]);
 
   useEffect(() => { loadWorkspace(); }, [loadWorkspace]);
 
@@ -94,12 +94,12 @@ export default function AdminDashboardPage() {
 
   const handleStatusUpdate = async (labProfileId: string, status: AdminLabOnboardingStatus) => {
     setUpdatingLabId(labProfileId);
-    setError(null);
     try {
       await setAdminLabOnboardingStatus(labProfileId, status);
       await loadWorkspace();
+      toast.success(`Lab ${status === "Active" ? "approved" : status === "Rejected" ? "rejected" : "updated"}.`);
     } catch (err) {
-      setError(readApiErrorMessage(err, "Could not update lab status."));
+      toast.error(readApiErrorMessage(err, "Could not update lab status."));
     } finally {
       setUpdatingLabId(null);
     }
@@ -194,12 +194,6 @@ export default function AdminDashboardPage() {
       <main className="max-w-7xl mx-auto px-4 py-4">
         <Breadcrumb items={[{ label: "Admin Dashboard" }]} className="mb-4" />
 
-        {error && (
-          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
-            {error}
-          </div>
-        )}
-
         {/* ── Stats Row ── */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
           <StatCard label="Total Labs" value={workspace?.stats.totalLabs ?? 0} />
@@ -211,8 +205,21 @@ export default function AdminDashboardPage() {
 
         {/* ── Tabs ── */}
         {loading ? (
-          <div className="bg-white rounded-xl shadow-sm p-12 text-center text-gray-400">
-            Loading admin workspace…
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className={`bg-white rounded-xl shadow-sm p-4 animate-slide-up ${i > 0 ? `animation-delay-${i * 100}` : ''}`}>
+                  <div className="skeleton h-4 w-24 mb-2 rounded" />
+                  <div className="skeleton h-7 w-16 rounded" />
+                </div>
+              ))}
+            </div>
+            <div className="bg-white rounded-xl shadow-sm p-5 animate-slide-up animation-delay-200">
+              <div className="skeleton h-5 w-32 mb-3 rounded" />
+              {[0, 1, 2].map((i) => (
+                <div key={i} className={`skeleton h-16 mb-2 rounded-lg ${i > 0 ? `animation-delay-${i * 100}` : ''}`} />
+              ))}
+            </div>
           </div>
         ) : (
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">

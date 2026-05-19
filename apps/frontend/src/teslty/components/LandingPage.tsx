@@ -263,74 +263,76 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
       </section>
 
       {/* Featured Labs Section — only shown when labs are available */}
-      {featuredLabs.length > 0 && <section id="featured-labs" className="py-8 sm:py-12 lg:py-14 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-6 sm:mb-10">
-            <h2 className="text-2xl sm:text-3xl text-gray-900 mb-2">
-              Our Featured Labs
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600 px-4">
-              Click on any lab to view their complete test catalog and book appointments
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-            {featuredLabs.map((lab) => (
-              <button
-                key={lab.id}
-                onClick={() => onLabSelect?.(lab)}
-                className="bg-white rounded-xl shadow-sm p-4 sm:p-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 text-left group"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-50 rounded-xl flex items-center justify-center text-2xl sm:text-3xl group-hover:bg-blue-100 transition">
-                    {lab.imageEmoji ?? lab.name?.slice(0, 1)}
-                  </div>
-                  {lab.homeCollection && (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded text-xs">
-                      <Home className="w-3 h-3" />
-                      <span className="hidden sm:inline">Home</span>
+      {featuredLabs.length > 0 && (
+        <section id="featured-labs" className="py-8 sm:py-12 lg:py-14 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-6 sm:mb-10">
+              <h2 className="text-2xl sm:text-3xl text-gray-900 mb-2">
+                Our Featured Labs
+              </h2>
+              <p className="text-base sm:text-lg text-gray-600 px-4">
+                Click on any lab to view their complete test catalog and book appointments
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+              {featuredLabs.map((lab) => (
+                <button
+                  key={lab.id}
+                  onClick={() => onLabSelect?.(lab)}
+                  className="bg-white rounded-xl shadow-sm p-4 sm:p-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 text-left group"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-50 rounded-xl flex items-center justify-center text-2xl sm:text-3xl group-hover:bg-blue-100 transition">
+                      {lab.imageEmoji ?? lab.name?.slice(0, 1)}
                     </div>
-                  )}
-                </div>
-                <h3 className="text-base sm:text-lg text-gray-900 mb-1.5 group-hover:text-blue-600 transition-colors">
-                  {lab.name}
-                </h3>
-                <div className="flex items-center gap-2 mb-2 text-sm">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-gray-900">{lab.rating ?? '—'}</span>
+                    {lab.homeCollection && (
+                      <div className="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded text-xs">
+                        <Home className="w-3 h-3" />
+                        <span className="hidden sm:inline">Home</span>
+                      </div>
+                    )}
                   </div>
-                  <span className="text-gray-500">({lab.reviews})</span>
-                </div>
-                <div className="space-y-1.5 mb-3 text-gray-600 text-sm">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate">{lab.distanceKm} km away</span>
+                  <h3 className="text-base sm:text-lg text-gray-900 mb-1.5 group-hover:text-blue-600 transition-colors">
+                    {lab.name}
+                  </h3>
+                  <div className="flex items-center gap-2 mb-2 text-sm">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="text-gray-900">{lab.rating ?? '—'}</span>
+                    </div>
+                    <span className="text-gray-500">({lab.reviews})</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <TestTube className="w-4 h-4 flex-shrink-0" />
-                    <span>{lab.testsAvailable} tests</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 flex-shrink-0" />
-                    <span>{lab.turnaroundTime ?? '—'}</span>
-                  </div>
-                </div>
-                <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-                  <div>
-                    <div className="text-gray-500 text-xs sm:text-sm">Starting from</div>
-                    <div className="text-xl sm:text-2xl text-blue-600">
-                      EGP {lab.startingFromEgp ?? '—'}
+                  <div className="space-y-1.5 mb-3 text-gray-600 text-sm">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate">{lab.distanceKm} km away</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <TestTube className="w-4 h-4 flex-shrink-0" />
+                      <span>{lab.testsAvailable} tests</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 flex-shrink-0" />
+                      <span>{lab.turnaroundTime ?? '—'}</span>
                     </div>
                   </div>
-                  <div className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg group-hover:bg-blue-700 transition text-sm">
-                    View
+                  <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+                    <div>
+                      <div className="text-gray-500 text-xs sm:text-sm">Starting from</div>
+                      <div className="text-xl sm:text-2xl text-blue-600">
+                        EGP {lab.startingFromEgp ?? '—'}
+                      </div>
+                    </div>
+                    <div className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg group-hover:bg-blue-700 transition text-sm">
+                      View
+                    </div>
                   </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>}
+        </section>
+      )}
 
       {/* How It Works */}
       <section id="how-it-works" className="py-8 sm:py-12 lg:py-14 bg-white">

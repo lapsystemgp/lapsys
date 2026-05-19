@@ -191,8 +191,8 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        <Breadcrumb items={[{ label: "Admin Dashboard" }]} className="mb-5" />
+      <main className="max-w-7xl mx-auto px-4 py-4">
+        <Breadcrumb items={[{ label: "Admin Dashboard" }]} className="mb-4" />
 
         {error && (
           <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
@@ -201,7 +201,7 @@ export default function AdminDashboardPage() {
         )}
 
         {/* ── Stats Row ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
           <StatCard label="Total Labs" value={workspace?.stats.totalLabs ?? 0} />
           <StatCard label="Active Labs" value={workspace?.stats.activeLabs ?? 0} />
           <StatCard label="Total Bookings" value={paymentRows.length} />
@@ -243,7 +243,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Tab content */}
-            <div className="p-6">
+            <div key={activeTab} className="p-5 animate-fade-in">
               {activeTab === "labApprovals" && (
                 <LabApprovalsTab
                   labs={filteredLabs}
@@ -286,9 +286,9 @@ export default function AdminDashboardPage() {
 
 function StatCard({ label, value, highlight }: { label: string; value: number | string; highlight?: boolean }) {
   return (
-    <div className={`bg-white rounded-xl p-5 shadow-sm border ${highlight ? "border-orange-300" : "border-gray-200"}`}>
-      <p className="text-sm text-gray-500 mb-1">{label}</p>
-      <p className={`text-3xl font-bold ${highlight ? "text-orange-500" : "text-gray-900"}`}>{value}</p>
+    <div className={`bg-white rounded-xl p-4 shadow-sm border transition-shadow duration-200 hover:shadow-md ${highlight ? "border-orange-300" : "border-gray-200"}`}>
+      <p className="text-xs text-gray-500 mb-1">{label}</p>
+      <p className={`text-2xl font-bold ${highlight ? "text-orange-500" : "text-gray-900"}`}>{value}</p>
     </div>
   );
 }

@@ -167,32 +167,32 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
     <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-100 relative">
       <button
         onClick={onBack}
-        className="absolute top-8 left-5 flex items-center gap-2 text-gray-600 hover:text-gray-900"
+        className="absolute top-6 left-5 flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150"
       >
         <ArrowLeft className="w-5 h-5" />
         Back to Home
       </button>
 
-      <div className="min-h-screen w-full flex items-start justify-center pt-20">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-xl p-8">
+      <div className="min-h-screen w-full flex items-start justify-center pt-14">
+        <div className="animate-scale-in w-full max-w-md">
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
             {/* Logo */}
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-4">
               <div className="flex items-center gap-2">
-                <TestTube className="w-10 h-10 text-blue-600" />
+                <TestTube className="w-9 h-9 text-blue-600" />
                 <span className="text-2xl text-blue-600">TesTly</span>
               </div>
             </div>
 
-            <h2 className="text-2xl text-center text-gray-900 mb-2">
+            <h2 className="text-xl text-center text-gray-900 mb-1">
               {isSignup ? 'Create Account' : 'Welcome Back'}
             </h2>
-            <p className="text-center text-gray-600 mb-8">
+            <p className="text-center text-gray-600 mb-5 text-sm">
               {isSignup ? 'Sign up to get started' : 'Sign in to your account'}
             </p>
 
             {/* User Type Selection */}
-            <div className={`grid gap-2 mb-6 p-1 bg-gray-100 rounded-lg ${isSignup ? 'grid-cols-2' : 'grid-cols-3'}`}>
+            <div className={`grid gap-1.5 mb-5 p-1 bg-gray-100 rounded-lg ${isSignup ? 'grid-cols-2' : 'grid-cols-3'}`}>
               <button
                 onClick={() => setUserType('patient')}
                 className={`py-2 px-4 rounded-md transition ${
@@ -228,7 +228,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
               {isSignup && (
                 <div>
                   <label className="block text-gray-700 mb-2">
@@ -383,14 +383,14 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="w-full py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:scale-[0.99] transition-all duration-150 disabled:opacity-60"
               >
                 {loading ? 'Please wait…' : isSignup ? 'Create Account' : 'Sign In'}
               </button>
             </form>
 
             {/* Toggle Sign In / Sign Up */}
-            <div className="mt-6 text-center">
+            <div className="mt-4 text-center">
               <p className="text-gray-600">
                 {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}
                 <button
@@ -412,7 +412,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
 
             {/* Demo Credentials (dev/demo only) */}
             {showDemoCredentials && (
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
                 <p className="text-gray-700 mb-2">Demo Credentials:</p>
                 <div className="space-y-1 text-gray-600">
                   <p>Patient: `patient@testly.com` / `password123`</p>
@@ -424,7 +424,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
           </div>
 
           {/* Security Badge */}
-          <div className="mt-6 text-center text-gray-600">
+          <div className="mt-4 text-center text-gray-600">
             <p className="flex items-center justify-center gap-2">
               <Lock className="w-4 h-4" />
               Secured with AES-256 encryption

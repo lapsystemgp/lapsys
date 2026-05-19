@@ -50,7 +50,41 @@ function formatPaymentMethod(method: string) {
   if (method === "Online") return "Online (demo)";
   if (method === "CashHomeCollection") return "Cash on collection";
   if (method === "CashLabVisit") return "Cash at lab";
+  if (method === "CashOnDelivery") return "Cash on delivery";
   return method;
+}
+
+function KitStatusBar({ kitStatus, kitTrackingNumber }: { kitStatus: string | null; kitTrackingNumber: string | null }) {
+  const stages = ["AwaitingShipment", "Shipped", "Delivered", "SampleReceived"];
+  const currentIdx = kitStatus ? stages.indexOf(kitStatus) : 0;
+  const labels = ["Awaiting Shipment", "Shipped", "Delivered", "Sample Received"];
+  return (
+    <div className="mt-3">
+      <p className="text-xs text-gray-500 mb-2">Kit Status</p>
+      <div className="flex items-center gap-1">
+        {stages.map((stage, idx) => (
+          <div key={stage} className="flex items-center gap-1 flex-1">
+            <div
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 ${
+                idx <= currentIdx ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-400"
+              }`}
+            >
+              {idx + 1}
+            </div>
+            <span className={`text-xs hidden sm:block ${idx <= currentIdx ? "text-blue-700" : "text-gray-400"}`}>
+              {labels[idx]}
+            </span>
+            {idx < stages.length - 1 && (
+              <div className={`h-0.5 flex-1 ${idx < currentIdx ? "bg-blue-600" : "bg-gray-200"}`} />
+            )}
+          </div>
+        ))}
+      </div>
+      {kitTrackingNumber && (
+        <p className="text-xs text-gray-600 mt-2">Tracking: <span className="font-mono">{kitTrackingNumber}</span></p>
+      )}
+    </div>
+  );
 }
 
 function resolveResultFileUrl(fileUrl: string) {
@@ -184,46 +218,47 @@ export default function PatientDashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="space-y-2">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+          <div className="space-y-1">
             <button
               onClick={() => router.push("/")}
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Home
             </button>
             <div>
-              <h1 className="text-2xl text-gray-900">Patient Workspace</h1>
-              <p className="text-gray-600">{user?.patient_profile?.full_name || user?.email}</p>
+              <h1 className="text-xl text-gray-900">Patient Workspace</h1>
+              <p className="text-sm text-gray-500">{user?.patient_profile?.full_name || user?.email}</p>
             </div>
           </div>
-          <div className="flex gap-3">
-            <button onClick={() => router.push("/labs")} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+          <div className="flex gap-2">
+            <button onClick={() => router.push("/labs")} className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
               Browse Labs
             </button>
-            <button onClick={handleLogout} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+            <button onClick={handleLogout} className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
               Logout
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        <Breadcrumb items={[{ label: "Patient Dashboard" }]} className="mb-6" />
-        <div className="flex gap-2 mb-6">
-          <button onClick={() => setTab("bookings")} className={`px-4 py-2 rounded-lg ${tab === "bookings" ? "bg-blue-600 text-white" : "bg-white border border-gray-200"}`}>
-            Bookings
-          </button>
-          <button onClick={() => setTab("results")} className={`px-4 py-2 rounded-lg ${tab === "results" ? "bg-blue-600 text-white" : "bg-white border border-gray-200"}`}>
-            Results
-          </button>
-          <button onClick={() => setTab("trends")} className={`px-4 py-2 rounded-lg ${tab === "trends" ? "bg-blue-600 text-white" : "bg-white border border-gray-200"}`}>
-            Trends
-          </button>
-          <button onClick={() => setTab("profile")} className={`px-4 py-2 rounded-lg ${tab === "profile" ? "bg-blue-600 text-white" : "bg-white border border-gray-200"}`}>
-            Profile
-          </button>
+      <main className="max-w-6xl mx-auto px-4 py-5">
+        <Breadcrumb items={[{ label: "Patient Dashboard" }]} className="mb-4" />
+        <div className="flex gap-1.5 mb-5 p-1 bg-white border border-gray-200 rounded-xl w-fit">
+          {(["bookings", "results", "trends", "profile"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`px-4 py-1.5 rounded-lg text-sm capitalize transition-all duration-150 ${
+                tab === t
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              }`}
+            >
+              {t}
+            </button>
+          ))}
         </div>
 
         {error && <p className="text-red-600 mb-4">{error}</p>}
@@ -235,17 +270,17 @@ export default function PatientDashboardPage() {
         ) : (
           <>
             {tab === "bookings" && (
-              <div className="space-y-4">
+              <div key="bookings" className="space-y-3 animate-fade-in">
                 {allBookings.length === 0 ? (
-                  <div className="bg-white rounded-xl p-6 shadow-sm">
-                    <p className="text-gray-700 mb-4">No bookings yet.</p>
-                    <button onClick={() => router.push("/labs")} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  <div className="bg-white rounded-xl p-5 shadow-sm">
+                    <p className="text-gray-700 mb-3">No bookings yet.</p>
+                    <button onClick={() => router.push("/labs")} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                       Start Booking
                     </button>
                   </div>
                 ) : (
                   allBookings.map((booking) => (
-                    <div key={booking.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                    <div key={booking.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h2 className="text-lg text-gray-900">{booking.test.name}</h2>
@@ -255,22 +290,31 @@ export default function PatientDashboardPage() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-gray-700">
                         <div>
-                          <p className="text-gray-500">Date & Time</p>
+                          <p className="text-gray-500">{booking.bookingType === "HomeTestKit" ? "Order Date" : "Date & Time"}</p>
                           <p>{formatDateTime(booking.scheduledAt)}</p>
                         </div>
                         <div>
                           <p className="text-gray-500">Type</p>
-                          <p>{booking.bookingType === "HomeCollection" ? "Home Collection" : "Lab Visit"}</p>
+                          <p>
+                            {booking.bookingType === "HomeCollection"
+                              ? "Home Collection"
+                              : booking.bookingType === "HomeTestKit"
+                                ? "Home Test Kit"
+                                : "Lab Visit"}
+                          </p>
                         </div>
                         <div>
                           <p className="text-gray-500">Total</p>
                           <p>EGP {booking.totalPriceEgp}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Address</p>
+                          <p className="text-gray-500">{booking.bookingType === "HomeTestKit" ? "Delivery Address" : "Address"}</p>
                           <p>{booking.homeAddress || booking.lab.address}</p>
                         </div>
                       </div>
+                      {booking.bookingType === "HomeTestKit" && (
+                        <KitStatusBar kitStatus={booking.kitStatus ?? null} kitTrackingNumber={booking.kitTrackingNumber ?? null} />
+                      )}
                       <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
                         <span className="text-gray-500">Payment</span>
                         <span className="text-gray-800">{formatPaymentMethod(booking.paymentMethod)}</span>
@@ -323,9 +367,9 @@ export default function PatientDashboardPage() {
             {tab === "trends" && <HealthTrendsPanel onUnauthorized={() => router.push("/login")} />}
 
             {tab === "results" && (
-              <div className="space-y-4">
+              <div key="results" className="space-y-3 animate-fade-in">
                 {workspace.results.length === 0 ? (
-                  <div className="bg-white rounded-xl p-6 shadow-sm">
+                  <div className="bg-white rounded-xl p-5 shadow-sm">
                     <p className="text-gray-700">No result files yet.</p>
                   </div>
                 ) : (
@@ -334,7 +378,7 @@ export default function PatientDashboardPage() {
                     const canSubmitReview = result.canReview && !result.review;
 
                     return (
-                      <div key={result.bookingId} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                      <div key={result.bookingId} className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
                         <div className="flex justify-between items-start mb-4 gap-3 flex-wrap">
                           <div>
                             <h2 className="text-lg text-gray-900">{result.testName}</h2>
@@ -452,8 +496,8 @@ export default function PatientDashboardPage() {
             )}
 
             {tab === "profile" && (
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 max-w-2xl">
-                <div className="space-y-4">
+              <div className="animate-fade-in bg-white rounded-xl p-5 shadow-sm border border-gray-200 max-w-2xl">
+                <div className="space-y-3">
                   <div>
                     <label className="block text-sm text-gray-600 mb-1">Full Name</label>
                     <input

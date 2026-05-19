@@ -149,18 +149,18 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-12 sm:py-16 lg:py-20">
+      <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-8 sm:py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl text-gray-900 mb-4 sm:mb-6">
+            <h1 className="animate-slide-up text-3xl sm:text-4xl lg:text-5xl text-gray-900 mb-3 sm:mb-4">
               Find the Best Medical Labs Near You
             </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-8 sm:mb-10">
+            <p className="animate-slide-up animation-delay-150 text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8">
               Compare prices, ratings, and book appointments instantly. Get your test results delivered digitally.
             </p>
 
             {/* Search Bar */}
-            <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
+            <form onSubmit={handleSubmit} className="animate-slide-up animation-delay-300 max-w-2xl mx-auto">
               <div className="bg-white rounded-full shadow-lg flex items-center px-4 sm:px-6 py-3 sm:py-4">
                 <Search className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 flex-shrink-0" />
                 <input
@@ -180,7 +180,7 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
             </form>
 
             {/* Popular Searches */}
-            <div className="mt-4 sm:mt-6 flex flex-wrap gap-2 sm:gap-3 justify-center">
+            <div className="animate-slide-up animation-delay-400 mt-4 sm:mt-5 flex flex-wrap gap-2 sm:gap-3 justify-center">
               <span className="text-gray-600 text-sm sm:text-base">Popular:</span>
               {['CBC Test', 'Lipid Profile', 'Thyroid Panel', 'Diabetes Screening'].map((term) => (
                 <button
@@ -194,7 +194,7 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
             </div>
 
             {/* Browse by criteria */}
-            <div className="mt-3 sm:mt-4 flex flex-wrap gap-2 sm:gap-3 justify-center">
+            <div className="animate-slide-up animation-delay-500 mt-3 flex flex-wrap gap-2 sm:gap-3 justify-center">
               <span className="text-gray-500 text-sm sm:text-base">Browse by:</span>
               <button
                 onClick={() => onSearch('', 'distance')}
@@ -222,12 +222,12 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-12 sm:py-16 lg:py-20 bg-white">
+      <section id="features" className="py-8 sm:py-12 lg:py-14 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl sm:text-3xl text-center text-gray-900 mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl text-center text-gray-900 mb-6 sm:mb-10">
             Why Choose TesTly?
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <FeatureCard
               icon={<Search className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />}
               title="Compare Lab Prices"
@@ -262,25 +262,25 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
         </div>
       </section>
 
-      {/* Featured Labs Section */}
-      <section id="featured-labs" className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+      {/* Featured Labs Section — only shown when labs are available */}
+      {featuredLabs.length > 0 && <section id="featured-labs" className="py-8 sm:py-12 lg:py-14 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl text-gray-900 mb-2 sm:mb-3">
+          <div className="text-center mb-6 sm:mb-10">
+            <h2 className="text-2xl sm:text-3xl text-gray-900 mb-2">
               Our Featured Labs
             </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 px-4">
+            <p className="text-base sm:text-lg text-gray-600 px-4">
               Click on any lab to view their complete test catalog and book appointments
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {featuredLabs.map((lab) => (
               <button
                 key={lab.id}
                 onClick={() => onLabSelect?.(lab)}
-                className="bg-white rounded-xl shadow-sm p-4 sm:p-6 hover:shadow-lg transition text-left group"
+                className="bg-white rounded-xl shadow-sm p-4 sm:p-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 text-left group"
               >
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-3">
                   <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-50 rounded-xl flex items-center justify-center text-2xl sm:text-3xl group-hover:bg-blue-100 transition">
                     {lab.imageEmoji ?? lab.name?.slice(0, 1)}
                   </div>
@@ -291,17 +291,17 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
                     </div>
                   )}
                 </div>
-                <h3 className="text-lg sm:text-xl text-gray-900 mb-2 group-hover:text-blue-600 transition">
+                <h3 className="text-base sm:text-lg text-gray-900 mb-1.5 group-hover:text-blue-600 transition-colors">
                   {lab.name}
                 </h3>
-                <div className="flex items-center gap-2 mb-3 text-sm">
+                <div className="flex items-center gap-2 mb-2 text-sm">
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                     <span className="text-gray-900">{lab.rating ?? '—'}</span>
                   </div>
                   <span className="text-gray-500">({lab.reviews})</span>
                 </div>
-                <div className="space-y-2 mb-4 text-gray-600 text-sm">
+                <div className="space-y-1.5 mb-3 text-gray-600 text-sm">
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 flex-shrink-0" />
                     <span className="truncate">{lab.distanceKm} km away</span>
@@ -315,7 +315,7 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
                     <span>{lab.turnaroundTime ?? '—'}</span>
                   </div>
                 </div>
-                <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
                   <div>
                     <div className="text-gray-500 text-xs sm:text-sm">Starting from</div>
                     <div className="text-xl sm:text-2xl text-blue-600">
@@ -330,15 +330,15 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-12 sm:py-16 lg:py-20 bg-white">
+      <section id="how-it-works" className="py-8 sm:py-12 lg:py-14 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl sm:text-3xl text-center text-gray-900 mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl text-center text-gray-900 mb-6 sm:mb-10">
             How It Works
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-6">
             <StepCard number="1" title="Search" description="Enter test name or symptoms" />
             <StepCard number="2" title="Compare" description="View labs, prices & ratings" />
             <StepCard number="3" title="Book" description="Schedule your appointment" />
@@ -348,17 +348,17 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-blue-600">
+      <section className="py-8 sm:py-12 lg:py-14 bg-blue-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl text-white mb-4 sm:mb-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl text-white mb-3 sm:mb-4">
             Ready to Find Your Lab?
           </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-blue-100 mb-6 sm:mb-8">
+          <p className="text-base sm:text-lg text-blue-100 mb-5 sm:mb-6">
             Join thousands of patients who trust TesTly for their medical testing needs
           </p>
           <button
             onClick={() => onNavigate('login')}
-            className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-blue-600 rounded-lg hover:bg-gray-100 text-base sm:text-lg"
+            className="px-6 sm:px-8 py-3 sm:py-3.5 bg-white text-blue-600 rounded-lg hover:bg-gray-100 hover:scale-105 active:scale-95 transition-all duration-150 text-base sm:text-lg"
           >
             Get Started Now
           </button>
@@ -366,7 +366,7 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-8 sm:py-12">
+      <footer className="bg-gray-900 text-gray-300 py-6 sm:py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             <div>
@@ -414,22 +414,22 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <div className="text-center p-4 sm:p-6 rounded-xl hover:bg-gray-50 transition">
-      <div className="flex justify-center mb-3 sm:mb-4">{icon}</div>
-      <h3 className="text-lg sm:text-xl text-gray-900 mb-2 sm:mb-3">{title}</h3>
-      <p className="text-sm sm:text-base text-gray-600">{description}</p>
+    <div className="text-center p-4 sm:p-5 rounded-xl hover:bg-gray-50 hover:scale-105 transition-all duration-200 cursor-default">
+      <div className="flex justify-center mb-3">{icon}</div>
+      <h3 className="text-base sm:text-lg text-gray-900 mb-1.5">{title}</h3>
+      <p className="text-sm text-gray-600">{description}</p>
     </div>
   );
 }
 
 function StepCard({ number, title, description }: { number: string; title: string; description: string }) {
   return (
-    <div className="text-center">
-      <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4">
+    <div className="text-center group">
+      <div className="w-11 h-11 sm:w-14 sm:h-14 bg-blue-600 text-white rounded-full flex items-center justify-center text-lg sm:text-xl mx-auto mb-3 group-hover:scale-110 group-hover:bg-blue-700 transition-all duration-200">
         {number}
       </div>
-      <h3 className="text-base sm:text-lg lg:text-xl text-gray-900 mb-1 sm:mb-2">{title}</h3>
-      <p className="text-sm sm:text-base text-gray-600">{description}</p>
+      <h3 className="text-sm sm:text-base lg:text-lg text-gray-900 mb-1">{title}</h3>
+      <p className="text-xs sm:text-sm text-gray-600">{description}</p>
     </div>
   );
 }

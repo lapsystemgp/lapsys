@@ -1,7 +1,10 @@
+"use client";
+
 import { useState } from 'react';
 import { ArrowLeft, TestTube, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { API_BASE_URL } from '../../lib/api';
 import { useSession } from '../../components/SessionProvider';
+import { useToast } from '../../components/ToastProvider';
 
 interface LoginPageProps {
   onLogin: (role: 'patient' | 'lab' | 'admin') => void;
@@ -16,6 +19,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
     (process.env.NODE_ENV !== 'production' &&
       process.env.NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS !== 'false');
 
+  const toast = useToast();
   const [isSignup, setIsSignup] = useState(defaultMode === 'register');
   const [userType, setUserType] = useState<'patient' | 'lab' | 'admin'>('patient');
   const [email, setEmail] = useState('');
@@ -27,7 +31,6 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
   const [labTurnaroundTime, setLabTurnaroundTime] = useState('');
   const [labHomeCollection, setLabHomeCollection] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const { refresh } = useSession();
@@ -64,7 +67,6 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
 
   const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
 
     try {
@@ -154,9 +156,9 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
     } catch (err: unknown) {
       const rawMessage = readRuntimeErrorMessage(err);
       if (rawMessage.toLowerCase() === 'failed to fetch') {
-        setError('Unable to reach the server. Please check that backend is running.');
+        toast.error('Unable to reach the server. Please check that the backend is running.');
       } else {
-        setError(rawMessage || 'Something went wrong');
+        toast.error(rawMessage || 'Something went wrong');
       }
     } finally {
       setLoading(false);
@@ -371,12 +373,6 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
                   <p className="mt-2 text-sm text-blue-700">
                     Labs with phone, accreditation, turnaround time, tests, and active schedule slots are ready for faster activation.
                   </p>
-                </div>
-              )}
-
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <p className="text-red-800">{error}</p>
                 </div>
               )}
 

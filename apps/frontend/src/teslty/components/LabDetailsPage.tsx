@@ -33,8 +33,58 @@ export function LabDetailsPage({ lab, tests, isLoading, timeSlots, onBack, onBoo
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p>Loading lab…</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="skeleton h-3.5 w-32 mb-3 rounded" />
+            <div className="skeleton h-4 w-24 mb-4 rounded" />
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white rounded-xl shadow-sm p-8 mb-6 animate-slide-up">
+            <div className="skeleton h-8 w-64 mb-3 rounded" />
+            <div className="flex gap-6 mb-4">
+              <div className="skeleton h-5 w-24 rounded" />
+              <div className="skeleton h-5 w-20 rounded" />
+            </div>
+            <div className="skeleton h-4 w-48 mb-6 rounded" />
+            <div className="grid grid-cols-4 gap-6 pb-6 border-b border-gray-100 mb-6">
+              {[0,1,2,3].map(i => (
+                <div key={i}>
+                  <div className="skeleton h-3.5 w-24 mb-2 rounded" />
+                  <div className="skeleton h-4 w-16 rounded" />
+                </div>
+              ))}
+            </div>
+            <div className="skeleton h-4 w-40 mb-3 rounded" />
+            <div className="flex gap-2">
+              {[0,1,2,3].map(i => <div key={i} className="skeleton h-9 w-20 rounded-lg" />)}
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm p-6 animate-slide-up animation-delay-100">
+            <div className="skeleton h-6 w-36 mb-6 rounded" />
+            <div className="flex gap-2 mb-6 pb-6 border-b border-gray-100">
+              {[0,1,2].map(i => <div key={i} className="skeleton h-9 w-24 rounded-lg" />)}
+            </div>
+            <div className="space-y-4">
+              {[0,1,2].map(i => (
+                <div key={i} className="border border-gray-100 rounded-lg p-6">
+                  <div className="skeleton h-6 w-48 mb-2 rounded" />
+                  <div className="skeleton h-4 w-full mb-4 rounded" />
+                  <div className="grid grid-cols-3 gap-4 mb-4">
+                    {[0,1,2].map(j => (
+                      <div key={j}>
+                        <div className="skeleton h-3.5 w-20 mb-1 rounded" />
+                        <div className="skeleton h-4 w-28 rounded" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="skeleton h-10 w-36 rounded-lg" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

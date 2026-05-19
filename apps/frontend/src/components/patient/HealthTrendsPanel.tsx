@@ -324,7 +324,23 @@ export function HealthTrendsPanel({ onUnauthorized }: Props) {
         </div>
       </div>
 
-      {loading && <p className="text-gray-600">Loading trends...</p>}
+      {loading && (
+        <div className="space-y-4">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className={`bg-white rounded-xl p-6 shadow-sm border border-gray-200 animate-slide-up${i > 0 ? ` animation-delay-${i}00` : ""}`}>
+              <div className="flex justify-between mb-3">
+                <div>
+                  <div className="skeleton h-5 w-40 mb-2 rounded" />
+                  <div className="skeleton h-3.5 w-28 rounded" />
+                </div>
+                <div className="skeleton h-5 w-16 rounded-full" />
+              </div>
+              <div className="skeleton h-4 w-full mb-4 rounded" />
+              <div className="skeleton h-64 w-full rounded-lg" />
+            </div>
+          ))}
+        </div>
+      )}
 
       {data && (
         <p className="text-xs text-gray-600 bg-gray-100 border border-gray-200 rounded-lg px-3 py-2">{data.disclaimer}</p>

@@ -32,7 +32,7 @@ export class LabService {
   async getWorkspace(userId: string) {
     const labProfile = await this.prisma.labProfile.findUnique({
       where: { user_id: userId },
-      select: { id: true, lab_name: true, address: true },
+      select: { id: true, lab_name: true, address: true, home_collection: true, home_test_kit: true },
     });
 
     if (!labProfile) {
@@ -71,6 +71,8 @@ export class LabService {
         id: labProfile.id,
         name: labProfile.lab_name,
         address: labProfile.address,
+        homeCollection: labProfile.home_collection,
+        homeTestKit: labProfile.home_test_kit,
       },
       bookings: bookingQueue.items,
       tests: tests.map((test) => ({
@@ -476,6 +478,31 @@ export class LabService {
       pendingResults,
       revenueEstimateEgp: revenueEstimate,
       capacityUsagePercent,
+    };
+  }
+
+  async updateLabProfile(userId: string, dto: { homeTestKit?: boolean; homeCollection?: boolean }) {
+    const labProfile = await this.prisma.labProfile.findUnique({
+      where: { user_id: userId },
+      select: { id: true },
+    });
+    if (!labProfile) throw new ForbiddenException('Only lab staff can update lab profile');
+
+    const updated = await this.prisma.labProfile.update({
+      where: { id: labProfile.id },
+      data: {
+        ...(dto.homeTestKit !== undefined ? { home_test_kit: dto.homeTestKit } : {}),
+        ...(dto.homeCollection !== undefined ? { home_collection: dto.homeCollection } : {}),
+      },
+      select: { id: true, lab_name: true, address: true, home_collection: true, home_test_kit: true },
+    });
+
+    return {
+      id: updated.id,
+      name: updated.lab_name,
+      address: updated.address,
+      homeCollection: updated.home_collection,
+      homeTestKit: updated.home_test_kit,
     };
   }
 

@@ -61,7 +61,7 @@ export class PublicTestsController {
         turnaround_time: true,
         parameters_count: true,
         lab_profile: {
-          select: { id: true, lab_name: true, address: true, home_collection: true, accreditation: true, turnaround_time: true },
+          select: { id: true, lab_name: true, address: true, home_collection: true, home_test_kit: true, accreditation: true, turnaround_time: true },
         },
       },
     });
@@ -82,6 +82,7 @@ export class PublicTestsController {
         name: test.lab_profile.lab_name,
         address: test.lab_profile.address,
         homeCollection: test.lab_profile.home_collection,
+        homeTestKit: test.lab_profile.home_test_kit,
         accreditation: test.lab_profile.accreditation ?? null,
         turnaroundTime: test.lab_profile.turnaround_time ?? null,
       },

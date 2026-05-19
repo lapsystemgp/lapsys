@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 import {
   BookingStatus,
   BookingType,
+  KitStatus,
   LabOnboardingStatus,
   PaymentMethod,
   PaymentStatus,
@@ -16,6 +17,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { AvailabilityQueryDto } from './dto/availability-query.dto';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { UpdateKitStatusDto } from './dto/update-kit-status.dto';
 import { AuditLogService } from '../common/services/audit-log.service';
 
 type BookingWithRelations = {
@@ -31,9 +33,14 @@ type BookingWithRelations = {
   payment_paid_at: Date | null;
   payment_failed_at: Date | null;
   payment_failure_reason: string | null;
+  kit_status: KitStatus | null;
+  kit_tracking_number: string | null;
+  kit_shipped_at: Date | null;
+  kit_delivered_at: Date | null;
+  sample_received_at: Date | null;
   created_at: Date;
   patient_profile: { id: string; full_name: string | null; phone: string | null; address: string | null };
-  lab_profile: { id: string; lab_name: string; address: string; home_collection: boolean };
+  lab_profile: { id: string; lab_name: string; address: string; home_collection: boolean; home_test_kit: boolean };
   lab_test: { id: string; name: string; price_egp: number };
   schedule_slot: { id: string; starts_at: Date; ends_at: Date } | null;
   status_events: Array<{
@@ -133,7 +140,7 @@ export class BookingsService {
         id: true,
         price_egp: true,
         lab_profile_id: true,
-        lab_profile: { select: { home_collection: true } },
+        lab_profile: { select: { home_collection: true, home_test_kit: true } },
       },
     });
 
@@ -145,9 +152,16 @@ export class BookingsService {
       throw new BadRequestException('This lab does not support home collection');
     }
 
+    if (dto.bookingType === BookingType.HomeTestKit && !test.lab_profile.home_test_kit) {
+      throw new BadRequestException('This lab does not offer home test kits');
+    }
+
     const normalizedAddress = dto.homeAddress?.trim();
-    if (dto.bookingType === BookingType.HomeCollection && !normalizedAddress) {
-      throw new BadRequestException('Home address is required for home collection');
+    if (
+      (dto.bookingType === BookingType.HomeCollection || dto.bookingType === BookingType.HomeTestKit) &&
+      !normalizedAddress
+    ) {
+      throw new BadRequestException('Home address is required for home collection and home test kit bookings');
     }
 
     const paymentMethod = dto.paymentMethod ?? PaymentMethod.Online;
@@ -157,41 +171,56 @@ export class BookingsService {
     if (paymentMethod === PaymentMethod.CashLabVisit && dto.bookingType !== BookingType.LabVisit) {
       throw new BadRequestException('Cash at lab visit is only available for lab visit bookings');
     }
-
-    const slot = await this.prisma.labScheduleSlot.findFirst({
-      where: {
-        id: dto.slotId,
-        lab_profile_id: dto.labId,
-        is_active: true,
-      },
-      select: {
-        id: true,
-        starts_at: true,
-      },
-    });
-
-    if (!slot) {
-      throw new NotFoundException('Selected slot is not available');
+    if (paymentMethod === PaymentMethod.CashOnDelivery && dto.bookingType !== BookingType.HomeTestKit) {
+      throw new BadRequestException('Cash on delivery is only available for home test kit bookings');
     }
 
-    if (slot.starts_at.getTime() <= Date.now()) {
-      throw new BadRequestException('Selected slot must be in the future');
-    }
+    let slot: { id: string; starts_at: Date } | null = null;
+    let scheduledAt: Date;
 
-    const conflictingBooking = await this.prisma.booking.findFirst({
-      where: {
-        schedule_slot_id: slot.id,
-        status: { in: ACTIVE_SLOT_STATUSES },
-      },
-      select: { id: true },
-    });
+    if (dto.bookingType === BookingType.HomeTestKit) {
+      // No appointment slot for kit orders — estimate delivery in 5 days
+      scheduledAt = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
+    } else {
+      if (!dto.slotId) {
+        throw new BadRequestException('A time slot is required for lab visit and home collection bookings');
+      }
+      slot = await this.prisma.labScheduleSlot.findFirst({
+        where: {
+          id: dto.slotId,
+          lab_profile_id: dto.labId,
+          is_active: true,
+        },
+        select: { id: true, starts_at: true },
+      });
 
-    if (conflictingBooking) {
-      throw new ConflictException('Selected slot is already booked');
+      if (!slot) {
+        throw new NotFoundException('Selected slot is not available');
+      }
+
+      if (slot.starts_at.getTime() <= Date.now()) {
+        throw new BadRequestException('Selected slot must be in the future');
+      }
+
+      const conflictingBooking = await this.prisma.booking.findFirst({
+        where: {
+          schedule_slot_id: slot.id,
+          status: { in: ACTIVE_SLOT_STATUSES },
+        },
+        select: { id: true },
+      });
+
+      if (conflictingBooking) {
+        throw new ConflictException('Selected slot is already booked');
+      }
+
+      scheduledAt = slot.starts_at;
     }
 
     const totalPrice =
-      test.price_egp + (dto.bookingType === BookingType.HomeCollection ? 100 : 0);
+      test.price_egp +
+      (dto.bookingType === BookingType.HomeCollection ? 100 : 0) +
+      (dto.bookingType === BookingType.HomeTestKit ? 150 : 0);
 
     const created = await this.prisma.$transaction(async (tx: any) => {
       const booking = await tx.booking.create({
@@ -201,15 +230,18 @@ export class BookingsService {
           lab_test_id: test.id,
           booking_type: dto.bookingType,
           status: BookingStatus.Pending,
-          scheduled_at: slot.starts_at,
+          scheduled_at: scheduledAt,
           home_address:
-            dto.bookingType === BookingType.HomeCollection
+            dto.bookingType === BookingType.HomeCollection || dto.bookingType === BookingType.HomeTestKit
               ? normalizedAddress
               : patientProfile.address ?? null,
           total_price_egp: totalPrice,
           payment_method: paymentMethod,
           payment_status: PaymentStatus.Pending,
-          schedule_slot_id: slot.id,
+          schedule_slot_id: slot?.id ?? null,
+          ...(dto.bookingType === BookingType.HomeTestKit
+            ? { kit_status: KitStatus.AwaitingShipment }
+            : {}),
         },
         include: this.bookingInclude(),
       });
@@ -357,7 +389,8 @@ export class BookingsService {
 
     if (
       booking.payment_method !== PaymentMethod.CashHomeCollection &&
-      booking.payment_method !== PaymentMethod.CashLabVisit
+      booking.payment_method !== PaymentMethod.CashLabVisit &&
+      booking.payment_method !== PaymentMethod.CashOnDelivery
     ) {
       throw new BadRequestException('Cash collection applies only to cash payment bookings');
     }
@@ -598,7 +631,7 @@ export class BookingsService {
   private bookingInclude() {
     return {
       patient_profile: { select: { id: true, full_name: true, phone: true, address: true } },
-      lab_profile: { select: { id: true, lab_name: true, address: true, home_collection: true } },
+      lab_profile: { select: { id: true, lab_name: true, address: true, home_collection: true, home_test_kit: true } },
       lab_test: { select: { id: true, name: true, price_egp: true } },
       schedule_slot: { select: { id: true, starts_at: true, ends_at: true } },
       status_events: {
@@ -622,6 +655,11 @@ export class BookingsService {
       paymentPaidAt: booking.payment_paid_at ? booking.payment_paid_at.toISOString() : null,
       paymentFailedAt: booking.payment_failed_at ? booking.payment_failed_at.toISOString() : null,
       paymentFailureReason: booking.payment_failure_reason ?? null,
+      kitStatus: booking.kit_status ?? null,
+      kitTrackingNumber: booking.kit_tracking_number ?? null,
+      kitShippedAt: booking.kit_shipped_at ? booking.kit_shipped_at.toISOString() : null,
+      kitDeliveredAt: booking.kit_delivered_at ? booking.kit_delivered_at.toISOString() : null,
+      sampleReceivedAt: booking.sample_received_at ? booking.sample_received_at.toISOString() : null,
       createdAt: booking.created_at.toISOString(),
       patient: {
         id: booking.patient_profile.id,
@@ -633,6 +671,7 @@ export class BookingsService {
         name: booking.lab_profile.lab_name,
         address: booking.lab_profile.address,
         homeCollection: booking.lab_profile.home_collection,
+        homeTestKit: booking.lab_profile.home_test_kit,
       },
       test: {
         id: booking.lab_test.id,
@@ -654,5 +693,85 @@ export class BookingsService {
         createdAt: event.created_at.toISOString(),
       })),
     };
+  }
+
+  async updateKitStatus(userId: string, bookingId: string, dto: UpdateKitStatusDto) {
+    const labProfile = await this.prisma.labProfile.findUnique({
+      where: { user_id: userId },
+      select: { id: true, onboarding_status: true },
+    });
+
+    if (!labProfile) {
+      throw new ForbiddenException('Only lab staff can update kit status');
+    }
+
+    if (labProfile.onboarding_status !== LabOnboardingStatus.Active) {
+      throw new ForbiddenException('Lab account is not active');
+    }
+
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      select: {
+        id: true,
+        lab_profile_id: true,
+        booking_type: true,
+        kit_status: true,
+        status: true,
+      },
+    });
+
+    if (!booking) throw new NotFoundException('Booking not found');
+    if (booking.lab_profile_id !== labProfile.id) {
+      throw new ForbiddenException('You can only update your own lab bookings');
+    }
+    if (booking.booking_type !== BookingType.HomeTestKit) {
+      throw new BadRequestException('Kit status only applies to home test kit bookings');
+    }
+    if (booking.status === BookingStatus.Cancelled || booking.status === BookingStatus.Rejected) {
+      throw new BadRequestException('Cannot update kit status for cancelled or rejected bookings');
+    }
+
+    const ORDER: KitStatus[] = [
+      KitStatus.AwaitingShipment,
+      KitStatus.Shipped,
+      KitStatus.Delivered,
+      KitStatus.SampleReceived,
+    ];
+    const currentIdx = ORDER.indexOf(booking.kit_status ?? KitStatus.AwaitingShipment);
+    const newIdx = ORDER.indexOf(dto.kitStatus);
+
+    if (newIdx !== currentIdx + 1) {
+      throw new BadRequestException(
+        `Kit must advance one stage at a time. Current: ${booking.kit_status ?? KitStatus.AwaitingShipment}`,
+      );
+    }
+
+    const now = new Date();
+    const timestampField: Record<KitStatus, string | null> = {
+      [KitStatus.AwaitingShipment]: null,
+      [KitStatus.Shipped]: 'kit_shipped_at',
+      [KitStatus.Delivered]: 'kit_delivered_at',
+      [KitStatus.SampleReceived]: 'sample_received_at',
+    };
+
+    const updated = await this.prisma.booking.update({
+      where: { id: bookingId },
+      data: {
+        kit_status: dto.kitStatus,
+        ...(dto.kitStatus === KitStatus.Shipped && dto.trackingNumber
+          ? { kit_tracking_number: dto.trackingNumber }
+          : {}),
+        ...(timestampField[dto.kitStatus] ? { [timestampField[dto.kitStatus]!]: now } : {}),
+      },
+      include: this.bookingInclude(),
+    });
+
+    const response = this.toBookingResponse(updated as BookingWithRelations);
+    this.auditLogService.log('booking.kit_status_updated', {
+      bookingId: response.id,
+      labUserId: userId,
+      kitStatus: dto.kitStatus,
+    });
+    return response;
   }
 }

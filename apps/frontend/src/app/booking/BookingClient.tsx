@@ -76,8 +76,8 @@ export default function BookingClient() {
   }, [labId, requestKey, router, testId]);
 
   const onSubmit = async (payload: {
-    slotId: string;
-    bookingType: "LabVisit" | "HomeCollection";
+    slotId?: string;
+    bookingType: "LabVisit" | "HomeCollection" | "HomeTestKit";
     homeAddress?: string;
     paymentMethod: PaymentMethod;
   }) => {

@@ -1,9 +1,10 @@
 import { apiFetch } from "./api";
 
 export type BookingStatus = "Pending" | "Confirmed" | "Rejected" | "Cancelled" | "Completed";
-export type BookingType = "LabVisit" | "HomeCollection";
-export type PaymentMethod = "Online" | "CashHomeCollection" | "CashLabVisit";
+export type BookingType = "LabVisit" | "HomeCollection" | "HomeTestKit";
+export type PaymentMethod = "Online" | "CashHomeCollection" | "CashLabVisit" | "CashOnDelivery";
 export type PaymentStatus = "Pending" | "Paid" | "Failed" | "Refunded";
+export type KitStatus = "AwaitingShipment" | "Shipped" | "Delivered" | "SampleReceived";
 
 export type BookingAvailabilitySlot = {
   id: string;
@@ -24,6 +25,11 @@ export type BookingItem = {
   paymentPaidAt: string | null;
   paymentFailedAt: string | null;
   paymentFailureReason: string | null;
+  kitStatus: KitStatus | null;
+  kitTrackingNumber: string | null;
+  kitShippedAt: string | null;
+  kitDeliveredAt: string | null;
+  sampleReceivedAt: string | null;
   createdAt: string;
   patient: {
     id: string;
@@ -35,6 +41,7 @@ export type BookingItem = {
     name: string;
     address: string;
     homeCollection: boolean;
+    homeTestKit: boolean;
   };
   test: {
     id: string;
@@ -72,7 +79,7 @@ export async function fetchBookingAvailability(params: {
 export async function createBooking(input: {
   labId: string;
   testId: string;
-  slotId: string;
+  slotId?: string;
   bookingType: BookingType;
   homeAddress?: string;
   paymentMethod?: PaymentMethod;
@@ -117,5 +124,17 @@ export async function setLabBookingStatus(bookingId: string, status: "Confirmed"
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
+  });
+}
+
+export async function updateKitStatus(
+  bookingId: string,
+  kitStatus: KitStatus,
+  trackingNumber?: string,
+) {
+  return await apiFetch<BookingItem>(`/bookings/${encodeURIComponent(bookingId)}/kit-status`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ kitStatus, ...(trackingNumber ? { trackingNumber } : {}) }),
   });
 }

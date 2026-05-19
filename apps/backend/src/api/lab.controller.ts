@@ -30,6 +30,7 @@ import { UpsertStructuredResultDto } from './dto/upsert-structured-result.dto';
 import { UploadedLabFile } from './lab-storage.service';
 import { StructuredResultsService } from './structured-results.service';
 import { LabPatientContextService } from './lab-patient-context.service';
+import { UpdateLabProfileDto } from './dto/update-lab-profile.dto';
 
 type RequestWithUser = {
   user?: { id?: string };
@@ -48,6 +49,12 @@ export class LabController {
   @Roles(Role.LabStaff)
   getWorkspace(@Req() req: RequestWithUser) {
     return this.labService.getWorkspace(req.user?.id ?? '');
+  }
+
+  @Patch('profile')
+  @Roles(Role.LabStaff)
+  updateProfile(@Req() req: RequestWithUser, @Body() dto: UpdateLabProfileDto) {
+    return this.labService.updateLabProfile(req.user?.id ?? '', dto);
   }
 
   @Get('patient-context')

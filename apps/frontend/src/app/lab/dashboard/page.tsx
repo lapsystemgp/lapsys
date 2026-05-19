@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Breadcrumb } from "../../../components/Breadcrumb";
 import { API_BASE_URL, ApiError } from "../../../lib/api";
-import { markCashCollected, setLabBookingStatus } from "../../../lib/bookingsApi";
+import { markCashCollected, setLabBookingStatus, updateKitStatus, type KitStatus } from "../../../lib/bookingsApi";
 import {
   createLabTest,
   deleteLabTest,
@@ -14,6 +14,7 @@ import {
   fetchLabPatientContext,
   fetchLabWorkspace,
   setLabResultStatus,
+  updateLabProfile,
   updateLabTest,
   type LabPatientContextResponse,
   type LabStructuredPanelInput,
@@ -22,8 +23,9 @@ import {
   upsertLabStructuredResults,
 } from "../../../lib/labApi";
 import { useSession } from "../../../components/SessionProvider";
+import { useToast } from "../../../components/ToastProvider";
 
-type Tab = "bookings" | "tests" | "results" | "schedule" | "analytics";
+type Tab = "bookings" | "tests" | "results" | "schedule" | "analytics" | "settings";
 
 function formatDateTime(value: string) {
   const date = new Date(value);
@@ -54,10 +56,10 @@ export default function LabDashboardPage() {
   const router = useRouter();
   const { user, logout } = useSession();
 
+  const toast = useToast();
   const [tab, setTab] = useState<Tab>("bookings");
   const [workspace, setWorkspace] = useState<LabWorkspaceResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const [newTest, setNewTest] = useState({ name: "", category: "", priceEgp: "" });
   const [editingTestId, setEditingTestId] = useState<string | null>(null);
@@ -67,6 +69,9 @@ export default function LabDashboardPage() {
   const [structuredJsonByBooking, setStructuredJsonByBooking] = useState<Record<string, string>>({});
   const [structuredSubmittingId, setStructuredSubmittingId] = useState<string | null>(null);
   const [cashActionId, setCashActionId] = useState<string | null>(null);
+  const [kitActionId, setKitActionId] = useState<string | null>(null);
+  const [kitTrackingInputs, setKitTrackingInputs] = useState<Record<string, string>>({});
+  const [savingProfile, setSavingProfile] = useState(false);
 
   const [patientContext, setPatientContext] = useState<LabPatientContextResponse | null>(null);
   const [patientContextLoading, setPatientContextLoading] = useState(false);
@@ -74,7 +79,6 @@ export default function LabDashboardPage() {
 
   const loadWorkspace = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
       const response = await fetchLabWorkspace();
       setWorkspace(response);
@@ -87,11 +91,11 @@ export default function LabDashboardPage() {
         router.push("/unauthorized?reason=pending_review");
         return;
       }
-      setError("Unable to load lab workspace.");
+      toast.error("Unable to load lab workspace.");
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [router, toast]);
 
   useEffect(() => {
     loadWorkspace();
@@ -112,19 +116,20 @@ export default function LabDashboardPage() {
     try {
       await setLabBookingStatus(bookingId, status);
       await loadWorkspace();
+      toast.success(status === "Confirmed" ? "Booking confirmed." : "Booking rejected.");
     } catch {
-      setError("Could not update booking status.");
+      toast.error("Could not update booking status.");
     }
   };
 
   const handleMarkCash = async (bookingId: string) => {
     setCashActionId(bookingId);
-    setError(null);
     try {
       await markCashCollected(bookingId);
       await loadWorkspace();
+      toast.success("Cash payment recorded.");
     } catch {
-      setError("Could not record cash payment.");
+      toast.error("Could not record cash payment.");
     } finally {
       setCashActionId(null);
     }
@@ -134,7 +139,35 @@ export default function LabDashboardPage() {
     if (method === "Online") return "Online (demo)";
     if (method === "CashHomeCollection") return "Cash on collection";
     if (method === "CashLabVisit") return "Cash at lab visit";
+    if (method === "CashOnDelivery") return "Cash on delivery";
     return method;
+  };
+
+  const handleKitStatus = async (bookingId: string, kitStatus: KitStatus, trackingNumber?: string) => {
+    setKitActionId(bookingId);
+    try {
+      await updateKitStatus(bookingId, kitStatus, trackingNumber);
+      await loadWorkspace();
+      const label = kitStatus === "Shipped" ? "Kit marked as shipped." : kitStatus === "Delivered" ? "Kit marked as delivered." : "Sample received.";
+      toast.success(label);
+    } catch {
+      toast.error("Could not update kit status.");
+    } finally {
+      setKitActionId(null);
+    }
+  };
+
+  const handleToggleHomeTestKit = async (current: boolean) => {
+    setSavingProfile(true);
+    try {
+      await updateLabProfile({ homeTestKit: !current });
+      await loadWorkspace();
+      toast.success(`Home test kits ${!current ? "enabled" : "disabled"}.`);
+    } catch {
+      toast.error("Could not update lab profile.");
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
   const handleCreateTest = async () => {
@@ -147,8 +180,9 @@ export default function LabDashboardPage() {
       });
       setNewTest({ name: "", category: "", priceEgp: "" });
       await loadWorkspace();
+      toast.success("Test created.");
     } catch {
-      setError("Could not create test.");
+      toast.error("Could not create test.");
     }
   };
 
@@ -156,8 +190,9 @@ export default function LabDashboardPage() {
     try {
       await updateLabTest(testId, { isActive: !isActive });
       await loadWorkspace();
+      toast.success(isActive ? "Test deactivated." : "Test activated.");
     } catch {
-      setError("Could not update test state.");
+      toast.error("Could not update test state.");
     }
   };
 
@@ -181,8 +216,9 @@ export default function LabDashboardPage() {
       setEditingTestId(null);
       setEditingTest({ name: "", category: "", priceEgp: "" });
       await loadWorkspace();
+      toast.success("Test saved.");
     } catch {
-      setError("Could not update test.");
+      toast.error("Could not update test.");
     }
   };
 
@@ -194,12 +230,13 @@ export default function LabDashboardPage() {
         setEditingTest({ name: "", category: "", priceEgp: "" });
       }
       await loadWorkspace();
+      toast.success("Test deleted.");
     } catch (err) {
       if (err instanceof ApiError && err.status === 400) {
-        setError("Cannot delete a test that already has bookings.");
+        toast.error("Cannot delete a test that already has bookings.");
         return;
       }
-      setError("Could not delete test.");
+      toast.error("Could not delete test.");
     }
   };
 
@@ -213,8 +250,9 @@ export default function LabDashboardPage() {
       });
       setNewSlot({ startsAt: "", endsAt: "", capacity: "1" });
       await loadWorkspace();
+      toast.success("Schedule slot added.");
     } catch {
-      setError("Could not create schedule slot.");
+      toast.error("Could not create schedule slot.");
     }
   };
 
@@ -222,15 +260,16 @@ export default function LabDashboardPage() {
     try {
       await deactivateScheduleSlot(slotId);
       await loadWorkspace();
+      toast.success("Slot deactivated.");
     } catch {
-      setError("Could not deactivate slot.");
+      toast.error("Could not deactivate slot.");
     }
   };
 
   const handleUploadResult = async (bookingId: string) => {
     const state = uploadState[bookingId];
     if (!state?.file || !state.summary.trim()) {
-      setError("Select PDF and summary before upload.");
+      toast.error("Select a PDF and add a summary before uploading.");
       return;
     }
     try {
@@ -240,8 +279,9 @@ export default function LabDashboardPage() {
       });
       setUploadState((prev) => ({ ...prev, [bookingId]: { summary: "", file: null } }));
       await loadWorkspace();
+      toast.success("Result uploaded.");
     } catch {
-      setError("Could not upload result.");
+      toast.error("Could not upload result.");
     }
   };
 
@@ -266,11 +306,10 @@ export default function LabDashboardPage() {
   const handleSaveStructured = async (bookingId: string) => {
     const raw = structuredJsonByBooking[bookingId]?.trim();
     if (!raw) {
-      setError("Paste structured JSON before saving.");
+      toast.error("Paste structured JSON before saving.");
       return;
     }
     setStructuredSubmittingId(bookingId);
-    setError(null);
     try {
       const parsed = JSON.parse(raw) as { panels?: unknown };
       if (!parsed.panels || !Array.isArray(parsed.panels)) {
@@ -278,8 +317,9 @@ export default function LabDashboardPage() {
       }
       await upsertLabStructuredResults(bookingId, parsed.panels as LabStructuredPanelInput[]);
       await loadWorkspace();
+      toast.success("Structured results saved.");
     } catch {
-      setError("Structured JSON must match { panels: [...] } and upload the PDF first.");
+      toast.error("Structured JSON must match { panels: [...] } — upload the PDF first.");
     } finally {
       setStructuredSubmittingId(null);
     }
@@ -309,61 +349,78 @@ export default function LabDashboardPage() {
     try {
       await setLabResultStatus(bookingId, "Delivered");
       await loadWorkspace();
+      toast.success("Result marked as delivered.");
     } catch (err) {
       if (err instanceof ApiError && err.status === 400) {
-        setError("Upload the result PDF first, then mark it as delivered.");
+        toast.error("Upload the result PDF first, then mark it as delivered.");
         return;
       }
-      setError("Could not mark result as delivered.");
+      toast.error("Could not mark result as delivered.");
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="space-y-2">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="space-y-1">
             <button
               onClick={() => router.push("/")}
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Home
             </button>
-            <h1 className="text-2xl text-gray-900">Lab Workspace</h1>
-            <p className="text-gray-600">{workspace?.lab.name || user?.lab_profile?.lab_name || user?.email}</p>
+            <h1 className="text-xl text-gray-900">Lab Workspace</h1>
+            <p className="text-sm text-gray-500">{workspace?.lab.name || user?.lab_profile?.lab_name || user?.email}</p>
           </div>
-          <button onClick={handleLogout} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+          <button onClick={handleLogout} className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
             Logout
           </button>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <Breadcrumb items={[{ label: "Lab Dashboard" }]} className="mb-6" />
-        <div className="flex gap-2 mb-6 flex-wrap">
-          {(["bookings", "tests", "results", "schedule", "analytics"] as Tab[]).map((item) => (
+      <main className="max-w-7xl mx-auto px-4 py-5">
+        <Breadcrumb items={[{ label: "Lab Dashboard" }]} className="mb-4" />
+        <div className="flex gap-1.5 mb-5 p-1 bg-white border border-gray-200 rounded-xl w-fit flex-wrap">
+          {(["bookings", "tests", "results", "schedule", "analytics", "settings"] as Tab[]).map((item) => (
             <button
               key={item}
               onClick={() => setTab(item)}
-              className={`px-4 py-2 rounded-lg capitalize ${tab === item ? "bg-blue-600 text-white" : "bg-white border border-gray-200"}`}
+              className={`px-4 py-1.5 rounded-lg text-sm capitalize transition-all duration-150 ${
+                tab === item ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              }`}
             >
               {item}
             </button>
           ))}
         </div>
 
-        {error && <p className="text-red-600 mb-4">{error}</p>}
-
         {loading || !workspace ? (
-          <p>Loading lab workspace...</p>
+          <div className="space-y-3">
+            {[0, 1].map((i) => (
+              <div key={i} className={`bg-white rounded-xl border border-gray-200 p-5 shadow-sm animate-slide-up ${i === 1 ? 'animation-delay-100' : ''}`}>
+                <div className="flex items-start justify-between mb-3">
+                  <div className="space-y-2">
+                    <div className="skeleton h-5 w-36 rounded" />
+                    <div className="skeleton h-4 w-24 rounded" />
+                    <div className="skeleton h-4 w-32 rounded" />
+                  </div>
+                  <div className="skeleton h-6 w-20 rounded-full" />
+                </div>
+                <div className="grid grid-cols-4 gap-3">
+                  {[0, 1, 2, 3].map((j) => <div key={j} className="skeleton h-10 rounded" />)}
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <>
             {tab === "bookings" && (
-              <div className="space-y-4">
+              <div key="bookings" className="space-y-3 animate-fade-in">
                 {[...bookingsByStatus.pending, ...bookingsByStatus.nonPending].map((booking) => (
-                  <div key={booking.id} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    <div className="flex items-start justify-between mb-4">
+                  <div key={booking.id} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <div className="flex items-start justify-between mb-3">
                       <div>
                         <h2 className="text-lg text-gray-900">{booking.patient.fullName || "Patient"}</h2>
                         <p className="text-gray-600">{booking.test.name}</p>
@@ -374,14 +431,20 @@ export default function LabDashboardPage() {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm text-gray-700">
                       <div>
                         <p className="text-gray-500">Type</p>
-                        <p>{booking.bookingType === "HomeCollection" ? "Home Collection" : "Lab Visit"}</p>
+                        <p>
+                          {booking.bookingType === "HomeCollection"
+                            ? "Home Collection"
+                            : booking.bookingType === "HomeTestKit"
+                              ? "Home Test Kit"
+                              : "Lab Visit"}
+                        </p>
                       </div>
                       <div>
                         <p className="text-gray-500">Phone</p>
                         <p>{booking.patient.phone || "-"}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Address</p>
+                        <p className="text-gray-500">{booking.bookingType === "HomeTestKit" ? "Delivery Address" : "Address"}</p>
                         <p>{booking.homeAddress || workspace.lab.address}</p>
                       </div>
                       <div>
@@ -396,7 +459,7 @@ export default function LabDashboardPage() {
                       {booking.paymentMethod === "Online" && booking.paymentStatus === "Paid" && (
                         <span className="ml-2 text-emerald-700">(Prepaid — demo)</span>
                       )}
-                      {(booking.paymentMethod === "CashHomeCollection" || booking.paymentMethod === "CashLabVisit") &&
+                      {(booking.paymentMethod === "CashHomeCollection" || booking.paymentMethod === "CashLabVisit" || booking.paymentMethod === "CashOnDelivery") &&
                         booking.paymentStatus === "Pending" && <span className="ml-2 text-amber-800">(Cash due)</span>}
                       {booking.paymentReference && (
                         <span className="ml-2 text-slate-600">Ref {booking.paymentReference}</span>
@@ -419,7 +482,7 @@ export default function LabDashboardPage() {
                       </div>
                     )}
                     {["Pending", "Confirmed"].includes(booking.status) &&
-                      (booking.paymentMethod === "CashHomeCollection" || booking.paymentMethod === "CashLabVisit") &&
+                      (booking.paymentMethod === "CashHomeCollection" || booking.paymentMethod === "CashLabVisit" || booking.paymentMethod === "CashOnDelivery") &&
                       booking.paymentStatus === "Pending" && (
                         <div className="mt-3">
                           <button
@@ -431,6 +494,52 @@ export default function LabDashboardPage() {
                           </button>
                         </div>
                       )}
+                    {booking.bookingType === "HomeTestKit" && booking.status === "Confirmed" && (
+                      <div className="mt-3 space-y-2">
+                        {booking.kitStatus === "AwaitingShipment" && (
+                          <div className="flex flex-wrap gap-2 items-center">
+                            <input
+                              type="text"
+                              placeholder="Tracking number (optional)"
+                              value={kitTrackingInputs[booking.id] ?? ""}
+                              onChange={(e) => setKitTrackingInputs((prev) => ({ ...prev, [booking.id]: e.target.value }))}
+                              className="px-3 py-2 border border-gray-300 rounded-lg text-sm w-48"
+                            />
+                            <button
+                              onClick={() => handleKitStatus(booking.id, "Shipped", kitTrackingInputs[booking.id])}
+                              disabled={kitActionId === booking.id}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
+                            >
+                              {kitActionId === booking.id ? "Updating..." : "Ship Kit"}
+                            </button>
+                          </div>
+                        )}
+                        {booking.kitStatus === "Shipped" && (
+                          <button
+                            onClick={() => handleKitStatus(booking.id, "Delivered")}
+                            disabled={kitActionId === booking.id}
+                            className="px-4 py-2 border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 disabled:opacity-50 text-sm"
+                          >
+                            {kitActionId === booking.id ? "Updating..." : "Mark Kit Delivered"}
+                          </button>
+                        )}
+                        {booking.kitStatus === "Delivered" && (
+                          <button
+                            onClick={() => handleKitStatus(booking.id, "SampleReceived")}
+                            disabled={kitActionId === booking.id}
+                            className="px-4 py-2 border border-green-300 text-green-700 rounded-lg hover:bg-green-50 disabled:opacity-50 text-sm"
+                          >
+                            {kitActionId === booking.id ? "Updating..." : "Mark Sample Received"}
+                          </button>
+                        )}
+                        {booking.kitStatus && (
+                          <p className="text-xs text-gray-500">
+                            Kit status: <span className="font-medium text-gray-700">{booking.kitStatus.replace(/([A-Z])/g, ' $1').trim()}</span>
+                            {booking.kitTrackingNumber && <> · Tracking: <span className="font-mono">{booking.kitTrackingNumber}</span></>}
+                          </p>
+                        )}
+                      </div>
+                    )}
                     <div className="mt-4 pt-4 border-t border-gray-100">
                       <button
                         type="button"
@@ -446,8 +555,8 @@ export default function LabDashboardPage() {
             )}
 
             {tab === "tests" && (
-              <div className="space-y-4">
-                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+              <div key="tests" className="space-y-3 animate-fade-in">
+                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                   <h2 className="text-lg text-gray-900 mb-3">Add Test</h2>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <input value={newTest.name} onChange={(e) => setNewTest((p) => ({ ...p, name: e.target.value }))} placeholder="Test name" className="px-3 py-2 border border-gray-300 rounded-lg" />
@@ -525,7 +634,7 @@ export default function LabDashboardPage() {
             )}
 
             {tab === "results" && (
-              <div className="space-y-4">
+              <div key="results" className="space-y-3 animate-fade-in">
                 {workspace.bookings
                   .filter((booking) => booking.status === "Confirmed" || booking.status === "Completed")
                   .map((booking) => {
@@ -621,8 +730,8 @@ export default function LabDashboardPage() {
             )}
 
             {tab === "schedule" && (
-              <div className="space-y-4">
-                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+              <div key="schedule" className="space-y-3 animate-fade-in">
+                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                   <h2 className="text-lg text-gray-900 mb-3">Add Slot</h2>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <input type="datetime-local" value={newSlot.startsAt} onChange={(e) => setNewSlot((p) => ({ ...p, startsAt: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg" />
@@ -647,29 +756,59 @@ export default function LabDashboardPage() {
               </div>
             )}
 
+            {tab === "settings" && (
+              <div key="settings" className="space-y-3 max-w-lg animate-fade-in">
+                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                  <h2 className="text-lg text-gray-900 mb-1">Service Options</h2>
+                  <p className="text-sm text-gray-500 mb-4">Control which collection types patients can book with your lab.</p>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-gray-900">Home Test Kits</p>
+                        <p className="text-sm text-gray-500">Ship self-collection kits to patients (+EGP 150 fee)</p>
+                      </div>
+                      <button
+                        onClick={() => handleToggleHomeTestKit(workspace.lab.homeTestKit)}
+                        disabled={savingProfile}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${
+                          workspace.lab.homeTestKit ? "bg-blue-600" : "bg-gray-200"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            workspace.lab.homeTestKit ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {tab === "analytics" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                  <p className="text-gray-500">Total Bookings</p>
-                  <p className="text-3xl text-gray-900">{workspace.analytics.totalBookings}</p>
+              <div key="analytics" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 animate-fade-in">
+                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                  <p className="text-sm text-gray-500">Total Bookings</p>
+                  <p className="text-2xl text-gray-900">{workspace.analytics.totalBookings}</p>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                  <p className="text-gray-500">Completed</p>
-                  <p className="text-3xl text-gray-900">{workspace.analytics.completedBookings}</p>
+                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                  <p className="text-sm text-gray-500">Completed</p>
+                  <p className="text-2xl text-gray-900">{workspace.analytics.completedBookings}</p>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                  <p className="text-gray-500">Pending Results</p>
-                  <p className="text-3xl text-gray-900">{workspace.analytics.pendingResults}</p>
+                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                  <p className="text-sm text-gray-500">Pending Results</p>
+                  <p className="text-2xl text-gray-900">{workspace.analytics.pendingResults}</p>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                  <p className="text-gray-500">Revenue Estimate</p>
-                  <p className="text-3xl text-gray-900">EGP {workspace.analytics.revenueEstimateEgp}</p>
+                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                  <p className="text-sm text-gray-500">Revenue Estimate</p>
+                  <p className="text-2xl text-gray-900">EGP {workspace.analytics.revenueEstimateEgp}</p>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm md:col-span-2 lg:col-span-4">
-                  <p className="text-gray-500 mb-2">Capacity Usage</p>
-                  <p className="text-2xl text-gray-900">{workspace.analytics.capacityUsagePercent}%</p>
+                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm md:col-span-2 lg:col-span-4">
+                  <p className="text-sm text-gray-500 mb-1.5">Capacity Usage</p>
+                  <p className="text-xl text-gray-900">{workspace.analytics.capacityUsagePercent}%</p>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm md:col-span-2 lg:col-span-4">
+                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm md:col-span-2 lg:col-span-4">
                   <p className="text-gray-500 mb-2">Top Tests</p>
                   <div className="space-y-2">
                     {workspace.analytics.topTests.map((test) => (

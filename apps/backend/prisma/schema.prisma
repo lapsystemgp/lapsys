@@ -40,6 +40,14 @@ enum LabOnboardingStatus {
 enum BookingType {
   LabVisit
   HomeCollection
+  HomeTestKit
+}
+
+enum KitStatus {
+  AwaitingShipment
+  Shipped
+  Delivered
+  SampleReceived
 }
 
 enum BookingStatus {
@@ -54,6 +62,7 @@ enum PaymentMethod {
   Online
   CashHomeCollection
   CashLabVisit
+  CashOnDelivery
 }
 
 enum PaymentStatus {
@@ -107,6 +116,7 @@ model LabProfile {
   accreditation     String?
   turnaround_time   String?
   home_collection   Boolean             @default(false)
+  home_test_kit     Boolean             @default(false)
   onboarding_status LabOnboardingStatus @default(PendingReview)
   latitude          Float?
   longitude         Float?
@@ -172,6 +182,11 @@ model Booking {
   payment_paid_at        DateTime?
   payment_failed_at      DateTime?
   payment_failure_reason String?
+  kit_status          KitStatus?
+  kit_tracking_number String?
+  kit_shipped_at      DateTime?
+  kit_delivered_at    DateTime?
+  sample_received_at  DateTime?
   created_at         DateTime      @default(now())
   updated_at         DateTime      @updatedAt
 

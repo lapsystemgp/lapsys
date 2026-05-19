@@ -7,6 +7,7 @@ export type PublicLabCard = {
   accreditation: string | null;
   turnaroundTime: string | null;
   homeCollection: boolean;
+  homeTestKit: boolean;
   rating: number | null;
   reviews: number;
   distanceKm: number;
@@ -50,6 +51,7 @@ export type PublicTestResponse = {
     name: string;
     address: string;
     homeCollection: boolean;
+    homeTestKit: boolean;
     accreditation: string | null;
     turnaroundTime: string | null;
   };

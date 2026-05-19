@@ -1,20 +1,25 @@
 import { apiFetch } from "./api";
 
 export type LabWorkspaceResponse = {
-  lab: { id: string; name: string; address: string };
+  lab: { id: string; name: string; address: string; homeCollection: boolean; homeTestKit: boolean };
   bookings: Array<{
     id: string;
     status: "Pending" | "Confirmed" | "Rejected" | "Cancelled" | "Completed";
-    bookingType: "LabVisit" | "HomeCollection";
+    bookingType: "LabVisit" | "HomeCollection" | "HomeTestKit";
     scheduledAt: string;
     homeAddress: string | null;
     totalPriceEgp: number;
-    paymentMethod: "Online" | "CashHomeCollection" | "CashLabVisit";
+    paymentMethod: "Online" | "CashHomeCollection" | "CashLabVisit" | "CashOnDelivery";
     paymentStatus: "Pending" | "Paid" | "Failed" | "Refunded";
     paymentReference: string | null;
     paymentPaidAt: string | null;
     paymentFailedAt: string | null;
     paymentFailureReason: string | null;
+    kitStatus: "AwaitingShipment" | "Shipped" | "Delivered" | "SampleReceived" | null;
+    kitTrackingNumber: string | null;
+    kitShippedAt: string | null;
+    kitDeliveredAt: string | null;
+    sampleReceivedAt: string | null;
     patient: { id: string; fullName: string | null; phone: string | null };
     test: { id: string; name: string; priceEgp: number };
   }>;
@@ -48,6 +53,14 @@ export type LabWorkspaceResponse = {
 
 export async function fetchLabWorkspace() {
   return await apiFetch<LabWorkspaceResponse>("/lab/workspace");
+}
+
+export async function updateLabProfile(input: { homeTestKit?: boolean; homeCollection?: boolean }) {
+  return await apiFetch("/lab/profile", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
 }
 
 export async function createLabTest(input: {

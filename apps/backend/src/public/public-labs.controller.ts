@@ -10,6 +10,7 @@ type PublicLabCard = {
   accreditation: string | null;
   turnaroundTime: string | null;
   homeCollection: boolean;
+  homeTestKit: boolean;
   rating: number | null;
   reviews: number;
   distanceKm: number;
@@ -83,7 +84,7 @@ export class PublicLabsController {
 
     const baseLabs = await this.prisma.labProfile.findMany({
       where: baseLabWhere,
-      select: { id: true, lab_name: true, address: true, accreditation: true, turnaround_time: true, home_collection: true, rating_average: true, review_count: true, latitude: true, longitude: true },
+      select: { id: true, lab_name: true, address: true, accreditation: true, turnaround_time: true, home_collection: true, home_test_kit: true, rating_average: true, review_count: true, latitude: true, longitude: true },
     });
 
     if (baseLabs.length === 0) {
@@ -168,6 +169,7 @@ export class PublicLabsController {
           accreditation: lab.accreditation ?? null,
           turnaroundTime: lab.turnaround_time ?? null,
           homeCollection: lab.home_collection,
+          homeTestKit: lab.home_test_kit,
           rating: lab.rating_average ?? null,
           reviews: lab.review_count ?? 0,
           distanceKm,
@@ -226,6 +228,7 @@ export class PublicLabsController {
         accreditation: true,
         turnaround_time: true,
         home_collection: true,
+        home_test_kit: true,
         rating_average: true,
         review_count: true,
       },
@@ -279,6 +282,7 @@ export class PublicLabsController {
       accreditation: lab.accreditation ?? null,
       turnaroundTime: lab.turnaround_time ?? null,
       homeCollection: lab.home_collection,
+      homeTestKit: lab.home_test_kit,
       rating: lab.rating_average ?? null,
       reviews: lab.review_count ?? 0,
       distanceKm: placeholderDistanceKm(lab.id),

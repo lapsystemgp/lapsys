@@ -19,6 +19,7 @@ import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { DemoOnlinePaymentDto } from './dto/demo-online-payment.dto';
 import { LabBookingStatusDto } from './dto/lab-booking-status.dto';
+import { UpdateKitStatusDto } from './dto/update-kit-status.dto';
 
 type RequestWithUser = {
   user?: { id?: string };
@@ -90,5 +91,16 @@ export class BookingsController {
       bookingId,
       dto.status as BookingStatus,
     );
+  }
+
+  @Patch(':bookingId/kit-status')
+  @Roles(Role.LabStaff)
+  @UseGuards(LabActiveGuard)
+  updateKitStatus(
+    @Req() req: RequestWithUser,
+    @Param('bookingId') bookingId: string,
+    @Body() dto: UpdateKitStatusDto,
+  ) {
+    return this.bookingsService.updateKitStatus(req.user?.id ?? '', bookingId, dto);
   }
 }

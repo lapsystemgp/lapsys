@@ -16,6 +16,7 @@ import {
 } from "../../../lib/patientApi";
 import { useSession } from "../../../components/SessionProvider";
 import { HealthTrendsPanel } from "../../../components/patient/HealthTrendsPanel";
+import { useToast } from "../../../components/ToastProvider";
 
 type Tab = "bookings" | "results" | "trends" | "profile";
 
@@ -96,10 +97,10 @@ export default function PatientDashboardPage() {
   const router = useRouter();
   const { user, logout } = useSession();
 
+  const toast = useToast();
   const [tab, setTab] = useState<Tab>("bookings");
   const [workspace, setWorkspace] = useState<PatientWorkspaceResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const [profileForm, setProfileForm] = useState<{
     fullName: string;
@@ -114,7 +115,6 @@ export default function PatientDashboardPage() {
 
   const loadWorkspace = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
       const response = await fetchPatientWorkspace();
       setWorkspace(response);
@@ -129,11 +129,11 @@ export default function PatientDashboardPage() {
         router.push("/login");
         return;
       }
-      setError("Unable to load patient workspace.");
+      toast.error("Unable to load patient workspace.");
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [router, toast]);
 
   useEffect(() => {
     loadWorkspace();
@@ -150,19 +150,20 @@ export default function PatientDashboardPage() {
     try {
       await cancelPatientBooking(bookingId);
       await loadWorkspace();
+      toast.success("Booking cancelled.");
     } catch {
-      setError("Could not cancel booking. Please try again.");
+      toast.error("Could not cancel booking. Please try again.");
     }
   };
 
   const handleDemoOnlinePayment = async (bookingId: string, outcome: "success" | "failure") => {
     setDemoPayBookingId(bookingId);
-    setError(null);
     try {
       await demoOnlinePayment(bookingId, outcome);
       await loadWorkspace();
+      toast.success(outcome === "success" ? "Payment processed successfully." : "Payment declined (demo).");
     } catch {
-      setError("Demo payment could not be completed.");
+      toast.error("Demo payment could not be completed.");
     } finally {
       setDemoPayBookingId(null);
     }
@@ -170,12 +171,12 @@ export default function PatientDashboardPage() {
 
   const handleSaveProfile = async () => {
     setSavingProfile(true);
-    setError(null);
     try {
       await updatePatientProfile(profileForm);
       await loadWorkspace();
+      toast.success("Profile saved.");
     } catch {
-      setError("Could not update profile.");
+      toast.error("Could not update profile.");
     } finally {
       setSavingProfile(false);
     }
@@ -194,7 +195,6 @@ export default function PatientDashboardPage() {
   const handleSubmitReview = async (result: PatientWorkspaceResult) => {
     const draft = ensureReviewDraft(result);
     setSubmittingReviewId(result.bookingId);
-    setError(null);
 
     try {
       await submitPatientReview({
@@ -203,8 +203,9 @@ export default function PatientDashboardPage() {
         comment: draft.comment.trim() || undefined,
       });
       await loadWorkspace();
+      toast.success("Review submitted. Thank you!");
     } catch {
-      setError("Could not submit review. Please try again.");
+      toast.error("Could not submit review. Please try again.");
     } finally {
       setSubmittingReviewId(null);
     }
@@ -261,10 +262,23 @@ export default function PatientDashboardPage() {
           ))}
         </div>
 
-        {error && <p className="text-red-600 mb-4">{error}</p>}
-
         {loading ? (
-          <p>Loading workspace...</p>
+          <div className="space-y-3">
+            {[0, 1].map((i) => (
+              <div key={i} className={`bg-white rounded-xl p-5 shadow-sm border border-gray-200 animate-slide-up ${i === 1 ? 'animation-delay-100' : ''}`}>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="space-y-2">
+                    <div className="skeleton h-5 w-40 rounded" />
+                    <div className="skeleton h-4 w-28 rounded" />
+                  </div>
+                  <div className="skeleton h-6 w-20 rounded-full" />
+                </div>
+                <div className="grid grid-cols-4 gap-3">
+                  {[0, 1, 2, 3].map((j) => <div key={j} className="skeleton h-10 rounded" />)}
+                </div>
+              </div>
+            ))}
+          </div>
         ) : !workspace ? (
           <p>Unable to load workspace.</p>
         ) : (

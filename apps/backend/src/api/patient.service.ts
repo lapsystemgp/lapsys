@@ -74,6 +74,11 @@ export class PatientService {
       paymentPaidAt: booking.payment_paid_at ? booking.payment_paid_at.toISOString() : null,
       paymentFailedAt: booking.payment_failed_at ? booking.payment_failed_at.toISOString() : null,
       paymentFailureReason: booking.payment_failure_reason ?? null,
+      kitStatus: booking.kit_status ?? null,
+      kitTrackingNumber: booking.kit_tracking_number ?? null,
+      kitShippedAt: booking.kit_shipped_at ? booking.kit_shipped_at.toISOString() : null,
+      kitDeliveredAt: booking.kit_delivered_at ? booking.kit_delivered_at.toISOString() : null,
+      sampleReceivedAt: booking.sample_received_at ? booking.sample_received_at.toISOString() : null,
       lab: {
         id: booking.lab_profile.id,
         name: booking.lab_profile.lab_name,

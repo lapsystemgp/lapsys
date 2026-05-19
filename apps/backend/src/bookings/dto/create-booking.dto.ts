@@ -8,8 +8,9 @@ export class CreateBookingDto {
   @IsUUID()
   testId!: string;
 
+  @IsOptional()
   @IsUUID()
-  slotId!: string;
+  slotId?: string;
 
   @IsEnum(BookingType)
   bookingType!: BookingType;

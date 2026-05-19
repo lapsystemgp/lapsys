@@ -75,7 +75,6 @@ export default function LabDashboardPage() {
 
   const [patientContext, setPatientContext] = useState<LabPatientContextResponse | null>(null);
   const [patientContextLoading, setPatientContextLoading] = useState(false);
-  const [patientContextError, setPatientContextError] = useState<string | null>(null);
 
   const loadWorkspace = useCallback(async () => {
     setLoading(true);
@@ -326,14 +325,13 @@ export default function LabDashboardPage() {
   };
 
   const openPatientContext = async (bookingId: string) => {
-    setPatientContextError(null);
     setPatientContextLoading(true);
     setPatientContext(null);
     try {
       const data = await fetchLabPatientContext({ bookingId });
       setPatientContext(data);
     } catch {
-      setPatientContextError("Could not load patient context.");
+      toast.error("Could not load patient context.");
     } finally {
       setPatientContextLoading(false);
     }
@@ -341,7 +339,6 @@ export default function LabDashboardPage() {
 
   const closePatientContext = () => {
     setPatientContext(null);
-    setPatientContextError(null);
     setPatientContextLoading(false);
   };
 
@@ -822,7 +819,7 @@ export default function LabDashboardPage() {
         )}
       </main>
 
-      {(patientContextLoading || patientContext !== null || patientContextError !== null) && (
+      {(patientContextLoading || patientContext !== null) && (
         <>
           <div
             className="fixed inset-0 bg-black/40 z-40"
@@ -844,7 +841,6 @@ export default function LabDashboardPage() {
             </div>
             <div className="p-6 space-y-6 flex-1">
               {patientContextLoading && <p className="text-gray-600">Loading…</p>}
-              {patientContextError && <p className="text-red-600">{patientContextError}</p>}
               {patientContext && !patientContextLoading && (
                 <>
                   <p className="text-sm text-gray-700 bg-slate-50 border border-slate-200 rounded-lg p-3">{patientContext.privacyNotice}</p>

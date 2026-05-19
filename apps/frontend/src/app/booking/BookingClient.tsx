@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BookingPage } from "../../teslty/components/BookingPage";
 import { ApiError } from "../../lib/api";
+import { useToast } from "../../components/ToastProvider";
 import {
   createBooking,
   fetchBookingAvailability,
@@ -20,6 +21,7 @@ import {
 export default function BookingClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const toast = useToast();
   const labId = searchParams.get("labId") ?? "";
   const testId = searchParams.get("testId") ?? "";
 
@@ -28,7 +30,6 @@ export default function BookingClient() {
   const [slots, setSlots] = useState<BookingAvailabilitySlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const requestKey = `${labId}:${testId}`;
 
@@ -36,12 +37,11 @@ export default function BookingClient() {
     let isMounted = true;
 
     if (!labId || !testId) {
-      setErrorMessage("Missing lab or test selection.");
+      toast.error("Missing lab or test selection.");
       return;
     }
 
     setIsLoading(true);
-    setErrorMessage(null);
 
     Promise.all([
       fetchPublicLabDetail(labId),
@@ -60,7 +60,7 @@ export default function BookingClient() {
           router.push("/login");
           return;
         }
-        setErrorMessage("Unable to load booking data. Please try again.");
+        toast.error("Unable to load booking data. Please try again.");
         setLab(null);
         setTest(null);
         setSlots([]);
@@ -73,6 +73,7 @@ export default function BookingClient() {
     return () => {
       isMounted = false;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [labId, requestKey, router, testId]);
 
   const onSubmit = async (payload: {
@@ -83,7 +84,6 @@ export default function BookingClient() {
   }) => {
     if (!labId || !testId) return;
     setIsSubmitting(true);
-    setErrorMessage(null);
 
     try {
       await createBooking({
@@ -101,13 +101,13 @@ export default function BookingClient() {
           throw error;
         }
         if (error.status === 409) {
-          setErrorMessage("Selected slot is no longer available. Please pick another slot.");
+          toast.error("Selected slot is no longer available. Please pick another slot.");
           const refreshed = await fetchBookingAvailability({ labId, testId, days: 7 });
           setSlots(refreshed.items);
           throw error;
         }
       }
-      setErrorMessage("Could not create booking. Please review your details and try again.");
+      toast.error("Could not create booking. Please review your details and try again.");
       throw error;
     } finally {
       setIsSubmitting(false);
@@ -126,7 +126,6 @@ export default function BookingClient() {
       slots={orderedSlots}
       isLoading={isLoading}
       isSubmitting={isSubmitting}
-      errorMessage={errorMessage}
       onBack={() => {
         if (labId) {
           router.push(`/labs/${labId}`);

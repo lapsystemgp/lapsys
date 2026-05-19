@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useToast } from "../ToastProvider";
 import {
   CartesianGrid,
   Line,
@@ -227,16 +228,15 @@ type Props = {
 };
 
 export function HealthTrendsPanel({ onUnauthorized }: Props) {
+  const toast = useToast();
   const [range, setRange] = useState<HealthProfileRange>("12m");
   const [groupBy, setGroupBy] = useState<HealthProfileGroupBy>("analyte");
   const [data, setData] = useState<PatientHealthProfileResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(
     async (nextRange: HealthProfileRange, nextGroup: HealthProfileGroupBy) => {
       setLoading(true);
-      setError(null);
       try {
         const response = await fetchPatientHealthProfile(nextRange, nextGroup);
         setData(response);
@@ -245,12 +245,12 @@ export function HealthTrendsPanel({ onUnauthorized }: Props) {
           onUnauthorized();
           return;
         }
-        setError("Unable to load health trends.");
+        toast.error("Unable to load health trends.");
       } finally {
         setLoading(false);
       }
     },
-    [onUnauthorized],
+    [onUnauthorized, toast],
   );
 
   useEffect(() => {
@@ -324,7 +324,6 @@ export function HealthTrendsPanel({ onUnauthorized }: Props) {
         </div>
       </div>
 
-      {error && <p className="text-red-600">{error}</p>}
       {loading && <p className="text-gray-600">Loading trends...</p>}
 
       {data && (

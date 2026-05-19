@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useToast } from "../../components/ToastProvider";
 import { ArrowLeft, CheckCircle, Clock, Home, MapPin, Package } from "lucide-react";
 import type { PaymentMethod } from "../../lib/bookingsApi";
 import type { PublicLabCard, PublicTestResponse } from "../../lib/publicApi";
@@ -16,7 +17,6 @@ interface BookingPageProps {
   slots: DisplaySlot[];
   isLoading?: boolean;
   isSubmitting?: boolean;
-  errorMessage?: string | null;
   onBack: () => void;
   onComplete: () => void;
   onSubmit: (payload: {
@@ -47,7 +47,6 @@ export function BookingPage({
   slots,
   isLoading,
   isSubmitting,
-  errorMessage,
   onBack,
   onComplete,
   onSubmit,
@@ -57,8 +56,8 @@ export function BookingPage({
   const [selectedSlotId, setSelectedSlotId] = useState("");
   const [homeAddress, setHomeAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("Online");
+  const toast = useToast();
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [localError, setLocalError] = useState<string | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -152,13 +151,12 @@ export function BookingPage({
   const basePrice = test?.priceEgp ?? lab.startingFromEgp ?? 0;
 
   const handleBooking = async () => {
-    setLocalError(null);
     if (bookingType !== "kit" && !effectiveSelectedSlotId) {
-      setLocalError("Please select a time slot.");
+      toast.error("Please select a time slot.");
       return;
     }
     if ((bookingType === "home" || bookingType === "kit") && !homeAddress.trim()) {
-      setLocalError("Delivery address is required.");
+      toast.error("Delivery address is required.");
       return;
     }
 
@@ -464,7 +462,6 @@ export function BookingPage({
               </span>
             </div>
           </div>
-          {(localError || errorMessage) && <p className="text-red-600 mb-4">{localError || errorMessage}</p>}
           <button
             onClick={handleBooking}
             disabled={(bookingType !== "kit" && !effectiveSelectedSlotId) || !!isSubmitting}

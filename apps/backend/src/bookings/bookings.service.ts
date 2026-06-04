@@ -71,7 +71,7 @@ export class BookingsService {
     // shift the boundary and mis-bucket or drop slots near midnight.
     const dateFrom = query.dateFrom
       ? new Date(`${query.dateFrom}T00:00:00Z`)
-      : new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00Z');
+      : new Date();
     const endDate = new Date(dateFrom);
     endDate.setUTCDate(endDate.getUTCDate() + days);
 

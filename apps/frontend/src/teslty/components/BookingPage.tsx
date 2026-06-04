@@ -86,7 +86,12 @@ export function BookingPage({
   }, [dates, selectedDate]);
 
   const timeSlotsForDate = useMemo(
-    () => slots.filter((slot) => toDateKey(slot.startsAt) === effectiveSelectedDate),
+    () =>
+      slots.filter(
+        (slot) =>
+          toDateKey(slot.startsAt) === effectiveSelectedDate &&
+          new Date(slot.startsAt) > new Date(),
+      ),
     [effectiveSelectedDate, slots],
   );
 

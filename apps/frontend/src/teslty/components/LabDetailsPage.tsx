@@ -131,10 +131,12 @@ export function LabDetailsPage({ lab, tests, isLoading, timeSlots, onBack, onBoo
                   <span className="text-xl">{lab.rating ?? '—'}</span>
                   <span>({lab.reviews} reviews)</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <MapPin className="w-5 h-5" />
-                  <span>{lab.distanceKm} km away</span>
-                </div>
+                {lab.distanceKm !== null && (
+                  <div className="flex items-center gap-1">
+                    <MapPin className="w-5 h-5" />
+                    <span>{lab.distanceKm} km away</span>
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-2 text-gray-600 mb-4">
                 <MapPin className="w-5 h-5" />

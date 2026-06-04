@@ -10,7 +10,7 @@ export type PublicLabCard = {
   homeTestKit: boolean;
   rating: number | null;
   reviews: number;
-  distanceKm: number;
+  distanceKm: number | null;
   testsAvailable: number;
   startingFromEgp: number | null;
   priceForQueryEgp: number | null;
@@ -57,6 +57,42 @@ export type PublicTestResponse = {
   };
 };
 
+export type PublicTestCard = {
+  name: string;
+  category: string;
+  minPriceEgp: number | null;
+  labCount: number;
+};
+
+export type PublicTestListResponse = {
+  items: PublicTestCard[];
+  pagination: { page: number; pageSize: number; totalCount: number };
+};
+
+export type TestOfferLab = {
+  labTestId: string;
+  labId: string;
+  labName: string;
+  address: string;
+  priceEgp: number;
+  rating: number | null;
+  reviews: number;
+  homeCollection: boolean;
+  homeTestKit: boolean;
+  accreditation: string | null;
+  turnaroundTime: string | null;
+};
+
+export type TestOffersResponse = {
+  name: string;
+  category: string;
+  description: string | null;
+  preparation: string | null;
+  turnaroundTime: string | null;
+  parametersCount: number | null;
+  labs: TestOfferLab[];
+};
+
 function toQueryString(params: Record<string, string | number | boolean | undefined | null>) {
   const searchParams = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
@@ -70,6 +106,7 @@ function toQueryString(params: Record<string, string | number | boolean | undefi
 export async function fetchPublicLabs(params: {
   q?: string;
   labName?: string;
+  city?: string;
   sort?: "price" | "rating" | "distance";
   minRating?: number;
   maxDistanceKm?: number;
@@ -85,6 +122,7 @@ export async function fetchPublicLabs(params: {
     `/public/labs${toQueryString({
       q: params.q,
       labName: params.labName,
+      city: params.city,
       sort: params.sort,
       minRating: params.minRating,
       maxDistanceKm: params.maxDistanceKm,
@@ -112,5 +150,17 @@ export async function fetchPublicLabDetail(labId: string, params?: { q?: string;
 
 export async function fetchPublicTest(labTestId: string) {
   return await apiFetch<PublicTestResponse>(`/public/tests/${encodeURIComponent(labTestId)}`);
+}
+
+export async function fetchPublicTests(params: { q?: string; page?: number; pageSize?: number }) {
+  return await apiFetch<PublicTestListResponse>(
+    `/public/tests${toQueryString({ q: params.q, page: params.page, pageSize: params.pageSize })}`,
+  );
+}
+
+export async function fetchTestOffers(params: { name: string; category?: string }) {
+  return await apiFetch<TestOffersResponse>(
+    `/public/tests/by-name${toQueryString({ name: params.name, category: params.category })}`,
+  );
 }
 

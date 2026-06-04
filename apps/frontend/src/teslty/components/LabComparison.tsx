@@ -6,15 +6,17 @@ import { Breadcrumb } from '../../components/Breadcrumb';
 interface LabComparisonProps {
   searchQuery: string;
   initialSort?: 'price' | 'rating' | 'distance';
+  initialCity?: string;
   onLabSelect: (lab: PublicLabCard) => void;
   onBack: () => void;
 }
 
-export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect, onBack }: LabComparisonProps) {
+export function LabComparison({ searchQuery, initialSort = 'price', initialCity = '', onLabSelect, onBack }: LabComparisonProps) {
   const [sortBy, setSortBy] = useState<'price' | 'rating' | 'distance'>(initialSort);
   const [showFilters, setShowFilters] = useState(false);
   const [homeCollectionOnly, setHomeCollectionOnly] = useState(false);
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
+  const [localCity, setLocalCity] = useState(initialCity);
   const [minRating, setMinRating] = useState(0);
   const [maxDistance, setMaxDistance] = useState(10);
   const [maxPrice, setMaxPrice] = useState(1000);
@@ -42,6 +44,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect,
     () =>
       JSON.stringify({
         localSearchQuery,
+        localCity,
         sortBy,
         homeCollectionOnly,
         minRating,
@@ -50,7 +53,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect,
         selectedAccreditations,
         userLocation,
       }),
-    [homeCollectionOnly, localSearchQuery, maxDistance, maxPrice, minRating, selectedAccreditations, sortBy, userLocation],
+    [homeCollectionOnly, localCity, localSearchQuery, maxDistance, maxPrice, minRating, selectedAccreditations, sortBy, userLocation],
   );
 
   const isLoading = lastResolvedKey !== '' && lastResolvedKey !== requestKey;
@@ -63,6 +66,10 @@ export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect,
   useEffect(() => {
     setLocalSearchQuery(searchQuery);
   }, [searchQuery]);
+
+  useEffect(() => {
+    setLocalCity(initialCity);
+  }, [initialCity]);
 
   const effectiveSearchQuery = localSearchQuery.trim();
 
@@ -82,9 +89,10 @@ export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect,
     let isMounted = true;
     fetchPublicLabs({
       q: effectiveSearchQuery || undefined,
+      city: localCity.trim() || undefined,
       sort: sortBy,
       minRating: minRating > 0 ? minRating : undefined,
-      maxDistanceKm: maxDistance < 10 ? maxDistance : undefined,
+      maxDistanceKm: userLocation && maxDistance < 10 ? maxDistance : undefined,
       maxPriceEgp: maxPrice < 1000 ? maxPrice : undefined,
       homeCollection: homeCollectionOnly ? true : undefined,
       accreditations: selectedAccreditations.length > 0 ? selectedAccreditations : undefined,
@@ -336,16 +344,28 @@ export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect,
                 </div>
               )}
               
-              {/* Search Input */}
-              <div className="relative">
-                <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={localSearchQuery}
-                  onChange={(e) => setLocalSearchQuery(e.target.value)}
-                  placeholder="Search labs or tests..."
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              {/* Search Inputs */}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                  <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={localSearchQuery}
+                    onChange={(e) => setLocalSearchQuery(e.target.value)}
+                    placeholder="Search labs or tests..."
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="relative sm:w-52">
+                  <MapPin className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={localCity}
+                    onChange={(e) => setLocalCity(e.target.value)}
+                    placeholder="Filter by city…"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
               </div>
             </div>
 
@@ -418,10 +438,12 @@ export function LabComparison({ searchQuery, initialSort = 'price', onLabSelect,
                             <span>{lab.rating ?? '—'}</span>
                             <span>({lab.reviews} reviews)</span>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            <span>{lab.distanceKm} km away</span>
-                          </div>
+                          {lab.distanceKm !== null && (
+                            <div className="flex items-center gap-1">
+                              <MapPin className="w-4 h-4" />
+                              <span>{lab.distanceKm} km away</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="text-right">

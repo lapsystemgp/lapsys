@@ -118,6 +118,7 @@ model LabProfile {
   home_collection   Boolean             @default(false)
   home_test_kit     Boolean             @default(false)
   onboarding_status LabOnboardingStatus @default(PendingReview)
+  city              String?
   latitude          Float?
   longitude         Float?
   rating_average    Float?

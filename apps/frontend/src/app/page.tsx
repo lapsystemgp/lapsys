@@ -63,10 +63,11 @@ export default function HomePage() {
 
   return (
     <LandingPage
-      onSearch={(query, sort) => {
+      onSearch={(query, sort, city) => {
         const params = new URLSearchParams();
         if (query.trim()) params.set('q', query.trim());
         if (sort && sort !== 'price') params.set('sort', sort);
+        if (city?.trim()) params.set('city', city.trim());
         const qs = params.toString();
         router.push(`/labs${qs ? `?${qs}` : ''}`);
       }}

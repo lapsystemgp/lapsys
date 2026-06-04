@@ -5,7 +5,7 @@ import type { Page, UserRole } from '../types';
 import { fetchPublicLabs, type PublicLabCard } from '../../lib/publicApi';
 
 interface LandingPageProps {
-  onSearch: (query: string, sort?: 'price' | 'rating' | 'distance') => void;
+  onSearch: (query: string, sort?: 'price' | 'rating' | 'distance', city?: string) => void;
   onNavigate: (page: Page) => void;
   userRole?: UserRole;
   currentUserLabel?: string;
@@ -15,12 +15,13 @@ interface LandingPageProps {
 
 export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, onLogout, onLabSelect }: LandingPageProps) {
   const [searchInput, setSearchInput] = useState('');
+  const [cityInput, setCityInput] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [featuredLabs, setFeaturedLabs] = useState<PublicLabCard[]>([]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(searchInput);
+    onSearch(searchInput, undefined, cityInput.trim() || undefined);
   };
 
   useEffect(() => {
@@ -161,21 +162,35 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
 
             {/* Search Bar */}
             <form onSubmit={handleSubmit} className="animate-slide-up animation-delay-300 max-w-2xl mx-auto">
-              <div className="bg-white rounded-full shadow-lg flex items-center px-4 sm:px-6 py-3 sm:py-4">
-                <Search className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 flex-shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Enter test name or symptoms"
-                  className="flex-1 px-3 sm:px-4 outline-none text-sm sm:text-base"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                />
-                <button
-                  type="submit"
-                  className="px-4 sm:px-8 py-2 sm:py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 text-sm sm:text-base flex-shrink-0"
-                >
-                  Search
-                </button>
+              <div className="bg-white rounded-2xl shadow-lg flex flex-col sm:flex-row gap-0">
+                <div className="flex items-center flex-1 px-4 py-3 sm:py-4">
+                  <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Test name or symptoms"
+                    className="flex-1 px-3 outline-none text-sm sm:text-base"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                  />
+                </div>
+                <div className="flex items-center sm:w-44 px-4 py-3 sm:py-4 border-t sm:border-t-0 sm:border-l border-gray-200">
+                  <MapPin className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="City (optional)"
+                    className="flex-1 px-3 outline-none text-sm sm:text-base"
+                    value={cityInput}
+                    onChange={(e) => setCityInput(e.target.value)}
+                  />
+                </div>
+                <div className="px-3 py-2 sm:py-2 flex items-center">
+                  <button
+                    type="submit"
+                    className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 text-sm sm:text-base"
+                  >
+                    Search
+                  </button>
+                </div>
               </div>
             </form>
 
@@ -303,10 +318,12 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
                     <span className="text-gray-500">({lab.reviews})</span>
                   </div>
                   <div className="space-y-1.5 mb-3 text-gray-600 text-sm">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 flex-shrink-0" />
-                      <span className="truncate">{lab.distanceKm} km away</span>
-                    </div>
+                    {lab.distanceKm !== null && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 flex-shrink-0" />
+                        <span className="truncate">{lab.distanceKm} km away</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-2">
                       <TestTube className="w-4 h-4 flex-shrink-0" />
                       <span>{lab.testsAvailable} tests</span>

@@ -1118,7 +1118,7 @@ async function main() {
 
   // ── Create schedule slots for the next 7 days ───────────────────────────
   const baseDate = new Date();
-  const slotData: Parameters<typeof prisma.labScheduleSlot.createMany>[0]['data'] = [];
+  const slotData: Prisma.LabScheduleSlotCreateManyInput[] = [];
 
   for (const { profile, data } of labProfiles) {
     for (let day = 1; day <= 7; day++) {

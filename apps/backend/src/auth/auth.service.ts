@@ -88,15 +88,14 @@ export class AuthService {
       where: { email: normalizedEmail },
     });
 
-    if (
-      user &&
-      (await bcrypt.compare(loginDto.password, user.password_hash)) &&
-      this.matchesSelectedRole(user.role, loginDto.selectedRole)
-    ) {
-      const { password_hash, ...result } = user;
-      return result;
+    if (!user) return null;
+    const passwordValid = await bcrypt.compare(loginDto.password, user.password_hash);
+    if (!passwordValid) return null;
+    if (!this.matchesSelectedRole(user.role, loginDto.selectedRole)) {
+      return { wrongRole: true as const };
     }
-    return null;
+    const { password_hash, ...result } = user;
+    return result;
   }
 
   private matchesSelectedRole(role: Role, selectedRole: LoginDto['selectedRole']) {

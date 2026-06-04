@@ -10,10 +10,17 @@ import { AuditLogService } from '../common/services/audit-log.service';
 @Module({
   imports: [
     PassportModule,
-    JwtModule.register({
-      global: true,
-      secret: process.env.JWT_SECRET || 'super_secret',
-      signOptions: { expiresIn: '1h' },
+    JwtModule.registerAsync({
+      useFactory: () => {
+        if (!process.env.JWT_SECRET) {
+          throw new Error('JWT_SECRET environment variable is required');
+        }
+        return {
+          global: true,
+          secret: process.env.JWT_SECRET,
+          signOptions: { expiresIn: '8h' },
+        };
+      },
     }),
   ],
   controllers: [AuthController],

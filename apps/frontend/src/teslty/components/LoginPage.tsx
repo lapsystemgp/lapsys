@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, TestTube, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { API_BASE_URL } from '../../lib/api';
 import { useSession } from '../../components/SessionProvider';
@@ -11,15 +11,25 @@ interface LoginPageProps {
   onBack: () => void;
   defaultMode?: 'login' | 'register';
   onAuthenticated?: (params: { role: 'patient' | 'lab' | 'admin'; lab_onboarding_status?: string | null }) => void;
+  sessionExpired?: boolean;
 }
 
-export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthenticated }: LoginPageProps) {
+export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthenticated, sessionExpired }: LoginPageProps) {
   const showDemoCredentials =
     process.env.NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS === 'true' ||
     (process.env.NODE_ENV !== 'production' &&
       process.env.NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS !== 'false');
 
   const toast = useToast();
+
+  useEffect(() => {
+    if (sessionExpired) {
+      toast.error('Your session has expired. Please sign in again.');
+    }
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [isSignup, setIsSignup] = useState(defaultMode === 'register');
   const [userType, setUserType] = useState<'patient' | 'lab' | 'admin'>('patient');
   const [email, setEmail] = useState('');

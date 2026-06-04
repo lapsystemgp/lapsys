@@ -8,7 +8,7 @@ function toUnauthorizedReason(labStatus: unknown) {
   return 'pending_review';
 }
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value;
 
   if (!token) {
@@ -17,6 +17,14 @@ export function proxy(request: NextRequest) {
 
   try {
     const payload = decodeJwt(token);
+
+    const exp = payload.exp;
+    if (exp && Math.floor(Date.now() / 1000) > exp) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('reason', 'expired');
+      return NextResponse.redirect(loginUrl);
+    }
+
     const role = payload.role;
     const labStatus = payload.lab_onboarding_status;
 

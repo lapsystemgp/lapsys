@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LoginPage } from "../../../teslty/components/LoginPage";
 
 function labUnauthorizedReason(status?: string | null) {
@@ -9,12 +10,15 @@ function labUnauthorizedReason(status?: string | null) {
   return "pending_review";
 }
 
-export default function LoginRoute() {
+function LoginRouteInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const sessionExpired = searchParams.get("reason") === "expired";
 
   return (
     <LoginPage
       defaultMode="login"
+      sessionExpired={sessionExpired}
       onBack={() => router.push("/")}
       onAuthenticated={({ role, lab_onboarding_status }) => {
         if (role === "lab" && lab_onboarding_status !== "Active") {
@@ -43,5 +47,13 @@ export default function LoginRoute() {
         router.push("/patient/dashboard");
       }}
     />
+  );
+}
+
+export default function LoginRoute() {
+  return (
+    <Suspense>
+      <LoginRouteInner />
+    </Suspense>
   );
 }

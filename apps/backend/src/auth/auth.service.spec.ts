@@ -110,7 +110,7 @@ describe('AuthService', () => {
 
       const result = await service.validateUser(dto);
       expect(result).not.toBeNull();
-      if (result) {
+      if (result && !('wrongRole' in result)) {
         expect(result.email).toEqual(dto.email);
         // @ts-expect-error - testing that password_hash is indeed omitted
         expect(result.password_hash).toBeUndefined();
@@ -131,7 +131,7 @@ describe('AuthService', () => {
       expect(result).toBeNull();
     });
 
-    it('should return null when the selected role does not match the account role', async () => {
+    it('should return { wrongRole: true } when the selected role does not match the account role', async () => {
       const dto = { email: 'lab@example.com', password: 'password123', selectedRole: 'patient' as const };
       const password_hash = await bcrypt.hash(dto.password, 10);
       mockPrismaService.user.findUnique.mockResolvedValue({
@@ -142,7 +142,7 @@ describe('AuthService', () => {
       });
 
       const result = await service.validateUser(dto);
-      expect(result).toBeNull();
+      expect(result).toEqual({ wrongRole: true });
     });
 
     it('should return admin user when selected role is admin', async () => {
@@ -157,7 +157,9 @@ describe('AuthService', () => {
 
       const result = await service.validateUser(dto);
       expect(result).not.toBeNull();
-      expect(result?.role).toBe(Role.Admin);
+      if (result && !('wrongRole' in result)) {
+        expect(result.role).toBe(Role.Admin);
+      }
     });
   });
 

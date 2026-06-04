@@ -20,6 +20,7 @@ import { AUTH_COOKIE_NAME } from './auth.constants';
 import { PatientRegisterDto } from './dto/patient-register.dto';
 import { LabRegisterDto } from './dto/lab-register.dto';
 import { AuditLogService } from '../common/services/audit-log.service';
+import { Role } from '@prisma/client';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -60,19 +61,25 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Login successful' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) response: Response) {
-    const user = await this.authService.validateUser(loginDto);
-    if (!user) {
+    const result = await this.authService.validateUser(loginDto);
+    if (!result) {
       throw new UnauthorizedException('Invalid credentials');
     }
+    if ('wrongRole' in result) {
+      throw new UnauthorizedException(
+        'Wrong account type. Please select the correct role for your account.',
+      );
+    }
 
-    const { access_token, user: userData } = await this.authService.login(user);
+    const { access_token, user: userData } = await this.authService.login(
+      result as { id: string; email: string; role: Role },
+    );
     this.auditLogService.log('auth.login', { userId: userData.id, role: userData.role });
-    
-    // Set HttpOnly cookie
+
     response.cookie(AUTH_COOKIE_NAME, access_token, {
       httpOnly: true,
       path: '/',
-      maxAge: 3600 * 1000, // 1 hour
+      maxAge: 8 * 3600 * 1000, // 8 hours
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
     });

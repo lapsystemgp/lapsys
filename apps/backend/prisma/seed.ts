@@ -1118,24 +1118,27 @@ async function main() {
 
   // ── Create schedule slots for the next 7 days ───────────────────────────
   const baseDate = new Date();
-  const scheduleSlots: Array<Awaited<ReturnType<typeof prisma.labScheduleSlot.create>>> = [];
+  const slotData: Parameters<typeof prisma.labScheduleSlot.createMany>[0]['data'] = [];
 
   for (const { profile, data } of labProfiles) {
     for (let day = 1; day <= 7; day++) {
       for (const time of data.timeSlots) {
-        const slot = await prisma.labScheduleSlot.create({
-          data: {
-            lab_profile_id: profile.id,
-            starts_at: toDateWithTime(baseDate, day, time),
-            ends_at: addMinutes(toDateWithTime(baseDate, day, time), 30),
-            capacity: 1,
-            is_active: true,
-          },
+        slotData.push({
+          lab_profile_id: profile.id,
+          starts_at: toDateWithTime(baseDate, day, time),
+          ends_at: addMinutes(toDateWithTime(baseDate, day, time), 30),
+          capacity: 1,
+          is_active: true,
         });
-        scheduleSlots.push(slot);
       }
     }
   }
+
+  await prisma.labScheduleSlot.createMany({ data: slotData });
+
+  const scheduleSlots = await prisma.labScheduleSlot.findMany({
+    where: { lab_profile_id: { in: labProfiles.map(({ profile }) => profile.id) } },
+  });
 
   // ── Demo bookings for Mazen ─────────────────────────────────────────────
   const patientProfileId = patientUser.patient_profile?.id;

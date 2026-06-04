@@ -332,20 +332,25 @@ export default function LabDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
+      {/* 1. Header */}
+      <header className="bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="space-y-1">
+            {/* 2. Back to Home button */}
             <button
               onClick={() => router.push("/")}
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150"
+              className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Home
             </button>
-            <h1 className="text-xl text-gray-900">Lab Workspace</h1>
-            <p className="text-sm text-gray-500">{workspace?.lab.name || user?.lab_profile?.lab_name || user?.email}</p>
+            {/* 3. Page title */}
+            <h1 className="text-xl font-bold text-gray-900">Lab Workspace</h1>
+            {/* 4. Lab name/email */}
+            <p className="text-sm font-medium text-gray-500">{workspace?.lab.name || user?.lab_profile?.lab_name || user?.email}</p>
           </div>
-          <button onClick={handleLogout} className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          {/* 5. Logout button */}
+          <button onClick={handleLogout} className="px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
             Logout
           </button>
         </div>
@@ -353,13 +358,14 @@ export default function LabDashboardPage() {
 
       <main className="max-w-7xl mx-auto px-4 py-5">
         <Breadcrumb items={[{ label: "Lab Dashboard" }]} className="mb-4" />
+        {/* 6. Tab pill buttons */}
         <div className="flex gap-1.5 mb-5 p-1 bg-white border border-gray-200 rounded-xl w-fit flex-wrap">
           {(["bookings", "tests", "results", "schedule", "analytics", "reviews", "settings"] as Tab[]).map((item) => (
             <button
               key={item}
               onClick={() => setTab(item)}
               className={`px-4 py-1.5 rounded-lg text-sm capitalize transition-all duration-150 ${
-                tab === item ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                tab === item ? "bg-blue-600 text-white shadow-sm font-semibold" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 font-medium"
               }`}
             >
               {item}
@@ -369,8 +375,9 @@ export default function LabDashboardPage() {
 
         {loading || !workspace ? (
           <div className="space-y-3">
+            {/* 7. Loading skeleton cards */}
             {[0, 1].map((i) => (
-              <div key={i} className={`bg-white rounded-xl border border-gray-200 p-5 shadow-sm animate-slide-up ${i === 1 ? 'animation-delay-100' : ''}`}>
+              <div key={i} className={`bg-white rounded-2xl border border-gray-100 p-5 shadow-sm animate-slide-up ${i === 1 ? 'animation-delay-100' : ''}`}>
                 <div className="flex items-start justify-between mb-3">
                   <div className="space-y-2">
                     <div className="skeleton h-5 w-36 rounded" />
@@ -390,19 +397,25 @@ export default function LabDashboardPage() {
             {tab === "bookings" && (
               <div key="bookings" className="space-y-3 animate-fade-in">
                 {[...bookingsByStatus.pending, ...bookingsByStatus.nonPending].map((booking) => (
-                  <div key={booking.id} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow duration-200">
+                  /* 8. Booking cards */
+                  <div key={booking.id} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow duration-200">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h2 className="text-lg text-gray-900">{booking.patient.fullName || "Patient"}</h2>
-                        <p className="text-gray-600">{booking.test.name}</p>
+                        {/* patient name h2 */}
+                        <h2 className="text-lg font-bold text-gray-900">{booking.patient.fullName || "Patient"}</h2>
+                        {/* test name p */}
+                        <p className="font-medium text-gray-600">{booking.test.name}</p>
                         <p className="text-gray-500">{formatDateTime(booking.scheduledAt)}</p>
                       </div>
-                      <span className={`px-3 py-1 rounded-full ${statusClass(booking.status)}`}>{booking.status}</span>
+                      {/* status badge */}
+                      <span className={`px-3 py-1 rounded-full font-medium ${statusClass(booking.status)}`}>{booking.status}</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm text-gray-700">
                       <div>
-                        <p className="text-gray-500">Type</p>
-                        <p>
+                        {/* field labels */}
+                        <p className="font-medium text-gray-500">Type</p>
+                        {/* field values */}
+                        <p className="font-semibold">
                           {booking.bookingType === "HomeCollection"
                             ? "Home Collection"
                             : booking.bookingType === "HomeTestKit"
@@ -411,19 +424,20 @@ export default function LabDashboardPage() {
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Phone</p>
-                        <p>{booking.patient.phone || "-"}</p>
+                        <p className="font-medium text-gray-500">Phone</p>
+                        <p className="font-semibold">{booking.patient.phone || "-"}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">{booking.bookingType === "HomeTestKit" ? "Delivery Address" : "Address"}</p>
-                        <p>{booking.homeAddress || workspace.lab.address}</p>
+                        <p className="font-medium text-gray-500">{booking.bookingType === "HomeTestKit" ? "Delivery Address" : "Address"}</p>
+                        <p className="font-semibold">{booking.homeAddress || workspace.lab.address}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Amount</p>
-                        <p>EGP {booking.totalPriceEgp}</p>
+                        <p className="font-medium text-gray-500">Amount</p>
+                        <p className="font-semibold">EGP {booking.totalPriceEgp}</p>
                       </div>
                     </div>
-                    <div className="mt-3 rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-800">
+                    {/* payment info div */}
+                    <div className="mt-3 rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-sm text-slate-800">
                       <span className="text-slate-500">Payment: </span>
                       {formatPaymentMethod(booking.paymentMethod)} ·{" "}
                       <span className="font-medium">{booking.paymentStatus}</span>
@@ -438,16 +452,18 @@ export default function LabDashboardPage() {
                     </div>
                     {booking.status === "Pending" && (
                       <div className="mt-4 flex flex-wrap gap-2">
+                        {/* Confirm button */}
                         <button
                           onClick={() => updateBookingStatus(booking.id, "Confirmed")}
                           disabled={
                             booking.paymentMethod === "Online" && booking.paymentStatus !== "Paid"
                           }
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                          className="px-4 py-2 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
                         >
                           Confirm
                         </button>
-                        <button onClick={() => updateBookingStatus(booking.id, "Rejected")} className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50">
+                        {/* Reject button */}
+                        <button onClick={() => updateBookingStatus(booking.id, "Rejected")} className="px-4 py-2 border border-red-300 text-red-600 font-medium rounded-xl hover:bg-red-50">
                           Reject
                         </button>
                       </div>
@@ -456,10 +472,11 @@ export default function LabDashboardPage() {
                       (booking.paymentMethod === "CashHomeCollection" || booking.paymentMethod === "CashLabVisit" || booking.paymentMethod === "CashOnDelivery") &&
                       booking.paymentStatus === "Pending" && (
                         <div className="mt-3">
+                          {/* "Record cash received" button */}
                           <button
                             onClick={() => handleMarkCash(booking.id)}
                             disabled={cashActionId === booking.id}
-                            className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50"
+                            className="px-4 py-2 border border-slate-300 rounded-lg font-medium hover:bg-slate-50 disabled:opacity-50"
                           >
                             {cashActionId === booking.id ? "Recording..." : "Record cash received (demo)"}
                           </button>
@@ -474,31 +491,34 @@ export default function LabDashboardPage() {
                               placeholder="Tracking number (optional)"
                               value={kitTrackingInputs[booking.id] ?? ""}
                               onChange={(e) => setKitTrackingInputs((prev) => ({ ...prev, [booking.id]: e.target.value }))}
-                              className="px-3 py-2 border border-gray-300 rounded-lg text-sm w-48"
+                              className="px-3 py-2 border border-gray-200 rounded-lg text-sm w-48"
                             />
+                            {/* Kit action button — Ship Kit */}
                             <button
                               onClick={() => handleKitStatus(booking.id, "Shipped", kitTrackingInputs[booking.id])}
                               disabled={kitActionId === booking.id}
-                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
+                              className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
                             >
                               {kitActionId === booking.id ? "Updating..." : "Ship Kit"}
                             </button>
                           </div>
                         )}
                         {booking.kitStatus === "Shipped" && (
+                          // Kit action button — Mark Kit Delivered
                           <button
                             onClick={() => handleKitStatus(booking.id, "Delivered")}
                             disabled={kitActionId === booking.id}
-                            className="px-4 py-2 border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 disabled:opacity-50 text-sm"
+                            className="px-4 py-2 border border-blue-300 text-blue-700 font-medium rounded-lg hover:bg-blue-50 disabled:opacity-50 text-sm"
                           >
                             {kitActionId === booking.id ? "Updating..." : "Mark Kit Delivered"}
                           </button>
                         )}
                         {booking.kitStatus === "Delivered" && (
+                          // Kit action button — Mark Sample Received
                           <button
                             onClick={() => handleKitStatus(booking.id, "SampleReceived")}
                             disabled={kitActionId === booking.id}
-                            className="px-4 py-2 border border-green-300 text-green-700 rounded-lg hover:bg-green-50 disabled:opacity-50 text-sm"
+                            className="px-4 py-2 border border-green-300 text-green-700 font-medium rounded-lg hover:bg-green-50 disabled:opacity-50 text-sm"
                           >
                             {kitActionId === booking.id ? "Updating..." : "Mark Sample Received"}
                           </button>
@@ -512,10 +532,11 @@ export default function LabDashboardPage() {
                       </div>
                     )}
                     <div className="mt-4 pt-4 border-t border-gray-100">
+                      {/* "Patient history & context" button — keep font-medium, change rounded-lg to rounded-xl */}
                       <button
                         type="button"
                         onClick={() => openPatientContext(booking.id)}
-                        className="px-4 py-2 border border-blue-300 text-blue-900 rounded-lg hover:bg-blue-50 text-sm font-medium"
+                        className="px-4 py-2 border border-blue-300 text-blue-900 rounded-xl hover:bg-blue-50 text-sm font-medium"
                       >
                         Patient history & context
                       </button>
@@ -527,48 +548,56 @@ export default function LabDashboardPage() {
 
             {tab === "tests" && (
               <div key="tests" className="space-y-3 animate-fade-in">
-                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                  <h2 className="text-lg text-gray-900 mb-3">Add Test</h2>
+                {/* 9. "Add Test" card */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                  {/* h2 "Add Test" */}
+                  <h2 className="text-lg font-bold text-gray-900 mb-3">Add Test</h2>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <input value={newTest.name} onChange={(e) => setNewTest((p) => ({ ...p, name: e.target.value }))} placeholder="Test name" className="px-3 py-2 border border-gray-300 rounded-lg" />
-                    <input value={newTest.category} onChange={(e) => setNewTest((p) => ({ ...p, category: e.target.value }))} placeholder="Category" className="px-3 py-2 border border-gray-300 rounded-lg" />
-                    <input value={newTest.priceEgp} onChange={(e) => setNewTest((p) => ({ ...p, priceEgp: e.target.value }))} placeholder="Price EGP" type="number" className="px-3 py-2 border border-gray-300 rounded-lg" />
-                    <button onClick={handleCreateTest} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Create</button>
+                    {/* input fields border-gray-200 */}
+                    <input value={newTest.name} onChange={(e) => setNewTest((p) => ({ ...p, name: e.target.value }))} placeholder="Test name" className="px-3 py-2 border border-gray-200 rounded-lg" />
+                    <input value={newTest.category} onChange={(e) => setNewTest((p) => ({ ...p, category: e.target.value }))} placeholder="Category" className="px-3 py-2 border border-gray-200 rounded-lg" />
+                    <input value={newTest.priceEgp} onChange={(e) => setNewTest((p) => ({ ...p, priceEgp: e.target.value }))} placeholder="Price EGP" type="number" className="px-3 py-2 border border-gray-200 rounded-lg" />
+                    {/* Create button */}
+                    <button onClick={handleCreateTest} className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700">Create</button>
                   </div>
                 </div>
                 <div className="space-y-3">
                   {workspace.tests.map((test) => (
-                    <div key={test.id} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                    // test item cards
+                    <div key={test.id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
                       {editingTestId === test.id ? (
                         <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
+                          {/* edit input fields border-gray-200 */}
                           <input
                             value={editingTest.name}
                             onChange={(e) => setEditingTest((prev) => ({ ...prev, name: e.target.value }))}
-                            className="px-3 py-2 border border-gray-300 rounded-lg"
+                            className="px-3 py-2 border border-gray-200 rounded-lg"
                             placeholder="Test name"
                           />
                           <input
                             value={editingTest.category}
                             onChange={(e) => setEditingTest((prev) => ({ ...prev, category: e.target.value }))}
-                            className="px-3 py-2 border border-gray-300 rounded-lg"
+                            className="px-3 py-2 border border-gray-200 rounded-lg"
                             placeholder="Category"
                           />
                           <input
                             type="number"
                             value={editingTest.priceEgp}
                             onChange={(e) => setEditingTest((prev) => ({ ...prev, priceEgp: e.target.value }))}
-                            className="px-3 py-2 border border-gray-300 rounded-lg"
+                            className="px-3 py-2 border border-gray-200 rounded-lg"
                             placeholder="Price EGP"
                           />
-                          <button onClick={handleSaveTest} className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                          {/* Save button */}
+                          <button onClick={handleSaveTest} className="px-3 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700">
                             Save
                           </button>
+                          {/* Cancel button */}
                           <button
                             onClick={() => {
                               setEditingTestId(null);
                               setEditingTest({ name: "", category: "", priceEgp: "" });
                             }}
-                            className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                            className="px-3 py-2 border border-gray-200 rounded-lg font-medium hover:bg-gray-50"
                           >
                             Cancel
                           </button>
@@ -576,23 +605,28 @@ export default function LabDashboardPage() {
                       ) : (
                         <div className="flex items-center justify-between gap-4">
                           <div>
-                            <p className="text-gray-900">{test.name}</p>
-                            <p className="text-sm text-gray-600">{test.category} - EGP {test.priceEgp}</p>
+                            {/* test name p */}
+                            <p className="font-semibold text-gray-900">{test.name}</p>
+                            {/* test category-price p */}
+                            <p className="text-sm font-medium text-gray-600">{test.category} - EGP {test.priceEgp}</p>
                           </div>
                           <div className="flex gap-2">
+                            {/* Edit button */}
                             <button
                               onClick={() => startEditingTest(test)}
-                              className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                              className="px-3 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50"
                             >
                               Edit
                             </button>
+                            {/* Delete button */}
                             <button
                               onClick={() => handleDeleteTest(test.id)}
-                              className="px-3 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50"
+                              className="px-3 py-2 border border-red-300 text-red-600 rounded-lg font-medium hover:bg-red-50"
                             >
                               Delete
                             </button>
-                            <button onClick={() => handleToggleTest(test.id, test.isActive)} className={`px-3 py-2 rounded-lg ${test.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
+                            {/* Active/Inactive button */}
+                            <button onClick={() => handleToggleTest(test.id, test.isActive)} className={`px-3 py-2 rounded-lg font-medium ${test.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
                               {test.isActive ? "Active" : "Inactive"}
                             </button>
                           </div>
@@ -611,10 +645,14 @@ export default function LabDashboardPage() {
                   .map((booking) => {
                     const state = uploadState[booking.id] ?? { summary: "", file: null };
                     return (
-                      <div key={booking.id} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-4">
-                        <h2 className="text-lg text-gray-900">{booking.test.name}</h2>
-                        <p className="text-sm text-gray-600">Patient: {booking.patient.fullName || "Patient"}</p>
+                      // 10. result cards
+                      <div key={booking.id} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-4">
+                        {/* test name h2 */}
+                        <h2 className="text-lg font-bold text-gray-900">{booking.test.name}</h2>
+                        {/* Patient: text */}
+                        <p className="text-sm font-medium text-gray-600">Patient: {booking.patient.fullName || "Patient"}</p>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          {/* input fields border-gray-200 */}
                           <input
                             type="file"
                             accept="application/pdf"
@@ -624,7 +662,7 @@ export default function LabDashboardPage() {
                                 [booking.id]: { summary: state.summary, file: event.target.files?.[0] || null },
                               }))
                             }
-                            className="px-3 py-2 border border-gray-300 rounded-lg"
+                            className="px-3 py-2 border border-gray-200 rounded-lg"
                           />
                           <input
                             value={state.summary}
@@ -635,14 +673,16 @@ export default function LabDashboardPage() {
                               }))
                             }
                             placeholder="Result summary"
-                            className="px-3 py-2 border border-gray-300 rounded-lg"
+                            className="px-3 py-2 border border-gray-200 rounded-lg"
                           />
-                          <button onClick={() => handleUploadResult(booking.id)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                          {/* Upload Result button */}
+                          <button onClick={() => handleUploadResult(booking.id)} className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700">
                             Upload Result
                           </button>
+                          {/* Mark Delivered button */}
                           <button
                             onClick={() => handleDeliverResult(booking.id)}
-                            className="px-4 py-2 border border-green-300 text-green-700 rounded-lg hover:bg-green-50"
+                            className="px-4 py-2 border border-green-300 text-green-700 font-semibold rounded-xl hover:bg-green-50"
                           >
                             Mark Delivered
                           </button>
@@ -663,23 +703,30 @@ export default function LabDashboardPage() {
 
             {tab === "schedule" && (
               <div key="schedule" className="space-y-3 animate-fade-in">
-                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                  <h2 className="text-lg text-gray-900 mb-3">Add Slot</h2>
+                {/* 11. "Add Slot" card */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                  {/* h2 Add Slot */}
+                  <h2 className="text-lg font-bold text-gray-900 mb-3">Add Slot</h2>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <input type="datetime-local" value={newSlot.startsAt} onChange={(e) => setNewSlot((p) => ({ ...p, startsAt: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg" />
-                    <input type="datetime-local" value={newSlot.endsAt} onChange={(e) => setNewSlot((p) => ({ ...p, endsAt: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg" />
-                    <input type="number" min={1} value={newSlot.capacity} onChange={(e) => setNewSlot((p) => ({ ...p, capacity: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg" />
-                    <button onClick={handleCreateSlot} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Create Slot</button>
+                    {/* input fields border-gray-200 */}
+                    <input type="datetime-local" value={newSlot.startsAt} onChange={(e) => setNewSlot((p) => ({ ...p, startsAt: e.target.value }))} className="px-3 py-2 border border-gray-200 rounded-lg" />
+                    <input type="datetime-local" value={newSlot.endsAt} onChange={(e) => setNewSlot((p) => ({ ...p, endsAt: e.target.value }))} className="px-3 py-2 border border-gray-200 rounded-lg" />
+                    <input type="number" min={1} value={newSlot.capacity} onChange={(e) => setNewSlot((p) => ({ ...p, capacity: e.target.value }))} className="px-3 py-2 border border-gray-200 rounded-lg" />
+                    {/* "Create Slot" button */}
+                    <button onClick={handleCreateSlot} className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700">Create Slot</button>
                   </div>
                 </div>
                 <div className="space-y-3">
                   {workspace.schedule.map((slot) => (
-                    <div key={slot.id} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex items-center justify-between gap-4">
+                    // slot cards
+                    <div key={slot.id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex items-center justify-between gap-4">
                       <div>
-                        <p className="text-gray-900">{formatDateTime(slot.startsAt)} - {formatDateTime(slot.endsAt)}</p>
+                        {/* slot time p */}
+                        <p className="font-medium text-gray-900">{formatDateTime(slot.startsAt)} - {formatDateTime(slot.endsAt)}</p>
                         <p className="text-sm text-gray-600">Capacity: {slot.capacity}</p>
                       </div>
-                      <button onClick={() => handleDeactivateSlot(slot.id)} className="px-3 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50">
+                      {/* "Deactivate" button */}
+                      <button onClick={() => handleDeactivateSlot(slot.id)} className="px-3 py-2 border border-red-300 text-red-600 font-medium rounded-lg hover:bg-red-50">
                         Deactivate
                       </button>
                     </div>
@@ -690,7 +737,8 @@ export default function LabDashboardPage() {
 
             {tab === "reviews" && (
               <div key="reviews" className="animate-fade-in">
-                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                {/* 13. Reviews tab */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
                   <div className="flex items-center gap-2 mb-5">
                     <MessageSquare className="w-5 h-5 text-blue-600" />
                     <h2 className="text-lg text-gray-900">Patient Reviews</h2>
@@ -701,7 +749,7 @@ export default function LabDashboardPage() {
                   {reviewsLoading ? (
                     <div className="space-y-3">
                       {[0, 1, 2].map((i) => (
-                        <div key={i} className="border border-gray-100 rounded-lg p-4">
+                        <div key={i} className="border border-gray-100 rounded-2xl p-4">
                           <div className="skeleton h-4 w-32 mb-2 rounded" />
                           <div className="skeleton h-4 w-full rounded" />
                         </div>
@@ -712,13 +760,14 @@ export default function LabDashboardPage() {
                   ) : (
                     <div className="space-y-3">
                       {reviewItems.map((review) => (
-                        <div key={review.id} className="border border-gray-100 rounded-lg p-4">
+                        <div key={review.id} className="border border-gray-100 rounded-2xl p-4">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
                               <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm">
                                 {review.patientName[0].toUpperCase()}
                               </div>
-                              <span className="text-gray-900">{review.patientName}</span>
+                              {/* reviewer name */}
+                              <span className="font-semibold text-gray-900">{review.patientName}</span>
                             </div>
                             <div className="flex items-center gap-0.5">
                               {[1, 2, 3, 4, 5].map((v) => (
@@ -740,8 +789,10 @@ export default function LabDashboardPage() {
 
             {tab === "settings" && (
               <div key="settings" className="space-y-3 max-w-lg animate-fade-in">
-                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                  <h2 className="text-lg text-gray-900 mb-1">Service Options</h2>
+                {/* 14. Settings tab */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                  {/* section heading */}
+                  <h2 className="text-lg font-bold text-gray-900 mb-1">Service Options</h2>
                   <p className="text-sm text-gray-500 mb-4">Control which collection types patients can book with your lab.</p>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -770,31 +821,34 @@ export default function LabDashboardPage() {
 
             {tab === "analytics" && (
               <div key="analytics" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 animate-fade-in">
-                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                  <p className="text-sm text-gray-500">Total Bookings</p>
-                  <p className="text-2xl text-gray-900">{workspace.analytics.totalBookings}</p>
+                {/* 12. Analytics stat cards */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                  {/* stat label */}
+                  <p className="text-sm font-medium text-gray-500">Total Bookings</p>
+                  {/* stat value */}
+                  <p className="text-2xl font-bold text-gray-900">{workspace.analytics.totalBookings}</p>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                  <p className="text-sm text-gray-500">Completed</p>
-                  <p className="text-2xl text-gray-900">{workspace.analytics.completedBookings}</p>
+                <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                  <p className="text-sm font-medium text-gray-500">Completed</p>
+                  <p className="text-2xl font-bold text-gray-900">{workspace.analytics.completedBookings}</p>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                  <p className="text-sm text-gray-500">Pending Results</p>
-                  <p className="text-2xl text-gray-900">{workspace.analytics.pendingResults}</p>
+                <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                  <p className="text-sm font-medium text-gray-500">Pending Results</p>
+                  <p className="text-2xl font-bold text-gray-900">{workspace.analytics.pendingResults}</p>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                  <p className="text-sm text-gray-500">Revenue Estimate</p>
-                  <p className="text-2xl text-gray-900">EGP {workspace.analytics.revenueEstimateEgp}</p>
+                <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                  <p className="text-sm font-medium text-gray-500">Revenue Estimate</p>
+                  <p className="text-2xl font-bold text-gray-900">EGP {workspace.analytics.revenueEstimateEgp}</p>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm md:col-span-2 lg:col-span-4">
-                  <p className="text-sm text-gray-500 mb-1.5">Capacity Usage</p>
-                  <p className="text-xl text-gray-900">{workspace.analytics.capacityUsagePercent}%</p>
+                <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm md:col-span-2 lg:col-span-4">
+                  <p className="text-sm font-medium text-gray-500 mb-1.5">Capacity Usage</p>
+                  <p className="text-xl font-bold text-gray-900">{workspace.analytics.capacityUsagePercent}%</p>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm md:col-span-2 lg:col-span-4">
-                  <p className="text-gray-500 mb-2">Top Tests</p>
+                <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm md:col-span-2 lg:col-span-4">
+                  <p className="font-medium text-gray-500 mb-2">Top Tests</p>
                   <div className="space-y-2">
                     {workspace.analytics.topTests.map((test) => (
-                      <p key={test.testId} className="text-gray-900">{test.testName}: {test.count}</p>
+                      <p key={test.testId} className="font-bold text-gray-900">{test.testName}: {test.count}</p>
                     ))}
                   </div>
                 </div>

@@ -66,7 +66,10 @@ export class PublicLabsController {
 
     const sort = (query.sort ?? 'price').toLowerCase();
     const minRating = clampFloat(query.minRating, { min: 0, max: 5, defaultValue: 0 });
-    const maxDistanceKm = clampFloat(query.maxDistanceKm, { min: 0.5, max: 50, defaultValue: 50 });
+    // Only apply distance filter when explicitly provided; otherwise show all labs
+    const maxDistanceKm = query.maxDistanceKm
+      ? clampFloat(query.maxDistanceKm, { min: 0.5, max: 500, defaultValue: 500 })
+      : Infinity;
     const userLat = clampFloat(query.userLat, { min: -90, max: 90, defaultValue: NaN });
     const userLng = clampFloat(query.userLng, { min: -180, max: 180, defaultValue: NaN });
     const hasUserLocation = Number.isFinite(userLat) && Number.isFinite(userLng);

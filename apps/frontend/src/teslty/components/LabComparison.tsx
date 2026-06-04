@@ -19,7 +19,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
   const [localCity, setLocalCity] = useState(initialCity);
   const [minRating, setMinRating] = useState(0);
-  const [maxDistance, setMaxDistance] = useState(10);
+  const [maxDistance, setMaxDistance] = useState(100);
   const [maxPrice, setMaxPrice] = useState(1000);
   const [selectedAccreditations, setSelectedAccreditations] = useState<string[]>([]);
   const [labs, setLabs] = useState<PublicLabCard[]>([]);
@@ -105,7 +105,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
       city: localCity.trim() || undefined,
       sort: sortBy,
       minRating: minRating > 0 ? minRating : undefined,
-      maxDistanceKm: userLocation && maxDistance < 10 ? maxDistance : undefined,
+      maxDistanceKm: userLocation && maxDistance < 100 ? maxDistance : undefined,
       maxPriceEgp: maxPrice < 1000 ? maxPrice : undefined,
       homeCollection: homeCollectionOnly ? true : undefined,
       accreditations: selectedAccreditations.length > 0 ? selectedAccreditations : undefined,
@@ -143,7 +143,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
   const clearAllFilters = () => {
     setHomeCollectionOnly(false);
     setMinRating(0);
-    setMaxDistance(10);
+    setMaxDistance(100);
     setMaxPrice(1000);
     setSelectedAccreditations([]);
   };
@@ -151,7 +151,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
   const activeFiltersCount =
     (homeCollectionOnly ? 1 : 0) +
     (minRating > 0 ? 1 : 0) +
-    (maxDistance < 10 ? 1 : 0) +
+    (maxDistance < 100 ? 1 : 0) +
     (maxPrice < 1000 ? 1 : 0) +
     selectedAccreditations.length;
 
@@ -416,15 +416,15 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
 
                       <div>
                         <label className="block text-gray-700 mb-2">
-                          Maximum Distance: {maxDistance < 10 ? `${maxDistance} km` : '10+ km'}
+                          Maximum Distance: {maxDistance < 100 ? `${maxDistance} km` : 'Any'}
                         </label>
                         <input
-                          type="range" min="1" max="10" step="0.5" value={maxDistance}
+                          type="range" min="5" max="100" step="5" value={maxDistance}
                           onChange={(e) => setMaxDistance(parseFloat(e.target.value))}
                           className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-blue-600"
                         />
                         <div className="flex justify-between text-gray-500 mt-1">
-                          <span>1 km</span><span>10+ km</span>
+                          <span>5 km</span><span>Any</span>
                         </div>
                       </div>
 

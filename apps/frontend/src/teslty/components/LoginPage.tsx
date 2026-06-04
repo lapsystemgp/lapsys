@@ -15,11 +15,6 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthenticated, sessionExpired }: LoginPageProps) {
-  const showDemoCredentials =
-    process.env.NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS === 'true' ||
-    (process.env.NODE_ENV !== 'production' &&
-      process.env.NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS !== 'false');
-
   const toast = useToast();
 
   useEffect(() => {
@@ -417,18 +412,6 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
                 </button>
               </p>
             </div>
-
-            {/* Demo Credentials (dev/demo only) */}
-            {showDemoCredentials && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
-                <p className="text-gray-700 mb-2">Demo Credentials:</p>
-                <div className="space-y-1 text-gray-600">
-                  <p>Patient: `patient@testly.com` / `password123`</p>
-                  <p>Lab: `alaflabs@testly.com` / `password123`</p>
-                  <p>Lab (Pending): `pendinglab@testly.com` / `password123`</p>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Security Badge */}

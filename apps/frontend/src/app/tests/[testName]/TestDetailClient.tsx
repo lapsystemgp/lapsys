@@ -64,7 +64,7 @@ export default function TestDetailClient() {
   const params = useParams();
   const searchParams = useSearchParams();
 
-  const testName = decodeURIComponent(params.testName as string);
+  const testName = params.testName as string;
   const category = searchParams.get("category") ?? undefined;
 
   const [data, setData] = useState<TestOffersResponse | null>(null);
@@ -97,8 +97,7 @@ export default function TestDetailClient() {
     return () => { isMounted = false; };
   }, [testName, category]);
 
-  // Request geolocation independently — updates sort/distance without refetching
-  useEffect(() => {
+  const requestLocation = () => {
     if (!navigator.geolocation) {
       setFilters((f) => (f.sort === "nearest" ? { ...f, sort: "price" } : f));
       return;
@@ -112,6 +111,22 @@ export default function TestDetailClient() {
       },
       { timeout: 8000 },
     );
+  };
+
+  // Request location on mount
+  useEffect(() => { requestLocation(); }, []);
+
+  // Watch for permission changes — auto-retry when user grants after initial denial
+  useEffect(() => {
+    if (!navigator.permissions) return;
+    let permStatus: PermissionStatus | null = null;
+    navigator.permissions.query({ name: "geolocation" }).then((status) => {
+      permStatus = status;
+      status.onchange = () => {
+        if (status.state === "granted") requestLocation();
+      };
+    }).catch(() => {});
+    return () => { if (permStatus) permStatus.onchange = null; };
   }, []);
 
   const preparations = data?.preparation

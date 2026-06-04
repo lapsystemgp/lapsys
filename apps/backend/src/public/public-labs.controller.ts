@@ -73,6 +73,7 @@ export class PublicLabsController {
     const userLat = clampFloat(query.userLat, { min: -90, max: 90, defaultValue: NaN });
     const userLng = clampFloat(query.userLng, { min: -180, max: 180, defaultValue: NaN });
     const hasUserLocation = Number.isFinite(userLat) && Number.isFinite(userLng);
+    const hasPriceFilter = query.maxPriceEgp !== undefined;
     const maxPriceEgp = clampInt(query.maxPriceEgp, { min: 0, max: 100_000, defaultValue: 100_000 });
 
     const homeCollection = parseBoolean(query.homeCollection);
@@ -203,10 +204,13 @@ export class PublicLabsController {
           imageEmoji: null,
         };
       })
-      .filter((card) => card.distanceKm === null || card.distanceKm <= maxDistanceKm)
+      .filter((card) => {
+        if (card.distanceKm === null) return maxDistanceKm === Infinity; // exclude un-geocoded labs when an explicit radius was supplied
+        return card.distanceKm <= maxDistanceKm;
+      })
       .filter((card) => {
         const effectivePrice = tokens.length > 0 ? card.priceForQueryEgp ?? card.startingFromEgp : card.startingFromEgp;
-        if (effectivePrice === null) return false;
+        if (effectivePrice === null) return !hasPriceFilter; // only drop null-price labs when a price filter was actually supplied
         return effectivePrice <= maxPriceEgp;
       });
 

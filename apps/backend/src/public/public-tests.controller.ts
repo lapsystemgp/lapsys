@@ -60,11 +60,12 @@ export class PublicTestsController {
     const category = (query.category ?? '').trim();
 
     if (!name) throw new NotFoundException('name param required');
+    if (!category) throw new NotFoundException('category param required');
 
     const tests = await this.prisma.labTest.findMany({
       where: {
         name: { equals: name, mode: 'insensitive' },
-        ...(category ? { category: { equals: category, mode: 'insensitive' } } : {}),
+        category: { equals: category, mode: 'insensitive' },
         is_active: true,
         lab_profile: { onboarding_status: LabOnboardingStatus.Active },
       },

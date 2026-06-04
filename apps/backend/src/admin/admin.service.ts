@@ -122,7 +122,10 @@ export class AdminService {
 
     const [totalBookings, revenueAggregate] = await Promise.all([
       this.prisma.booking.count(),
-      this.prisma.booking.aggregate({ _sum: { total_price_egp: true } }),
+      this.prisma.booking.aggregate({
+        _sum: { total_price_egp: true },
+        where: { payment_status: 'Paid' },
+      }),
     ]);
 
     return {

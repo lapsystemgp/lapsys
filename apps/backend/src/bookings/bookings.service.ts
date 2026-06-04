@@ -67,10 +67,13 @@ export class BookingsService {
 
   async getAvailability(query: AvailabilityQueryDto) {
     const days = query.days ?? 7;
-    const dateFrom = query.dateFrom ? new Date(`${query.dateFrom}T00:00:00`) : new Date();
-    dateFrom.setHours(0, 0, 0, 0);
+    // Build window bounds in UTC so server timezone (e.g. Cairo UTC+2/+3) doesn't
+    // shift the boundary and mis-bucket or drop slots near midnight.
+    const dateFrom = query.dateFrom
+      ? new Date(`${query.dateFrom}T00:00:00Z`)
+      : new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00Z');
     const endDate = new Date(dateFrom);
-    endDate.setDate(endDate.getDate() + days);
+    endDate.setUTCDate(endDate.getUTCDate() + days);
 
     const labTest = await this.prisma.labTest.findFirst({
       where: {
@@ -202,18 +205,6 @@ export class BookingsService {
         throw new BadRequestException('Selected slot must be in the future');
       }
 
-      const conflictingBooking = await this.prisma.booking.findFirst({
-        where: {
-          schedule_slot_id: slot.id,
-          status: { in: ACTIVE_SLOT_STATUSES },
-        },
-        select: { id: true },
-      });
-
-      if (conflictingBooking) {
-        throw new ConflictException('Selected slot is already booked');
-      }
-
       scheduledAt = slot.starts_at;
     }
 
@@ -223,28 +214,50 @@ export class BookingsService {
       (dto.bookingType === BookingType.HomeTestKit ? 150 : 0);
 
     const created = await this.prisma.$transaction(async (tx: any) => {
-      const booking = await tx.booking.create({
-        data: {
-          patient_profile_id: patientProfile.id,
-          lab_profile_id: test.lab_profile_id,
-          lab_test_id: test.id,
-          booking_type: dto.bookingType,
-          status: BookingStatus.Pending,
-          scheduled_at: scheduledAt,
-          home_address:
-            dto.bookingType === BookingType.HomeCollection || dto.bookingType === BookingType.HomeTestKit
-              ? normalizedAddress
-              : null,
-          total_price_egp: totalPrice,
-          payment_method: paymentMethod,
-          payment_status: PaymentStatus.Pending,
-          schedule_slot_id: slot?.id ?? null,
-          ...(dto.bookingType === BookingType.HomeTestKit
-            ? { kit_status: KitStatus.AwaitingShipment }
-            : {}),
-        },
-        include: this.bookingInclude(),
-      });
+      if (slot) {
+        const conflictingBooking = await tx.booking.findFirst({
+          where: {
+            schedule_slot_id: slot.id,
+            status: { in: ACTIVE_SLOT_STATUSES },
+          },
+          select: { id: true },
+        });
+
+        if (conflictingBooking) {
+          throw new ConflictException('Selected slot is already booked');
+        }
+      }
+
+      let booking: any;
+      try {
+        booking = await tx.booking.create({
+          data: {
+            patient_profile_id: patientProfile.id,
+            lab_profile_id: test.lab_profile_id,
+            lab_test_id: test.id,
+            booking_type: dto.bookingType,
+            status: BookingStatus.Pending,
+            scheduled_at: scheduledAt,
+            home_address:
+              dto.bookingType === BookingType.HomeCollection || dto.bookingType === BookingType.HomeTestKit
+                ? normalizedAddress
+                : null,
+            total_price_egp: totalPrice,
+            payment_method: paymentMethod,
+            payment_status: PaymentStatus.Pending,
+            schedule_slot_id: slot?.id ?? null,
+            ...(dto.bookingType === BookingType.HomeTestKit
+              ? { kit_status: KitStatus.AwaitingShipment }
+              : {}),
+          },
+          include: this.bookingInclude(),
+        });
+      } catch (err: any) {
+        if (err?.code === 'P2002') {
+          throw new ConflictException('Selected slot is already booked');
+        }
+        throw err;
+      }
 
       await tx.bookingStatusEvent.create({
         data: {
@@ -717,6 +730,8 @@ export class BookingsService {
         booking_type: true,
         kit_status: true,
         status: true,
+        payment_status: true,
+        payment_method: true,
       },
     });
 
@@ -729,6 +744,13 @@ export class BookingsService {
     }
     if (booking.status === BookingStatus.Cancelled || booking.status === BookingStatus.Rejected) {
       throw new BadRequestException('Cannot update kit status for cancelled or rejected bookings');
+    }
+    if (
+      dto.kitStatus === KitStatus.Shipped &&
+      booking.payment_method !== PaymentMethod.CashOnDelivery &&
+      booking.payment_status !== PaymentStatus.Paid
+    ) {
+      throw new BadRequestException('Cannot ship kit before payment is completed');
     }
 
     const ORDER: KitStatus[] = [

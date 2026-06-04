@@ -27,26 +27,44 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
   const [lastResolvedKey, setLastResolvedKey] = useState<string>('');
   const [testsLoaded, setTestsLoaded] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [locationStatus, setLocationStatus] = useState<'idle' | 'requesting' | 'granted' | 'denied'>('idle');
+  const [locationStatus, setLocationStatus] = useState<'idle' | 'requesting' | 'granted' | 'denied' | 'unavailable' | 'timeout'>('idle');
 
   const effectiveSearchQuery = localSearchQuery.trim();
   const [activeTab, setActiveTab] = useState<'tests' | 'labs'>(searchQuery.trim() ? 'tests' : 'labs');
 
-  // Request location once on mount — independent of sortBy
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setLocationStatus('denied');
-      return;
-    }
+  const requestLocation = () => {
+    if (!navigator.geolocation) { setLocationStatus('unavailable'); return; }
     setLocationStatus('requesting');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocationStatus('granted');
       },
-      () => setLocationStatus('denied'),
-      { timeout: 10000 },
+      (err) => {
+        // Distinguish the failure reason — a timeout or unavailable fix is NOT a denial
+        if (err.code === err.PERMISSION_DENIED) setLocationStatus('denied');
+        else if (err.code === err.TIMEOUT) setLocationStatus('timeout');
+        else setLocationStatus('unavailable');
+      },
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 },
     );
+  };
+
+  // Request location on mount
+  useEffect(() => { requestLocation(); }, []);
+
+  // Watch for permission changes (user grants after initial denial)
+  useEffect(() => {
+    if (!navigator.permissions) return;
+    let permStatus: PermissionStatus | null = null;
+    navigator.permissions.query({ name: 'geolocation' }).then((status) => {
+      permStatus = status;
+      status.onchange = () => {
+        if (status.state === 'granted') requestLocation();
+        if (status.state === 'denied') setLocationStatus('denied');
+      };
+    }).catch(() => {});
+    return () => { if (permStatus) permStatus.onchange = null; };
   }, []);
 
   const requestKey = useMemo(
@@ -470,6 +488,30 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                 <div className="flex items-center gap-2 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm mb-4">
                   <MapPin className="w-4 h-4 animate-pulse flex-shrink-0" />
                   Getting your location to sort by nearest…
+                </div>
+              )}
+              {sortBy === 'distance' && (locationStatus === 'denied' || locationStatus === 'timeout' || locationStatus === 'unavailable') && (
+                <div className="flex items-center justify-between gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm mb-4">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 flex-shrink-0" />
+                    {locationStatus === 'denied'
+                      ? 'Location access denied — enable location in your browser settings, then Retry.'
+                      : locationStatus === 'timeout'
+                        ? 'Timed out getting your location. Check your connection or GPS and Retry.'
+                        : "Couldn't determine your location right now. Please Retry."}
+                  </div>
+                  <button
+                    onClick={requestLocation}
+                    className="shrink-0 px-3 py-1 bg-amber-700 text-white rounded-md text-xs hover:bg-amber-800 transition-colors"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+              {sortBy === 'distance' && locationStatus === 'granted' && userLocation && (
+                <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm mb-4">
+                  <MapPin className="w-4 h-4 flex-shrink-0" />
+                  Using your location ({userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}) — sorted by nearest first.
                 </div>
               )}
 

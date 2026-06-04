@@ -3,8 +3,11 @@ import { AppShell } from "../components/AppShell";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Fullstack Monorepo App",
-  description: "Secure user authentication system",
+  title: {
+    default: "TesTly",
+    template: "%s | TesTly",
+  },
+  description: "Find and compare medical labs, book tests, and get results online.",
 };
 
 export default function RootLayout({

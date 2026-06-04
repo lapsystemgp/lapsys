@@ -253,22 +253,7 @@ export class PatientService {
         },
       });
 
-      const aggregate = await tx.review.aggregate({
-        where: {
-          lab_profile_id: booking.lab_profile_id,
-          status: ReviewStatus.Published,
-        },
-        _count: { _all: true },
-        _avg: { rating: true },
-      });
-
-      await tx.labProfile.update({
-        where: { id: booking.lab_profile_id },
-        data: {
-          review_count: aggregate._count._all ?? 0,
-          rating_average: aggregate._avg.rating ?? null,
-        },
-      });
+      await this.recomputeLabRating(tx, booking.lab_profile_id);
 
       return createdReview;
     });

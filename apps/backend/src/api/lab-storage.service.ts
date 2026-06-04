@@ -62,7 +62,7 @@ class LocalDiskLabStorageAdapter implements LabFileStorageAdapter {
     return {
       fileName: file.originalname || safeName,
       fileUrl: `/results/files/${safeName}`,
-      mimeType: file.mimetype || 'application/pdf',
+      mimeType: 'application/pdf',
       sizeBytes: file.size,
     };
   }
@@ -110,14 +110,14 @@ class S3CompatibleLabStorageAdapter implements LabFileStorageAdapter {
         Bucket: this.bucket,
         Key: objectKey,
         Body: file.buffer,
-        ContentType: file.mimetype || 'application/pdf',
+        ContentType: 'application/pdf',
       }),
     );
 
     return {
       fileName: file.originalname || path.basename(objectKey),
       fileUrl: this.resolveFileUrl(objectKey),
-      mimeType: file.mimetype || 'application/pdf',
+      mimeType: 'application/pdf',
       sizeBytes: file.size,
     };
   }

@@ -64,7 +64,7 @@ export default function TestDetailClient() {
   const params = useParams();
   const searchParams = useSearchParams();
 
-  const testName = params.testName as string;
+  const testName = decodeURIComponent(params.testName as string);
   const category = searchParams.get("category") ?? undefined;
 
   const [data, setData] = useState<TestOffersResponse | null>(null);

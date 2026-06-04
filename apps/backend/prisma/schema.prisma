@@ -131,6 +131,9 @@ model LabProfile {
   schedule_slots LabScheduleSlot[]
   bookings       Booking[]
   reviews        Review[]
+
+  @@index([city])
+  @@index([rating_average])
 }
 
 model LabTest {

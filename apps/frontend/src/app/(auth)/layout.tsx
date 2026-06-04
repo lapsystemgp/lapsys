@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Authentication',
+  title: 'Sign In',
 };
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {

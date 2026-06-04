@@ -12,6 +12,7 @@ import { createReadStream } from 'node:fs';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import type { Response } from 'express';
+import { ResultStatus } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -55,6 +56,13 @@ export class ResultsDownloadController {
       throw new ForbiddenException('Access denied');
     }
 
+    if (isPatient && !isAdmin && !isLabStaff) {
+      const { status } = resultFile;
+      if (status !== ResultStatus.Uploaded && status !== ResultStatus.Delivered) {
+        throw new ForbiddenException('Result is not yet available');
+      }
+    }
+
     const filePath = path.resolve(process.cwd(), 'uploads', 'results', safeName);
 
     try {
@@ -63,10 +71,11 @@ export class ResultsDownloadController {
       throw new NotFoundException('File not found on disk');
     }
 
-    res.setHeader('Content-Type', resultFile.mime_type || 'application/pdf');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader(
       'Content-Disposition',
-      `inline; filename="${resultFile.file_name.replace(/"/g, '')}"`,
+      `attachment; filename="${resultFile.file_name.replace(/"/g, '')}"`,
     );
     createReadStream(filePath).pipe(res);
   }

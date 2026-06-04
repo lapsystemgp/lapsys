@@ -54,7 +54,7 @@ export function BookingPage({
   onComplete,
   onSubmit,
 }: BookingPageProps) {
-  const [bookingType, setBookingType] = useState<"lab" | "home" | "kit">("lab");
+  const [bookingType, setBookingType] = useState<"lab" | "home" | "kit" | null>(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlotId, setSelectedSlotId] = useState("");
   const [homeAddress, setHomeAddress] = useState("");
@@ -154,6 +154,10 @@ export function BookingPage({
   const basePrice = test?.priceEgp ?? lab.startingFromEgp ?? 0;
 
   const handleBooking = async () => {
+    if (!bookingType) {
+      toast.error("Please choose a collection type.");
+      return;
+    }
     if (bookingType !== "kit" && !effectiveSelectedSlotId) {
       toast.error("Please select a time slot.");
       return;
@@ -441,6 +445,7 @@ export function BookingPage({
                   ? "Enter your full delivery address for the kit"
                   : "Enter your complete address for sample collection"
               }
+              maxLength={500}
               className="w-full px-4 py-3 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
               rows={3}
             />

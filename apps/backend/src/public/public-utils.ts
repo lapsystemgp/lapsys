@@ -26,21 +26,6 @@ export function parseCsv(value: unknown): string[] {
     .filter((part) => part.length > 0);
 }
 
-function hashStringToUint32(input: string) {
-  // djb2-ish, stable, fast, non-crypto
-  let hash = 5381;
-  for (let index = 0; index < input.length; index += 1) {
-    hash = (hash * 33) ^ input.charCodeAt(index);
-  }
-  return hash >>> 0;
-}
-
-export function placeholderDistanceKm(stableId: string) {
-  // 0.8km .. 12.0km (1 decimal)
-  const raw = hashStringToUint32(stableId) % 113; // 0..112
-  const km = 0.8 + raw / 10;
-  return Math.round(km * 10) / 10;
-}
 
 export function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;

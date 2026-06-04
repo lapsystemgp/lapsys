@@ -7,6 +7,9 @@ type PublicLabCard = {
   id: string;
   name: string;
   address: string;
+  city: string | null;
+  phone: string | null;
+  contactEmail: string | null;
   accreditation: string | null;
   turnaroundTime: string | null;
   homeCollection: boolean;
@@ -17,7 +20,7 @@ type PublicLabCard = {
   testsAvailable: number;
   startingFromEgp: number | null;
   priceForQueryEgp: number | null;
-  imageEmoji: string;
+  imageEmoji: string | null;
 };
 
 type PublicLabDetail = {
@@ -86,7 +89,7 @@ export class PublicLabsController {
 
     const baseLabs = await this.prisma.labProfile.findMany({
       where: baseLabWhere,
-      select: { id: true, lab_name: true, address: true, accreditation: true, turnaround_time: true, home_collection: true, home_test_kit: true, rating_average: true, review_count: true, latitude: true, longitude: true },
+      select: { id: true, lab_name: true, address: true, city: true, phone: true, accreditation: true, turnaround_time: true, home_collection: true, home_test_kit: true, rating_average: true, review_count: true, latitude: true, longitude: true },
     });
 
     if (baseLabs.length === 0) {
@@ -178,6 +181,9 @@ export class PublicLabsController {
           id: lab.id,
           name: lab.lab_name,
           address: lab.address,
+          city: lab.city ?? null,
+          phone: lab.phone ?? null,
+          contactEmail: null,
           accreditation: lab.accreditation ?? null,
           turnaroundTime: lab.turnaround_time ?? null,
           homeCollection: lab.home_collection,
@@ -237,12 +243,15 @@ export class PublicLabsController {
         id: true,
         lab_name: true,
         address: true,
+        city: true,
+        phone: true,
         accreditation: true,
         turnaround_time: true,
         home_collection: true,
         home_test_kit: true,
         rating_average: true,
         review_count: true,
+        user: { select: { email: true } },
       },
     });
 
@@ -298,6 +307,9 @@ export class PublicLabsController {
       id: lab.id,
       name: lab.lab_name,
       address: lab.address,
+      city: lab.city ?? null,
+      phone: lab.phone ?? null,
+      contactEmail: lab.user?.email ?? null,
       accreditation: lab.accreditation ?? null,
       turnaroundTime: lab.turnaround_time ?? null,
       homeCollection: lab.home_collection,

@@ -4,6 +4,9 @@ export type PublicLabCard = {
   id: string;
   name: string;
   address: string;
+  city: string | null;
+  phone: string | null;
+  contactEmail: string | null;
   accreditation: string | null;
   turnaroundTime: string | null;
   homeCollection: boolean;
@@ -14,7 +17,7 @@ export type PublicLabCard = {
   testsAvailable: number;
   startingFromEgp: number | null;
   priceForQueryEgp: number | null;
-  imageEmoji: string;
+  imageEmoji: string | null;
 };
 
 export type PublicLabListResponse = {
@@ -81,6 +84,7 @@ export type TestOfferLab = {
   homeTestKit: boolean;
   accreditation: string | null;
   turnaroundTime: string | null;
+  distanceKm: number | null;
 };
 
 export type TestOffersResponse = {
@@ -158,9 +162,9 @@ export async function fetchPublicTests(params: { q?: string; page?: number; page
   );
 }
 
-export async function fetchTestOffers(params: { name: string; category?: string }) {
+export async function fetchTestOffers(params: { name: string; category?: string; userLat?: number; userLng?: number }) {
   return await apiFetch<TestOffersResponse>(
-    `/public/tests/by-name${toQueryString({ name: params.name, category: params.category })}`,
+    `/public/tests/by-name${toQueryString({ name: params.name, category: params.category, userLat: params.userLat, userLng: params.userLng })}`,
   );
 }
 

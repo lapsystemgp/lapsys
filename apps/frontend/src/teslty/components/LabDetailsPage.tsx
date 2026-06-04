@@ -152,7 +152,7 @@ export function LabDetailsPage({ lab, tests, isLoading, timeSlots, onBack, onBoo
           </div>
 
           {/* Lab Details Grid */}
-          <div className="grid grid-cols-4 gap-6 pb-6 border-b border-gray-200 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pb-6 border-b border-gray-200 mb-6">
             <div>
               <div className="flex items-center gap-2 text-gray-500 mb-2">
                 <Award className="w-5 h-5" />
@@ -167,20 +167,24 @@ export function LabDetailsPage({ lab, tests, isLoading, timeSlots, onBack, onBoo
               </div>
               <div className="text-gray-900">{lab.turnaroundTime ?? '—'}</div>
             </div>
-            <div>
-              <div className="flex items-center gap-2 text-gray-500 mb-2">
-                <Phone className="w-5 h-5" />
-                <span>Contact</span>
+            {lab.phone && (
+              <div>
+                <div className="flex items-center gap-2 text-gray-500 mb-2">
+                  <Phone className="w-5 h-5" />
+                  <span>Contact</span>
+                </div>
+                <div className="text-gray-900">{lab.phone}</div>
               </div>
-              <div className="text-gray-900">+20 2 1234 5678</div>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 text-gray-500 mb-2">
-                <Mail className="w-5 h-5" />
-                <span>Email</span>
+            )}
+            {lab.contactEmail && (
+              <div>
+                <div className="flex items-center gap-2 text-gray-500 mb-2">
+                  <Mail className="w-5 h-5" />
+                  <span>Email</span>
+                </div>
+                <div className="text-gray-900">{lab.contactEmail}</div>
               </div>
-              <div className="text-gray-900">info@{lab.name.toLowerCase().replace(/\s+/g, '')}.com</div>
-            </div>
+            )}
           </div>
 
           {/* Available Time Slots */}

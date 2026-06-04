@@ -117,6 +117,45 @@ export class AdminService {
     };
   }
 
+  async getAggregateStats(userId: string) {
+    await this.assertAdmin(userId);
+
+    const [totalBookings, revenueAggregate] = await Promise.all([
+      this.prisma.booking.count(),
+      this.prisma.booking.aggregate({ _sum: { total_price_egp: true } }),
+    ]);
+
+    return {
+      totalBookings,
+      totalRevenueEgp: revenueAggregate._sum.total_price_egp ?? 0,
+    };
+  }
+
+  async listPatients(userId: string) {
+    await this.assertAdmin(userId);
+
+    const patients = await this.prisma.patientProfile.findMany({
+      orderBy: { created_at: 'desc' },
+      select: {
+        id: true,
+        full_name: true,
+        created_at: true,
+        user: { select: { email: true } },
+        _count: { select: { bookings: true } },
+      },
+    });
+
+    return {
+      items: patients.map((p) => ({
+        id: p.id,
+        name: p.full_name ?? null,
+        email: p.user.email,
+        bookingCount: p._count.bookings,
+        joinedAt: p.created_at.toISOString(),
+      })),
+    };
+  }
+
   async listRecentPayments(userId: string, limit?: number) {
     await this.assertAdmin(userId);
 

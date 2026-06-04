@@ -30,6 +30,16 @@ export class AdminController {
     return this.adminService.setLabOnboardingStatus(req.user?.id ?? '', labProfileId, dto);
   }
 
+  @Get('stats')
+  getAggregateStats(@Req() req: RequestWithUser) {
+    return this.adminService.getAggregateStats(req.user?.id ?? '');
+  }
+
+  @Get('patients')
+  listPatients(@Req() req: RequestWithUser) {
+    return this.adminService.listPatients(req.user?.id ?? '');
+  }
+
   @Get('payments/recent')
   listRecentPayments(@Req() req: RequestWithUser) {
     return this.adminService.listRecentPayments(req.user?.id ?? '');

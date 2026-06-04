@@ -85,3 +85,24 @@ export type AdminPaymentRecord = {
 export async function fetchAdminRecentPayments() {
   return await apiFetch<{ items: AdminPaymentRecord[] }>("/admin/payments/recent");
 }
+
+export type AdminAggregateStats = {
+  totalBookings: number;
+  totalRevenueEgp: number;
+};
+
+export async function fetchAdminAggregateStats() {
+  return await apiFetch<AdminAggregateStats>("/admin/stats");
+}
+
+export type AdminPatientRecord = {
+  id: string;
+  name: string | null;
+  email: string;
+  bookingCount: number;
+  joinedAt: string;
+};
+
+export async function fetchAdminPatients() {
+  return await apiFetch<{ items: AdminPatientRecord[] }>("/admin/patients");
+}

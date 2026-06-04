@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  AlertTriangle,
   BarChart2,
   CalendarDays,
   CheckCircle,
@@ -10,7 +9,6 @@ import {
   LogOut,
   Search,
   Shield,
-  ShieldCheck,
   Users,
   XCircle,
 } from "lucide-react";
@@ -19,17 +17,21 @@ import { useRouter } from "next/navigation";
 import { Breadcrumb } from "../../../components/Breadcrumb";
 import { ApiError } from "../../../lib/api";
 import {
+  fetchAdminAggregateStats,
+  fetchAdminPatients,
   fetchAdminRecentPayments,
   fetchAdminWorkspace,
   setAdminLabOnboardingStatus,
+  type AdminAggregateStats,
   type AdminLabOnboardingStatus,
+  type AdminPatientRecord,
   type AdminPaymentRecord,
   type AdminWorkspaceResponse,
 } from "../../../lib/adminApi";
 import { useSession } from "../../../components/SessionProvider";
 import { useToast } from "../../../components/ToastProvider";
 
-type Tab = "labApprovals" | "userManagement" | "allBookings" | "analytics" | "security";
+type Tab = "labApprovals" | "userManagement" | "allBookings" | "analytics";
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString("en-GB", {
@@ -59,7 +61,9 @@ export default function AdminDashboardPage() {
 
   const toast = useToast();
   const [workspace, setWorkspace] = useState<AdminWorkspaceResponse | null>(null);
+  const [aggregateStats, setAggregateStats] = useState<AdminAggregateStats | null>(null);
   const [paymentRows, setPaymentRows] = useState<AdminPaymentRecord[]>([]);
+  const [patients, setPatients] = useState<AdminPatientRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("labApprovals");
   const [labStatusFilter, setLabStatusFilter] = useState<"All" | AdminLabOnboardingStatus>("All");
@@ -67,15 +71,20 @@ export default function AdminDashboardPage() {
   const [userSearch, setUserSearch] = useState("");
   const [updatingLabId, setUpdatingLabId] = useState<string | null>(null);
   const [expandedLabId, setExpandedLabId] = useState<string | null>(null);
-  const [twoFaEnabled, setTwoFaEnabled] = useState(true);
-  const [rateLimitEnabled, setRateLimitEnabled] = useState(true);
 
   const loadWorkspace = useCallback(async () => {
     setLoading(true);
     try {
-      const [response, payments] = await Promise.all([fetchAdminWorkspace(), fetchAdminRecentPayments()]);
+      const [response, payments, stats, patientsRes] = await Promise.all([
+        fetchAdminWorkspace(),
+        fetchAdminRecentPayments(),
+        fetchAdminAggregateStats(),
+        fetchAdminPatients(),
+      ]);
       setWorkspace(response);
       setPaymentRows(payments.items);
+      setAggregateStats(stats);
+      setPatients(patientsRes.items);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) { router.push("/login"); return; }
       if (err instanceof ApiError && err.status === 403) { router.push("/unauthorized"); return; }
@@ -120,20 +129,6 @@ export default function AdminDashboardPage() {
     });
   }, [workspace, labStatusFilter, labSearch]);
 
-  // Derive unique patients from payment rows
-  const patients = useMemo(() => {
-    const map = new Map<string, { name: string | null; email: string; bookings: number; joined: string }>();
-    for (const row of paymentRows) {
-      const existing = map.get(row.patientEmail);
-      if (existing) {
-        existing.bookings += 1;
-      } else {
-        map.set(row.patientEmail, { name: row.patientName, email: row.patientEmail, bookings: 1, joined: row.createdAt });
-      }
-    }
-    return Array.from(map.values());
-  }, [paymentRows]);
-
   const filteredPatients = useMemo(() => {
     const q = userSearch.trim().toLowerCase();
     if (!q) return patients;
@@ -157,14 +152,11 @@ export default function AdminDashboardPage() {
     return Array.from(map.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 5);
   }, [paymentRows]);
 
-  const totalRevenue = useMemo(() => paymentRows.reduce((s, r) => s + r.totalPriceEgp, 0), [paymentRows]);
-
   const tabs: { key: Tab; label: string; icon: ReactNode; badge?: number }[] = [
     { key: "labApprovals", label: "Lab Approvals", icon: <FlaskConical className="w-4 h-4" />, badge: pendingCount || undefined },
     { key: "userManagement", label: "User Management", icon: <Users className="w-4 h-4" /> },
     { key: "allBookings", label: "All Bookings", icon: <CalendarDays className="w-4 h-4" /> },
     { key: "analytics", label: "Analytics", icon: <BarChart2 className="w-4 h-4" /> },
-    { key: "security", label: "Security", icon: <ShieldCheck className="w-4 h-4" /> },
   ];
 
   return (
@@ -198,8 +190,8 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
           <StatCard label="Total Labs" value={workspace?.stats.totalLabs ?? 0} />
           <StatCard label="Active Labs" value={workspace?.stats.activeLabs ?? 0} />
-          <StatCard label="Total Bookings" value={paymentRows.length} />
-          <StatCard label="Platform Revenue" value={`EGP ${(totalRevenue / 1000).toFixed(0)}K`} />
+          <StatCard label="Total Bookings" value={aggregateStats?.totalBookings ?? 0} />
+          <StatCard label="Platform Revenue" value={`EGP ${((aggregateStats?.totalRevenueEgp ?? 0) / 1000).toFixed(0)}K`} />
           <StatCard label="Pending Approvals" value={pendingCount} highlight />
         </div>
 
@@ -273,14 +265,6 @@ export default function AdminDashboardPage() {
               )}
               {activeTab === "allBookings" && <AllBookingsTab bookings={paymentRows} />}
               {activeTab === "analytics" && <AnalyticsTab topLabs={topLabs} topTests={topTests} />}
-              {activeTab === "security" && (
-                <SecurityTab
-                  twoFaEnabled={twoFaEnabled}
-                  onToggleTwoFa={() => setTwoFaEnabled((v) => !v)}
-                  rateLimitEnabled={rateLimitEnabled}
-                  onToggleRateLimit={() => setRateLimitEnabled((v) => !v)}
-                />
-              )}
             </div>
           </div>
         )}
@@ -300,22 +284,6 @@ function StatCard({ label, value, highlight }: { label: string; value: number | 
   );
 }
 
-function Toggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) {
-  return (
-    <button
-      onClick={onToggle}
-      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-        enabled ? "bg-violet-600" : "bg-gray-200"
-      }`}
-    >
-      <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-          enabled ? "translate-x-6" : "translate-x-1"
-        }`}
-      />
-    </button>
-  );
-}
 
 function LabStatusBadge({ status }: { status: AdminLabOnboardingStatus }) {
   const map: Record<AdminLabOnboardingStatus, string> = {
@@ -511,7 +479,7 @@ function UserManagementTab({
   searchQuery,
   onSearchChange,
 }: {
-  patients: { name: string | null; email: string; bookings: number; joined: string }[];
+  patients: AdminPatientRecord[];
   searchQuery: string;
   onSearchChange: (q: string) => void;
 }) {
@@ -531,7 +499,7 @@ function UserManagementTab({
       </div>
 
       {patients.length === 0 ? (
-        <p className="text-gray-400 text-sm py-8 text-center">No patient data available yet.</p>
+        <p className="text-gray-400 text-sm py-8 text-center">No patient accounts yet.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -541,27 +509,17 @@ function UserManagementTab({
                 <th className="pb-3 pr-4">Email</th>
                 <th className="pb-3 pr-4">Role</th>
                 <th className="pb-3 pr-4">Bookings</th>
-                <th className="pb-3 pr-4">Status</th>
-                <th className="pb-3 pr-4">Joined</th>
-                <th className="pb-3">Actions</th>
+                <th className="pb-3">Joined</th>
               </tr>
             </thead>
             <tbody>
               {patients.map((p) => (
-                <tr key={p.email} className="border-b border-gray-100 text-gray-800">
+                <tr key={p.id} className="border-b border-gray-100 text-gray-800">
                   <td className="py-3 pr-4 font-medium">{p.name ?? "—"}</td>
                   <td className="py-3 pr-4 text-gray-600">{p.email}</td>
                   <td className="py-3 pr-4">Patient</td>
-                  <td className="py-3 pr-4">{p.bookings}</td>
-                  <td className="py-3 pr-4">
-                    <span className="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-medium">
-                      Active
-                    </span>
-                  </td>
-                  <td className="py-3 pr-4 text-gray-500">{formatDate(p.joined)}</td>
-                  <td className="py-3">
-                    <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">View</button>
-                  </td>
+                  <td className="py-3 pr-4">{p.bookingCount}</td>
+                  <td className="py-3 text-gray-500">{formatDate(p.joinedAt)}</td>
                 </tr>
               ))}
             </tbody>
@@ -576,7 +534,8 @@ function UserManagementTab({
 function AllBookingsTab({ bookings }: { bookings: AdminPaymentRecord[] }) {
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-900 mb-5">All Platform Bookings</h2>
+      <h2 className="text-lg font-semibold text-gray-900 mb-1">Recent Bookings</h2>
+      <p className="text-xs text-gray-400 mb-5">Showing the {bookings.length} most recent bookings. Use the stat cards above for platform-wide totals.</p>
       {bookings.length === 0 ? (
         <p className="text-gray-400 text-sm py-8 text-center">No booking records yet.</p>
       ) : (
@@ -665,87 +624,3 @@ function AnalyticsTab({
   );
 }
 
-/* ── Security Tab ── */
-function SecurityTab({
-  twoFaEnabled,
-  onToggleTwoFa,
-  rateLimitEnabled,
-  onToggleRateLimit,
-}: {
-  twoFaEnabled: boolean;
-  onToggleTwoFa: () => void;
-  rateLimitEnabled: boolean;
-  onToggleRateLimit: () => void;
-}) {
-  return (
-    <div>
-      <h2 className="text-lg font-semibold text-gray-900 mb-5">Security Settings</h2>
-      <div className="space-y-4">
-        {/* 2FA */}
-        <div className="border border-gray-200 rounded-xl p-5 flex items-center justify-between">
-          <div>
-            <p className="font-semibold text-gray-900">Two-Factor Authentication</p>
-            <p className="text-sm text-gray-500 mt-0.5">Require 2FA for all admin accounts</p>
-          </div>
-          <Toggle enabled={twoFaEnabled} onToggle={onToggleTwoFa} />
-        </div>
-
-        {/* Data Encryption */}
-        <div className="border border-gray-200 rounded-xl p-5">
-          <p className="font-semibold text-gray-900">Data Encryption</p>
-          <p className="text-sm text-gray-500 mt-0.5">AES-256 encryption for all sensitive data</p>
-          <div className="flex items-center gap-1.5 mt-2">
-            <CheckCircle className="w-4 h-4 text-green-500" />
-            <span className="text-green-600 text-sm font-medium">Enabled</span>
-          </div>
-        </div>
-
-        {/* Rate Limiting */}
-        <div className="border border-gray-200 rounded-xl p-5 flex items-center justify-between">
-          <div>
-            <p className="font-semibold text-gray-900">Rate Limiting</p>
-            <p className="text-sm text-gray-500 mt-0.5">Protect against brute force attacks</p>
-          </div>
-          <Toggle enabled={rateLimitEnabled} onToggle={onToggleRateLimit} />
-        </div>
-
-        {/* OWASP */}
-        <div className="border border-orange-200 bg-orange-50 rounded-xl p-5">
-          <div className="flex items-center gap-2 mb-1">
-            <AlertTriangle className="w-4 h-4 text-orange-500" />
-            <p className="font-semibold text-gray-900">OWASP Protection</p>
-          </div>
-          <p className="text-sm text-gray-600 mb-3">
-            Active protection against SQL Injection, XSS, CSRF, and other OWASP Top 10 vulnerabilities
-          </p>
-          <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            View Security Logs
-          </button>
-        </div>
-
-        {/* Encrypted Backups */}
-        <div className="border border-gray-200 rounded-xl p-5">
-          <p className="font-semibold text-gray-900 mb-3">Encrypted Backups</p>
-          <div className="space-y-2 text-sm">
-            {[
-              ["Last Backup", "—"],
-              ["Backup Frequency", "Daily"],
-            ].map(([label, val]) => (
-              <div key={label} className="flex justify-between">
-                <span className="text-gray-500">{label}</span>
-                <span className="text-gray-900">{val}</span>
-              </div>
-            ))}
-            <div className="flex justify-between">
-              <span className="text-gray-500">Encryption Status</span>
-              <span className="flex items-center gap-1 text-green-600 font-medium">
-                <CheckCircle className="w-3.5 h-3.5" />
-                Encrypted (AES-256)
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}

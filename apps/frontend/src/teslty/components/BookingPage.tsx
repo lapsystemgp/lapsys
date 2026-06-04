@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+
+const HOME_COLLECTION_FEE = 100;
+const HOME_KIT_FEE = 150;
 import { useToast } from "../../components/ToastProvider";
 import { ArrowLeft, CheckCircle, Clock, Home, MapPin, Package } from "lucide-react";
 import type { PaymentMethod } from "../../lib/bookingsApi";
@@ -257,7 +260,7 @@ export function BookingPage({
 
         <div className="bg-white rounded-xl shadow-sm p-5 mb-4 animate-slide-up animation-delay-100">
           <h3 className="text-base text-gray-900 mb-3">Choose Collection Type</h3>
-          <div className={`grid gap-3 ${lab.homeCollection || lab.homeTestKit ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-1"}`}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button
               onClick={() => setBookingType("lab")}
               className={`p-4 rounded-lg border-2 transition ${
@@ -268,30 +271,42 @@ export function BookingPage({
               <div className="text-gray-900 mb-0.5">Visit Lab</div>
               <div className="text-gray-600 text-sm">Come to our facility</div>
             </button>
-            {lab.homeCollection && (
-              <button
-                onClick={() => setBookingType("home")}
-                className={`p-4 rounded-lg border-2 transition ${
-                  bookingType === "home" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <Home className={`w-7 h-7 mx-auto mb-2 ${bookingType === "home" ? "text-blue-600" : "text-gray-400"}`} />
-                <div className="text-gray-900 mb-0.5">Home Collection</div>
-                <div className="text-gray-600 text-sm">We come to you (+EGP 100)</div>
-              </button>
-            )}
-            {lab.homeTestKit && (
-              <button
-                onClick={() => setBookingType("kit")}
-                className={`p-4 rounded-lg border-2 transition ${
-                  bookingType === "kit" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <Package className={`w-7 h-7 mx-auto mb-2 ${bookingType === "kit" ? "text-blue-600" : "text-gray-400"}`} />
-                <div className="text-gray-900 mb-0.5">Home Test Kit</div>
-                <div className="text-gray-600 text-sm">Kit shipped to you (+EGP 150)</div>
-              </button>
-            )}
+            <button
+              onClick={() => setBookingType("home")}
+              disabled={!lab.homeCollection}
+              className={`p-4 rounded-lg border-2 transition ${
+                !lab.homeCollection
+                  ? "border-gray-100 bg-gray-50 cursor-not-allowed opacity-60"
+                  : bookingType === "home"
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <Home className={`w-7 h-7 mx-auto mb-2 ${bookingType === "home" && lab.homeCollection ? "text-blue-600" : "text-gray-400"}`} />
+              <div className={`mb-0.5 ${lab.homeCollection ? "text-gray-900" : "text-gray-500"}`}>Home Collection</div>
+              {lab.homeCollection
+                ? <div className="text-gray-600 text-sm">We come to you (+EGP {HOME_COLLECTION_FEE})</div>
+                : <div className="text-gray-500 text-xs">Not available at this lab</div>
+              }
+            </button>
+            <button
+              onClick={() => setBookingType("kit")}
+              disabled={!lab.homeTestKit}
+              className={`p-4 rounded-lg border-2 transition ${
+                !lab.homeTestKit
+                  ? "border-gray-100 bg-gray-50 cursor-not-allowed opacity-60"
+                  : bookingType === "kit"
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <Package className={`w-7 h-7 mx-auto mb-2 ${bookingType === "kit" && lab.homeTestKit ? "text-blue-600" : "text-gray-400"}`} />
+              <div className={`mb-0.5 ${lab.homeTestKit ? "text-gray-900" : "text-gray-500"}`}>Home Test Kit</div>
+              {lab.homeTestKit
+                ? <div className="text-gray-600 text-sm">Kit shipped to you (+EGP {HOME_KIT_FEE})</div>
+                : <div className="text-gray-500 text-xs">Not available at this lab</div>
+              }
+            </button>
           </div>
         </div>
 
@@ -434,19 +449,19 @@ export function BookingPage({
             {bookingType === "home" && (
               <div className="flex justify-between">
                 <span className="text-gray-600">Home Collection Fee</span>
-                <span className="text-gray-900">EGP 100</span>
+                <span className="text-gray-900">EGP {HOME_COLLECTION_FEE}</span>
               </div>
             )}
             {bookingType === "kit" && (
               <div className="flex justify-between">
                 <span className="text-gray-600">Kit & Shipping Fee</span>
-                <span className="text-gray-900">EGP 150</span>
+                <span className="text-gray-900">EGP {HOME_KIT_FEE}</span>
               </div>
             )}
             <div className="border-t pt-3 flex justify-between">
               <span className="text-gray-900">Total Amount</span>
               <span className="text-2xl text-blue-600">
-                EGP {basePrice + (bookingType === "home" ? 100 : bookingType === "kit" ? 150 : 0)}
+                EGP {basePrice + (bookingType === "home" ? HOME_COLLECTION_FEE : bookingType === "kit" ? HOME_KIT_FEE : 0)}
               </span>
             </div>
             <div className="flex justify-between text-sm">

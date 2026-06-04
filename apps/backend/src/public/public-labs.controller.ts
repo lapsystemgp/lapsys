@@ -42,12 +42,6 @@ function normalizeContains(input: string) {
   return input.trim();
 }
 
-function pickEmoji(stableId: string) {
-  const emojis = ['🧪', '🏥', '🔬', '🩺', '🧬', '⚕️'];
-  const index = (stableId.charCodeAt(0) + stableId.charCodeAt(stableId.length - 1)) % emojis.length;
-  return emojis[index] ?? '🧪';
-}
-
 @Controller('public/labs')
 export class PublicLabsController {
   constructor(private readonly prisma: PrismaService) {}
@@ -77,7 +71,7 @@ export class PublicLabsController {
       ...(homeCollection === undefined ? {} : { home_collection: homeCollection }),
       ...(minRating > 0 ? { rating_average: { gte: minRating } } : {}),
       ...(labName.length > 0 ? { lab_name: { contains: normalizeContains(labName), mode: 'insensitive' } } : {}),
-      ...(city.length > 0 ? { address: { contains: city, mode: 'insensitive' } } : {}),
+      ...(city.length > 0 ? { city: { contains: city, mode: 'insensitive' } } : {}),
       ...(accreditations.length > 0
         ? {
             OR: accreditations.map((token) => ({
@@ -194,7 +188,7 @@ export class PublicLabsController {
           testsAvailable,
           startingFromEgp,
           priceForQueryEgp,
-          imageEmoji: pickEmoji(lab.id),
+          imageEmoji: null,
         };
       })
       .filter((card) => card.distanceKm === null || card.distanceKm <= maxDistanceKm)
@@ -320,7 +314,7 @@ export class PublicLabsController {
       testsAvailable: totalCount,
       startingFromEgp: null,
       priceForQueryEgp: null,
-      imageEmoji: pickEmoji(lab.id),
+      imageEmoji: null,
     };
 
     return {
@@ -339,4 +333,3 @@ export class PublicLabsController {
     };
   }
 }
-

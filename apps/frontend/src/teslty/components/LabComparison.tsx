@@ -124,7 +124,10 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
     return () => { isMounted = false; };
   }, [effectiveSearchQuery, homeCollectionOnly, maxDistance, maxPrice, minRating, requestKey, selectedAccreditations, sortBy, userLocation]);
 
-  const availableAccreditations = ['NABL', 'CAP', 'ISO', 'JCI'];
+  const availableAccreditations = useMemo(
+    () => [...new Set(labs.map((l) => l.accreditation).filter((a): a is string => a != null))].sort(),
+    [labs],
+  );
 
   const toggleAccreditation = (accreditation: string) => {
     setSelectedAccreditations(prev =>
@@ -148,14 +151,6 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
     (maxDistance < 10 ? 1 : 0) +
     (maxPrice < 1000 ? 1 : 0) +
     selectedAccreditations.length;
-
-  const getPlaceholderTimeSlots = (stableId: string) => {
-    const slots = ['08:00', '09:30', '11:00', '13:00', '15:00', '16:30', '18:00'];
-    const seed = stableId.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-    const count = 3 + (seed % 3);
-    const start = seed % (slots.length - count);
-    return slots.slice(start, start + count);
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -518,7 +513,6 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                   labs.map((lab) => {
                     const price = lab.priceForQueryEgp ?? lab.startingFromEgp;
                     const priceLabel = lab.priceForQueryEgp ? 'for this test' : 'starting from';
-                    const timeSlots = getPlaceholderTimeSlots(lab.id);
                     return (
                       <div key={lab.id} className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
                         <div className="flex items-start justify-between mb-3">
@@ -577,9 +571,6 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                                 <span>Home Collection</span>
                               </div>
                             )}
-                            <div className="text-gray-600">
-                              {timeSlots.length} slots today
-                            </div>
                           </div>
                           <button
                             onClick={() => onLabSelect(lab)}

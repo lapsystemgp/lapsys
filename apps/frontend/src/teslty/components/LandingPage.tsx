@@ -197,7 +197,7 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
             {/* Popular Searches */}
             <div className="animate-slide-up animation-delay-400 mt-4 sm:mt-5 flex flex-wrap gap-2 sm:gap-3 justify-center">
               <span className="text-gray-600 text-sm sm:text-base">Popular:</span>
-              {['CBC Test', 'Lipid Profile', 'Thyroid Panel', 'Diabetes Screening'].map((term) => (
+              {['CBC', 'Lipid Profile', 'Thyroid Panel', 'HbA1c'].map((term) => (
                 <button
                   key={term}
                   onClick={() => onSearch(term)}
@@ -373,7 +373,7 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
             Ready to Find Your Lab?
           </h2>
           <p className="text-base sm:text-lg text-blue-100 mb-5 sm:mb-6">
-            Join thousands of patients who trust TesTly for their medical testing needs
+            Find accredited labs across Egypt and book your tests in minutes
           </p>
           <button
             onClick={() => onNavigate('login')}

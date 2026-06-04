@@ -18,12 +18,11 @@ interface LabDetailsPageProps {
   lab?: PublicLabCard | null;
   tests: LabDetailsTest[];
   isLoading?: boolean;
-  timeSlots?: string[];
   onBack: () => void;
   onBookTest: (lab: PublicLabCard, test: LabDetailsTest) => void;
 }
 
-export function LabDetailsPage({ lab, tests, isLoading, timeSlots, onBack, onBookTest }: LabDetailsPageProps) {
+export function LabDetailsPage({ lab, tests, isLoading, onBack, onBookTest }: LabDetailsPageProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   // Scroll to top when component mounts
@@ -187,17 +186,6 @@ export function LabDetailsPage({ lab, tests, isLoading, timeSlots, onBack, onBoo
             )}
           </div>
 
-          {/* Available Time Slots */}
-          <div>
-            <h3 className="text-lg text-gray-900 mb-3">Available Time Slots Today</h3>
-            <div className="flex flex-wrap gap-2">
-              {timeSlots?.map((time: string, index: number) => (
-                <span key={index} className="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg">
-                  {time}
-                </span>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Test Catalog */}

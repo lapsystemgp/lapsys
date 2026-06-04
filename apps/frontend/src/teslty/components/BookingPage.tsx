@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-
-const HOME_COLLECTION_FEE = 100;
-const HOME_KIT_FEE = 150;
 import { useToast } from "../../components/ToastProvider";
 import { ArrowLeft, CheckCircle, Clock, Home, MapPin, Package } from "lucide-react";
 import type { PaymentMethod } from "../../lib/bookingsApi";
 import type { PublicLabCard, PublicTestResponse } from "../../lib/publicApi";
 import { Breadcrumb } from "../../components/Breadcrumb";
+
+const HOME_COLLECTION_FEE = 100;
+const HOME_KIT_FEE = 150;
 
 type DisplaySlot = {
   id: string;

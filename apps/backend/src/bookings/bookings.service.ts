@@ -234,7 +234,7 @@ export class BookingsService {
           home_address:
             dto.bookingType === BookingType.HomeCollection || dto.bookingType === BookingType.HomeTestKit
               ? normalizedAddress
-              : patientProfile.address ?? null,
+              : null,
           total_price_egp: totalPrice,
           payment_method: paymentMethod,
           payment_status: PaymentStatus.Pending,
@@ -506,7 +506,7 @@ export class BookingsService {
       booking.payment_status === PaymentStatus.Paid ? PaymentStatus.Refunded : undefined;
 
     const updated = await this.prisma.$transaction(async (tx: any) => {
-      const record = await tx.booking.update({
+      await tx.booking.update({
         where: { id: booking.id },
         data: {
           status: BookingStatus.Cancelled,

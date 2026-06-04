@@ -82,7 +82,10 @@ export default function BookingClient() {
     homeAddress?: string;
     paymentMethod: PaymentMethod;
   }) => {
-    if (!labId || !testId) return;
+    if (!labId || !testId) {
+      toast.error("Missing lab or test selection.");
+      throw new Error("Missing lab or test selection");
+    }
     setIsSubmitting(true);
 
     try {

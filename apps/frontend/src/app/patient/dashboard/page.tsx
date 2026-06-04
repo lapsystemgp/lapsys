@@ -218,26 +218,32 @@ export default function PatientDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
+      {/* Header — #1: frosted glass border */}
+      <header className="bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
           <div className="space-y-1">
+            {/* Back to Home — #2: font-medium */}
             <button
               onClick={() => router.push("/")}
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150"
+              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150 font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Home
             </button>
             <div>
-              <h1 className="text-xl text-gray-900">Patient Workspace</h1>
-              <p className="text-sm text-gray-500">{user?.patient_profile?.full_name || user?.email}</p>
+              {/* Page title — #3: font-bold */}
+              <h1 className="text-xl text-gray-900 font-bold">Patient Workspace</h1>
+              {/* User email/name — #4: font-medium */}
+              <p className="text-sm text-gray-500 font-medium">{user?.patient_profile?.full_name || user?.email}</p>
             </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => router.push("/labs")} className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            {/* Browse Labs — #5: font-medium */}
+            <button onClick={() => router.push("/labs")} className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
               Browse Labs
             </button>
-            <button onClick={handleLogout} className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            {/* Logout — #5: font-medium */}
+            <button onClick={handleLogout} className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
               Logout
             </button>
           </div>
@@ -246,6 +252,7 @@ export default function PatientDashboardPage() {
 
       <main className="max-w-6xl mx-auto px-4 py-5">
         <Breadcrumb items={[{ label: "Patient Dashboard" }]} className="mb-4" />
+        {/* Tab pills — #6: font-semibold active, font-medium inactive */}
         <div className="flex gap-1.5 mb-5 p-1 bg-white border border-gray-200 rounded-xl w-fit">
           {(["bookings", "results", "trends", "profile"] as const).map((t) => (
             <button
@@ -253,8 +260,8 @@ export default function PatientDashboardPage() {
               onClick={() => setTab(t)}
               className={`px-4 py-1.5 rounded-lg text-sm capitalize transition-all duration-150 ${
                 tab === t
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  ? "bg-blue-600 text-white shadow-sm font-semibold"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 font-medium"
               }`}
             >
               {t}
@@ -265,7 +272,7 @@ export default function PatientDashboardPage() {
         {loading ? (
           <div className="space-y-3">
             {[0, 1].map((i) => (
-              <div key={i} className={`bg-white rounded-xl p-5 shadow-sm border border-gray-200 animate-slide-up ${i === 1 ? 'animation-delay-100' : ''}`}>
+              <div key={i} className={`bg-white rounded-2xl p-5 shadow-sm border border-gray-200 animate-slide-up ${i === 1 ? 'animation-delay-100' : ''}`}>
                 <div className="flex justify-between items-start mb-4">
                   <div className="space-y-2">
                     <div className="skeleton h-5 w-40 rounded" />
@@ -286,30 +293,36 @@ export default function PatientDashboardPage() {
             {tab === "bookings" && (
               <div key="bookings" className="space-y-3 animate-fade-in">
                 {allBookings.length === 0 ? (
-                  <div className="bg-white rounded-xl p-5 shadow-sm">
+                  // Empty state — #19: rounded-2xl, font-semibold rounded-xl on button
+                  <div className="bg-white rounded-2xl p-5 shadow-sm">
                     <p className="text-gray-700 mb-3">No bookings yet.</p>
-                    <button onClick={() => router.push("/labs")} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <button onClick={() => router.push("/labs")} className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold">
                       Start Booking
                     </button>
                   </div>
                 ) : (
                   allBookings.map((booking) => (
-                    <div key={booking.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                    // Booking card — #7: rounded-2xl
+                    <div key={booking.id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h2 className="text-lg text-gray-900">{booking.test.name}</h2>
-                          <p className="text-gray-600">{booking.lab.name}</p>
+                          {/* Booking test name — #8: font-bold */}
+                          <h2 className="text-lg text-gray-900 font-bold">{booking.test.name}</h2>
+                          {/* Booking lab name — #9: font-medium */}
+                          <p className="text-gray-600 font-medium">{booking.lab.name}</p>
                         </div>
-                        <span className={`px-3 py-1 rounded-full ${bookingStatusClass(booking.status)}`}>{booking.status}</span>
+                        {/* Booking status badge — #10: font-medium */}
+                        <span className={`px-3 py-1 rounded-full font-medium ${bookingStatusClass(booking.status)}`}>{booking.status}</span>
                       </div>
+                      {/* Booking fields — #11: label font-medium, #12: value font-semibold */}
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-gray-700">
                         <div>
-                          <p className="text-gray-500">{booking.bookingType === "HomeTestKit" ? "Order Date" : "Date & Time"}</p>
-                          <p>{formatDateTime(booking.scheduledAt)}</p>
+                          <p className="text-gray-500 font-medium">{booking.bookingType === "HomeTestKit" ? "Order Date" : "Date & Time"}</p>
+                          <p className="font-semibold">{formatDateTime(booking.scheduledAt)}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Type</p>
-                          <p>
+                          <p className="text-gray-500 font-medium">Type</p>
+                          <p className="font-semibold">
                             {booking.bookingType === "HomeCollection"
                               ? "Home Collection"
                               : booking.bookingType === "HomeTestKit"
@@ -318,12 +331,12 @@ export default function PatientDashboardPage() {
                           </p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Total</p>
-                          <p>EGP {booking.totalPriceEgp}</p>
+                          <p className="text-gray-500 font-medium">Total</p>
+                          <p className="font-semibold">EGP {booking.totalPriceEgp}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">{booking.bookingType === "HomeTestKit" ? "Delivery Address" : "Address"}</p>
-                          <p>{booking.homeAddress || booking.lab.address}</p>
+                          <p className="text-gray-500 font-medium">{booking.bookingType === "HomeTestKit" ? "Delivery Address" : "Address"}</p>
+                          <p className="font-semibold">{booking.homeAddress || booking.lab.address}</p>
                         </div>
                       </div>
                       {booking.bookingType === "HomeTestKit" && (
@@ -346,10 +359,11 @@ export default function PatientDashboardPage() {
                         booking.status === "Pending" &&
                         (booking.paymentStatus === "Pending" || booking.paymentStatus === "Failed") && (
                           <div className="mt-4 flex flex-wrap gap-2">
+                            {/* Demo pay successfully — #13: font-semibold */}
                             <button
                               onClick={() => handleDemoOnlinePayment(booking.id, "success")}
                               disabled={demoPayBookingId === booking.id}
-                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-semibold"
                             >
                               {demoPayBookingId === booking.id ? "Processing..." : "Demo: pay successfully"}
                             </button>
@@ -364,9 +378,10 @@ export default function PatientDashboardPage() {
                         )}
                       {["Pending", "Confirmed"].includes(booking.status) && (
                         <div className="mt-4">
+                          {/* Cancel Booking — #14: font-medium */}
                           <button
                             onClick={() => handleCancel(booking.id)}
-                            className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50"
+                            className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 font-medium"
                           >
                             Cancel Booking
                           </button>
@@ -383,7 +398,7 @@ export default function PatientDashboardPage() {
             {tab === "results" && (
               <div key="results" className="space-y-3 animate-fade-in">
                 {workspace.results.length === 0 ? (
-                  <div className="bg-white rounded-xl p-5 shadow-sm">
+                  <div className="bg-white rounded-2xl p-5 shadow-sm">
                     <p className="text-gray-700">No result files yet.</p>
                   </div>
                 ) : (
@@ -392,11 +407,14 @@ export default function PatientDashboardPage() {
                     const canSubmitReview = result.canReview && !result.review;
 
                     return (
-                      <div key={result.bookingId} className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                      // Results card — #15: rounded-2xl
+                      <div key={result.bookingId} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
                         <div className="flex justify-between items-start mb-4 gap-3 flex-wrap">
                           <div>
-                            <h2 className="text-lg text-gray-900">{result.testName}</h2>
-                            <p className="text-gray-600">{result.labName}</p>
+                            {/* Result test name — #15: font-bold */}
+                            <h2 className="text-lg text-gray-900 font-bold">{result.testName}</h2>
+                            {/* Result lab name — #15: font-medium */}
+                            <p className="text-gray-600 font-medium">{result.labName}</p>
                             <p className="text-sm text-gray-500">{formatDateTime(result.scheduledAt)}</p>
                           </div>
                           <div className="flex flex-col items-end gap-2">
@@ -438,11 +456,12 @@ export default function PatientDashboardPage() {
 
                         <div className="flex gap-3 mb-4">
                           {result.file ? (
+                            // Open PDF — #16: font-semibold rounded-xl
                             <a
                               href={resolveResultFileUrl(result.file.fileUrl)}
                               target="_blank"
                               rel="noreferrer"
-                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                              className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold"
                             >
                               Open PDF
                             </a>
@@ -463,7 +482,8 @@ export default function PatientDashboardPage() {
                           </div>
                         ) : canSubmitReview ? (
                           <div className="p-4 border border-gray-200 rounded-lg">
-                            <p className="text-gray-900 mb-3">Rate this lab</p>
+                            {/* Rate this lab — #17: font-semibold */}
+                            <p className="text-gray-900 mb-3 font-semibold">Rate this lab</p>
                             <div className="flex items-center gap-1 mb-3">
                               {[1, 2, 3, 4, 5].map((value) => (
                                 <button
@@ -494,10 +514,11 @@ export default function PatientDashboardPage() {
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3"
                               rows={3}
                             />
+                            {/* Submit Review — #17: font-semibold */}
                             <button
                               onClick={() => handleSubmitReview(result)}
                               disabled={submittingReviewId === result.bookingId}
-                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-semibold"
                             >
                               {submittingReviewId === result.bookingId ? "Submitting..." : "Submit Review"}
                             </button>
@@ -511,10 +532,12 @@ export default function PatientDashboardPage() {
             )}
 
             {tab === "profile" && (
-              <div className="animate-fade-in bg-white rounded-xl p-5 shadow-sm border border-gray-200 max-w-2xl">
+              // Profile card — #18: rounded-2xl
+              <div className="animate-fade-in bg-white rounded-2xl p-5 shadow-sm border border-gray-200 max-w-2xl">
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">Full Name</label>
+                    {/* Form labels — #18: font-medium */}
+                    <label className="block text-sm text-gray-600 mb-1 font-medium">Full Name</label>
                     <input
                       value={profileForm.fullName}
                       onChange={(event) => setProfileForm((prev) => ({ ...prev, fullName: event.target.value }))}
@@ -522,11 +545,11 @@ export default function PatientDashboardPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">Email</label>
+                    <label className="block text-sm text-gray-600 mb-1 font-medium">Email</label>
                     <input value={workspace.profile.email} disabled className="w-full px-4 py-2 border border-gray-200 bg-gray-50 rounded-lg" />
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">Phone</label>
+                    <label className="block text-sm text-gray-600 mb-1 font-medium">Phone</label>
                     <input
                       value={profileForm.phone}
                       onChange={(event) => setProfileForm((prev) => ({ ...prev, phone: event.target.value }))}
@@ -534,7 +557,7 @@ export default function PatientDashboardPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">Address</label>
+                    <label className="block text-sm text-gray-600 mb-1 font-medium">Address</label>
                     <textarea
                       value={profileForm.address}
                       onChange={(event) => setProfileForm((prev) => ({ ...prev, address: event.target.value }))}
@@ -543,7 +566,7 @@ export default function PatientDashboardPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-600 mb-2">What labs can see (longitudinal care)</label>
+                    <label className="block text-sm text-gray-600 mb-2 font-medium">What labs can see (longitudinal care)</label>
                     <select
                       value={profileForm.labHistorySharing}
                       onChange={(event) =>
@@ -566,10 +589,11 @@ export default function PatientDashboardPage() {
                       structured history and summaries labs use for context.
                     </p>
                   </div>
+                  {/* Save Profile — #18: font-semibold rounded-xl */}
                   <button
                     onClick={handleSaveProfile}
                     disabled={savingProfile}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 font-semibold"
                   >
                     {savingProfile ? "Saving..." : "Save Profile"}
                   </button>

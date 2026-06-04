@@ -115,7 +115,7 @@ export class LabController {
   }
 
   @Post('results/:bookingId/upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
   @Roles(Role.LabStaff)
   uploadResult(
     @Req() req: RequestWithUser,

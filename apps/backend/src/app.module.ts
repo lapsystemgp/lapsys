@@ -23,6 +23,7 @@ import { AdminService } from './admin/admin.service';
 import { ClinicalNormalizationService } from './api/clinical-normalization.service';
 import { StructuredResultsService } from './api/structured-results.service';
 import { LabPatientContextService } from './api/lab-patient-context.service';
+import { ResultsDownloadController } from './api/results-download.controller';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { LabPatientContextService } from './api/lab-patient-context.service';
     BookingsController,
     FaqController,
     AdminController,
+    ResultsDownloadController,
   ],
   providers: [
     AppService,

@@ -88,6 +88,8 @@ export class PublicTestsController {
             home_test_kit: true,
             accreditation: true,
             turnaround_time: true,
+            latitude: true,
+            longitude: true,
           },
         },
       },
@@ -116,6 +118,8 @@ export class PublicTestsController {
         homeTestKit: t.lab_profile.home_test_kit,
         accreditation: t.lab_profile.accreditation ?? null,
         turnaroundTime: t.lab_profile.turnaround_time ?? null,
+        latitude: t.lab_profile.latitude ?? null,
+        longitude: t.lab_profile.longitude ?? null,
       })),
     };
   }

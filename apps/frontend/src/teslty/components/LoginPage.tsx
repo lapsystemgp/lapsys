@@ -176,7 +176,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-100 relative">
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-50 relative">
       <button
         onClick={onBack}
         className="absolute top-6 left-5 flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150"
@@ -187,19 +187,21 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
 
       <div className="min-h-screen w-full flex items-start justify-center pt-14">
         <div className="animate-scale-in w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 sm:p-8">
             {/* Logo */}
             <div className="flex justify-center mb-4">
               <div className="flex items-center gap-2">
-                <TestTube className="w-9 h-9 text-blue-600" />
-                <span className="text-2xl text-blue-600">TesTly</span>
+                <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-sm">
+                  <TestTube className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-xl font-bold text-gray-900">Tes<span className="text-blue-600">Tly</span></span>
               </div>
             </div>
 
-            <h2 className="text-xl text-center text-gray-900 mb-1">
+            <h2 className="text-xl font-bold text-center text-gray-900 mb-1">
               {isSignup ? 'Create Account' : 'Welcome Back'}
             </h2>
-            <p className="text-center text-gray-600 mb-5 text-sm">
+            <p className="text-center text-gray-600 font-medium mb-5 text-sm">
               {isSignup ? 'Sign up to get started' : 'Sign in to your account'}
             </p>
 
@@ -209,8 +211,8 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
                 onClick={() => setUserType('patient')}
                 className={`py-2 px-4 rounded-md transition ${
                   userType === 'patient'
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white text-blue-600 shadow-sm font-semibold'
+                    : 'text-gray-600 hover:text-gray-900 font-medium'
                 }`}
               >
                 Patient
@@ -219,8 +221,8 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
                 onClick={() => setUserType('lab')}
                 className={`py-2 px-4 rounded-md transition ${
                   userType === 'lab'
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white text-blue-600 shadow-sm font-semibold'
+                    : 'text-gray-600 hover:text-gray-900 font-medium'
                 }`}
               >
                 Lab
@@ -230,8 +232,8 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
                   onClick={() => setUserType('admin')}
                   className={`py-2 px-4 rounded-md transition ${
                     userType === 'admin'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-white text-blue-600 shadow-sm font-semibold'
+                      : 'text-gray-600 hover:text-gray-900 font-medium'
                   }`}
                 >
                   Admin
@@ -243,7 +245,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
             <form onSubmit={handleSubmit} className="space-y-3">
               {isSignup && (
                 <div>
-                  <label className="block text-gray-700 mb-2">
+                  <label className="block text-gray-700 font-medium mb-2">
                     {userType === 'lab' ? 'Lab Name' : 'Full Name'}
                   </label>
                   <div className="relative">
@@ -252,7 +254,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
                       placeholder={userType === 'lab' ? 'Enter lab name' : 'Enter your name'}
                       required={userType === 'lab'}
                     />
@@ -262,12 +264,12 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
 
               {isSignup && userType === 'lab' && (
                 <div>
-                  <label className="block text-gray-700 mb-2">Lab Address</label>
+                  <label className="block text-gray-700 font-medium mb-2">Lab Address</label>
                   <input
                     type="text"
                     value={labAddress}
                     onChange={(e) => setLabAddress(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
                     placeholder="Enter lab address"
                     required
                   />
@@ -276,12 +278,12 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
 
               {isSignup && userType === 'lab' && (
                 <div>
-                  <label className="block text-gray-700 mb-2">Lab Phone (Optional)</label>
+                  <label className="block text-gray-700 font-medium mb-2">Lab Phone (Optional)</label>
                   <input
                     type="tel"
                     value={labPhone}
                     onChange={(e) => setLabPhone(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
                     placeholder="+20 ..."
                   />
                 </div>
@@ -289,12 +291,12 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
 
               {isSignup && userType === 'lab' && (
                 <div>
-                  <label className="block text-gray-700 mb-2">Accreditation (Optional)</label>
+                  <label className="block text-gray-700 font-medium mb-2">Accreditation (Optional)</label>
                   <input
                     type="text"
                     value={labAccreditation}
                     onChange={(e) => setLabAccreditation(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
                     placeholder="NABL, CAP, ISO..."
                   />
                 </div>
@@ -302,12 +304,12 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
 
               {isSignup && userType === 'lab' && (
                 <div>
-                  <label className="block text-gray-700 mb-2">Turnaround Time (Optional)</label>
+                  <label className="block text-gray-700 font-medium mb-2">Turnaround Time (Optional)</label>
                   <input
                     type="text"
                     value={labTurnaroundTime}
                     onChange={(e) => setLabTurnaroundTime(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
                     placeholder="24 hours"
                   />
                 </div>
@@ -329,14 +331,14 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
               )}
 
               <div>
-                <label className="block text-gray-700 mb-2">Email Address</label>
+                <label className="block text-gray-700 font-medium mb-2">Email Address</label>
                 <div className="relative">
                   <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
                     placeholder="Enter your email"
                     required
                   />
@@ -344,14 +346,14 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
               </div>
 
               <div>
-                <label className="block text-gray-700 mb-2">Password</label>
+                <label className="block text-gray-700 font-medium mb-2">Password</label>
                 <div className="relative">
                   <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
                     placeholder="Enter your password"
                     minLength={8}
                     required
@@ -389,7 +391,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:scale-[0.99] transition-all duration-150 disabled:opacity-60"
+                className="w-full py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-sm hover:shadow-md hover:bg-blue-700 active:scale-[0.99] transition-all duration-150 disabled:opacity-60"
               >
                 {loading ? 'Please wait…' : isSignup ? 'Create Account' : 'Sign In'}
               </button>
@@ -409,7 +411,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
                       return next;
                     });
                   }}
-                  className="text-blue-600 hover:text-blue-700"
+                  className="text-blue-600 hover:text-blue-700 font-semibold"
                 >
                   {isSignup ? 'Sign In' : 'Sign Up'}
                 </button>
@@ -431,7 +433,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
 
           {/* Security Badge */}
           <div className="mt-4 text-center text-gray-600">
-            <p className="flex items-center justify-center gap-2">
+            <p className="flex items-center justify-center gap-2 font-medium">
               <Lock className="w-4 h-4" />
               Secured with AES-256 encryption
             </p>

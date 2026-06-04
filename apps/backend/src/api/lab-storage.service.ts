@@ -61,7 +61,7 @@ class LocalDiskLabStorageAdapter implements LabFileStorageAdapter {
 
     return {
       fileName: file.originalname || safeName,
-      fileUrl: `/uploads/results/${safeName}`,
+      fileUrl: `/results/files/${safeName}`,
       mimeType: file.mimetype || 'application/pdf',
       sizeBytes: file.size,
     };

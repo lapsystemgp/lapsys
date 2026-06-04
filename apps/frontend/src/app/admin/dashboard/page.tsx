@@ -170,12 +170,12 @@ export default function AdminDashboardPage() {
             </div>
             <div>
               <p className="text-white font-semibold leading-tight">Admin Panel</p>
-              <p className="text-indigo-200 text-xs">TesTly Platform</p>
+              <p className="text-indigo-200 text-xs font-medium">TesTly Platform</p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-sm px-4 py-2 rounded-lg border border-white/20 transition-colors"
+            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-sm px-4 py-2 rounded-xl border border-white/20 transition-colors font-medium"
           >
             <LogOut className="w-4 h-4" />
             Logout
@@ -200,13 +200,13 @@ export default function AdminDashboardPage() {
           <div className="space-y-3">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[0, 1, 2, 3].map((i) => (
-                <div key={i} className={`bg-white rounded-xl shadow-sm p-4 animate-slide-up ${i > 0 ? `animation-delay-${i * 100}` : ''}`}>
+                <div key={i} className={`bg-white rounded-2xl shadow-sm p-4 animate-slide-up ${i > 0 ? `animation-delay-${i * 100}` : ''}`}>
                   <div className="skeleton h-4 w-24 mb-2 rounded" />
                   <div className="skeleton h-7 w-16 rounded" />
                 </div>
               ))}
             </div>
-            <div className="bg-white rounded-xl shadow-sm p-5 animate-slide-up animation-delay-200">
+            <div className="bg-white rounded-2xl shadow-sm p-5 animate-slide-up animation-delay-200">
               <div className="skeleton h-5 w-32 mb-3 rounded" />
               {[0, 1, 2].map((i) => (
                 <div key={i} className={`skeleton h-16 mb-2 rounded-lg ${i > 0 ? `animation-delay-${i * 100}` : ''}`} />
@@ -214,9 +214,9 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
             {/* Tab bar */}
-            <div className="flex overflow-x-auto border-b border-gray-200">
+            <div className="flex overflow-x-auto border-b border-gray-100">
               {tabs.map((tab) => {
                 const active = activeTab === tab.key;
                 return (
@@ -225,8 +225,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setActiveTab(tab.key)}
                     className={`flex items-center gap-2 px-5 py-4 text-sm whitespace-nowrap border-b-2 transition-colors ${
                       active
-                        ? "border-violet-600 text-violet-700 font-medium"
-                        : "border-transparent text-gray-500 hover:text-gray-700"
+                        ? "border-violet-600 text-violet-700 font-semibold"
+                        : "border-transparent text-gray-500 hover:text-gray-700 font-medium"
                     }`}
                   >
                     <span className={active ? "text-violet-600" : "text-gray-400"}>{tab.icon}</span>
@@ -277,8 +277,8 @@ export default function AdminDashboardPage() {
 
 function StatCard({ label, value, highlight }: { label: string; value: number | string; highlight?: boolean }) {
   return (
-    <div className={`bg-white rounded-xl p-4 shadow-sm border transition-shadow duration-200 hover:shadow-md ${highlight ? "border-orange-300" : "border-gray-200"}`}>
-      <p className="text-xs text-gray-500 mb-1">{label}</p>
+    <div className={`bg-white rounded-2xl p-4 shadow-sm border transition-shadow duration-200 hover:shadow-md ${highlight ? "border-orange-300" : "border-gray-100"}`}>
+      <p className="text-xs text-gray-500 mb-1 font-medium">{label}</p>
       <p className={`text-2xl font-bold ${highlight ? "text-orange-500" : "text-gray-900"}`}>{value}</p>
     </div>
   );
@@ -354,14 +354,14 @@ function LabApprovalsTab({
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Pending Lab Approvals</h2>
+        <h2 className="text-lg font-bold text-gray-900">Pending Lab Approvals</h2>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search labs…"
-            className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 w-52"
+            className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 w-52"
           />
         </div>
       </div>
@@ -373,8 +373,8 @@ function LabApprovalsTab({
             onClick={() => onStatusFilterChange(f)}
             className={`px-4 py-1.5 rounded-full text-sm transition-colors ${
               statusFilter === f
-                ? "bg-violet-600 text-white"
-                : "border border-gray-300 text-gray-600 hover:bg-gray-50"
+                ? "bg-violet-600 text-white font-semibold"
+                : "border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium"
             }`}
           >
             {filterLabels[f]}
@@ -394,20 +394,20 @@ function LabApprovalsTab({
             return (
               <div
                 key={lab.id}
-                className={`rounded-xl border p-5 transition-colors ${
-                  isPending ? "border-orange-200 bg-orange-50/40" : "border-gray-200 bg-white"
+                className={`rounded-2xl border p-5 transition-colors ${
+                  isPending ? "border-orange-200 bg-orange-50/40" : "border-gray-100 bg-white"
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-base font-semibold text-gray-900">{lab.labName}</h3>
+                  <h3 className="text-base font-bold text-gray-900">{lab.labName}</h3>
                   <LabStatusBadge status={lab.onboardingStatus} />
                 </div>
 
                 <div className="text-sm text-gray-600 space-y-0.5 mb-4">
-                  <p>Email: {lab.email}</p>
-                  <p>Phone: {lab.phone || "Not provided"}</p>
-                  <p>Address: {lab.address}</p>
-                  <p>Accreditation: {lab.accreditation || "Not provided"}</p>
+                  <p><span className="font-medium">Email:</span> <span className="font-semibold">{lab.email}</span></p>
+                  <p><span className="font-medium">Phone:</span> <span className="font-semibold">{lab.phone || "Not provided"}</span></p>
+                  <p><span className="font-medium">Address:</span> <span className="font-semibold">{lab.address}</span></p>
+                  <p><span className="font-medium">Accreditation:</span> <span className="font-semibold">{lab.accreditation || "Not provided"}</span></p>
                   <p className="text-gray-400 text-xs mt-1">Submitted: {formatDate(lab.createdAt)}</p>
                 </div>
 
@@ -416,7 +416,7 @@ function LabApprovalsTab({
                     <button
                       onClick={() => onStatusUpdate(lab.id, "Active")}
                       disabled={!lab.onboardingReadiness.isReady || updatingLabId === lab.id}
-                      className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                      className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
                     >
                       <CheckCircle className="w-4 h-4" />
                       Approve Lab
@@ -426,7 +426,7 @@ function LabApprovalsTab({
                     <button
                       onClick={() => onStatusUpdate(lab.id, "Rejected")}
                       disabled={updatingLabId === lab.id}
-                      className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                      className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
                     >
                       <XCircle className="w-4 h-4" />
                       Reject
@@ -434,7 +434,7 @@ function LabApprovalsTab({
                   )}
                   <button
                     onClick={() => onToggleExpand(lab.id)}
-                    className="flex items-center gap-1.5 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    className="flex items-center gap-1.5 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-xl text-sm font-medium transition-colors"
                   >
                     <Eye className="w-4 h-4" />
                     {isExpanded ? "Hide Details" : "View Details"}
@@ -442,7 +442,7 @@ function LabApprovalsTab({
                 </div>
 
                 {isExpanded && (
-                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
+                  <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                       {[
                         ["Tests", lab.testsCount],
@@ -451,8 +451,8 @@ function LabApprovalsTab({
                         ["Rating", lab.ratingAverage ? `${lab.ratingAverage.toFixed(1)} (${lab.reviewCount})` : "—"],
                       ].map(([label, val]) => (
                         <div key={String(label)} className="bg-gray-50 rounded-lg p-3">
-                          <p className="text-gray-400 text-xs">{label}</p>
-                          <p className="text-gray-900 font-medium mt-0.5">{val}</p>
+                          <p className="text-gray-400 text-xs font-medium">{label}</p>
+                          <p className="text-gray-900 font-semibold mt-0.5">{val}</p>
                         </div>
                       ))}
                     </div>
@@ -486,14 +486,14 @@ function UserManagementTab({
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <h2 className="text-lg font-semibold text-gray-900">User Management</h2>
+        <h2 className="text-lg font-bold text-gray-900">User Management</h2>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search users…"
-            className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-300 w-52"
+            className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 w-52"
           />
         </div>
       </div>
@@ -505,21 +505,21 @@ function UserManagementTab({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 text-left text-gray-700 font-semibold">
-                <th className="pb-3 pr-4">Name</th>
-                <th className="pb-3 pr-4">Email</th>
-                <th className="pb-3 pr-4">Role</th>
-                <th className="pb-3 pr-4">Bookings</th>
-                <th className="pb-3">Joined</th>
+                <th className="pb-3 pr-4 font-semibold">Name</th>
+                <th className="pb-3 pr-4 font-semibold">Email</th>
+                <th className="pb-3 pr-4 font-semibold">Role</th>
+                <th className="pb-3 pr-4 font-semibold">Bookings</th>
+                <th className="pb-3 font-semibold">Joined</th>
               </tr>
             </thead>
             <tbody>
               {patients.map((p) => (
                 <tr key={p.id} className="border-b border-gray-100 text-gray-800">
-                  <td className="py-3 pr-4 font-medium">{p.name ?? "—"}</td>
-                  <td className="py-3 pr-4 text-gray-600">{p.email}</td>
-                  <td className="py-3 pr-4">Patient</td>
-                  <td className="py-3 pr-4">{p.bookingCount}</td>
-                  <td className="py-3 text-gray-500">{formatDate(p.joinedAt)}</td>
+                  <td className="py-3 pr-4 font-semibold">{p.name ?? "—"}</td>
+                  <td className="py-3 pr-4 text-gray-600 font-medium">{p.email}</td>
+                  <td className="py-3 pr-4 font-medium">Patient</td>
+                  <td className="py-3 pr-4 font-semibold">{p.bookingCount}</td>
+                  <td className="py-3 text-gray-500 font-medium">{formatDate(p.joinedAt)}</td>
                 </tr>
               ))}
             </tbody>
@@ -534,7 +534,7 @@ function UserManagementTab({
 function AllBookingsTab({ bookings }: { bookings: AdminPaymentRecord[] }) {
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-900 mb-1">Recent Bookings</h2>
+      <h2 className="text-lg font-bold text-gray-900 mb-1">Recent Bookings</h2>
       <p className="text-xs text-gray-400 mb-5">Showing the {bookings.length} most recent bookings. Use the stat cards above for platform-wide totals.</p>
       {bookings.length === 0 ? (
         <p className="text-gray-400 text-sm py-8 text-center">No booking records yet.</p>
@@ -543,27 +543,27 @@ function AllBookingsTab({ bookings }: { bookings: AdminPaymentRecord[] }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 text-left text-gray-700 font-semibold">
-                <th className="pb-3 pr-4">Booking ID</th>
-                <th className="pb-3 pr-4">Patient</th>
-                <th className="pb-3 pr-4">Lab</th>
-                <th className="pb-3 pr-4">Test</th>
-                <th className="pb-3 pr-4">Date</th>
-                <th className="pb-3 pr-4">Status</th>
-                <th className="pb-3">Amount</th>
+                <th className="pb-3 pr-4 font-semibold">Booking ID</th>
+                <th className="pb-3 pr-4 font-semibold">Patient</th>
+                <th className="pb-3 pr-4 font-semibold">Lab</th>
+                <th className="pb-3 pr-4 font-semibold">Test</th>
+                <th className="pb-3 pr-4 font-semibold">Date</th>
+                <th className="pb-3 pr-4 font-semibold">Status</th>
+                <th className="pb-3 font-semibold">Amount</th>
               </tr>
             </thead>
             <tbody>
               {bookings.map((row, i) => (
                 <tr key={row.bookingId} className="border-b border-gray-100 text-gray-800">
-                  <td className="py-3 pr-4 text-gray-500">#{String(i + 1).padStart(6, "0")}</td>
-                  <td className="py-3 pr-4">{row.patientName ?? row.patientEmail}</td>
-                  <td className="py-3 pr-4 text-gray-600">{row.labName}</td>
-                  <td className="py-3 pr-4 text-gray-600">{row.testName}</td>
-                  <td className="py-3 pr-4 text-gray-500">{formatDate(row.scheduledAt || row.createdAt)}</td>
+                  <td className="py-3 pr-4 text-gray-500 font-medium">#{String(i + 1).padStart(6, "0")}</td>
+                  <td className="py-3 pr-4 font-semibold">{row.patientName ?? row.patientEmail}</td>
+                  <td className="py-3 pr-4 text-gray-600 font-medium">{row.labName}</td>
+                  <td className="py-3 pr-4 text-gray-600 font-medium">{row.testName}</td>
+                  <td className="py-3 pr-4 text-gray-500 font-medium">{formatDate(row.scheduledAt || row.createdAt)}</td>
                   <td className="py-3 pr-4">
                     <BookingStatusBadge status={row.bookingStatus} />
                   </td>
-                  <td className="py-3 font-medium">EGP {row.totalPriceEgp}</td>
+                  <td className="py-3 font-semibold">EGP {row.totalPriceEgp}</td>
                 </tr>
               ))}
             </tbody>
@@ -584,10 +584,10 @@ function AnalyticsTab({
 }) {
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-900 mb-5">Platform Analytics</h2>
+      <h2 className="text-lg font-bold text-gray-900 mb-5">Platform Analytics</h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="border border-gray-200 rounded-xl p-5">
-          <h3 className="font-semibold text-gray-900 mb-4">Top Performing Labs</h3>
+        <div className="border border-gray-100 rounded-2xl p-5">
+          <h3 className="font-bold text-gray-900 mb-4">Top Performing Labs</h3>
           {topLabs.length === 0 ? (
             <p className="text-gray-400 text-sm">No booking data yet.</p>
           ) : (
@@ -595,25 +595,25 @@ function AnalyticsTab({
               {topLabs.map((lab) => (
                 <div key={lab.name} className="flex items-start justify-between">
                   <div>
-                    <p className="text-gray-900 font-medium">{lab.name}</p>
-                    <p className="text-xs text-gray-400">{lab.bookings} bookings</p>
+                    <p className="text-gray-900 font-semibold">{lab.name}</p>
+                    <p className="text-xs text-gray-400 font-medium">{lab.bookings} bookings</p>
                   </div>
-                  <span className="text-green-600 font-semibold">EGP {lab.revenue.toLocaleString()}</span>
+                  <span className="text-green-600 font-bold">EGP {lab.revenue.toLocaleString()}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
-        <div className="border border-gray-200 rounded-xl p-5">
-          <h3 className="font-semibold text-gray-900 mb-4">Most Popular Tests</h3>
+        <div className="border border-gray-100 rounded-2xl p-5">
+          <h3 className="font-bold text-gray-900 mb-4">Most Popular Tests</h3>
           {topTests.length === 0 ? (
             <p className="text-gray-400 text-sm">No booking data yet.</p>
           ) : (
             <div className="space-y-4">
               {topTests.map((test) => (
                 <div key={test.name} className="flex items-center justify-between">
-                  <p className="text-gray-900">{test.name}</p>
-                  <span className="text-blue-600 font-semibold">{test.count} tests</span>
+                  <p className="text-gray-900 font-medium">{test.name}</p>
+                  <span className="text-blue-600 font-bold">{test.count} tests</span>
                 </div>
               ))}
             </div>
@@ -623,4 +623,3 @@ function AnalyticsTab({
     </div>
   );
 }
-

@@ -11,6 +11,8 @@ import {
   Role,
 } from "@prisma/client";
 import * as bcrypt from "bcrypt";
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 const prisma = new PrismaClient();
 
@@ -924,6 +926,8 @@ async function seedCanonicalMarkers() {
 // Main
 // ---------------------------------------------------------------------------
 async function main() {
+  const samplePdfUrl = ensureSamplePdf();
+
   // Wipe all tables in dependency order
   await prisma.bookingStatusEvent.deleteMany();
   await prisma.review.deleteMany();
@@ -1194,7 +1198,7 @@ async function main() {
       booking_id: bookingOne.id,
       status: ResultStatus.Uploaded,
       file_name: "cbc-results.pdf",
-      file_url: "https://example.com/results/cbc-results.pdf",
+      file_url: samplePdfUrl,
       mime_type: "application/pdf",
       size_bytes: 220_000,
       uploaded_by_user_id: primaryLab.profile.user_id,
@@ -1278,7 +1282,7 @@ async function main() {
       booking_id: bookingPast.id,
       status: ResultStatus.Delivered,
       file_name: "follow-up-metabolic.pdf",
-      file_url: "https://example.com/results/follow-up-metabolic.pdf",
+      file_url: samplePdfUrl,
       mime_type: "application/pdf",
       size_bytes: 198_000,
       uploaded_by_user_id: secondaryLab.profile.user_id,
@@ -1382,7 +1386,7 @@ async function main() {
         booking_id: booking.id,
         status: ResultStatus.Delivered,
         file_name: `result-ahmed-${booking.id.slice(0, 6)}.pdf`,
-        file_url: `https://example.com/results/ahmed-${booking.id.slice(0, 6)}.pdf`,
+        file_url: samplePdfUrl,
         mime_type: "application/pdf",
         size_bytes: 185_000,
         uploaded_by_user_id: entry.lab.profile.user_id,
@@ -1432,7 +1436,7 @@ async function main() {
         booking_id: booking.id,
         status: ResultStatus.Delivered,
         file_name: `result-fatima-${booking.id.slice(0, 6)}.pdf`,
-        file_url: `https://example.com/results/fatima-${booking.id.slice(0, 6)}.pdf`,
+        file_url: samplePdfUrl,
         mime_type: "application/pdf",
         size_bytes: 192_000,
         uploaded_by_user_id: entry.lab.profile.user_id,
@@ -1481,7 +1485,7 @@ async function main() {
         booking_id: booking.id,
         status: ResultStatus.Delivered,
         file_name: `result-omar-${booking.id.slice(0, 6)}.pdf`,
-        file_url: `https://example.com/results/omar-${booking.id.slice(0, 6)}.pdf`,
+        file_url: samplePdfUrl,
         mime_type: "application/pdf",
         size_bytes: 175_000,
         uploaded_by_user_id: entry.lab.profile.user_id,
@@ -1541,6 +1545,42 @@ async function main() {
   console.log(`✓ Seeded ${labProfiles.length} labs across ${new Set(labProfiles.map((l) => l.data.city)).size} cities`);
   console.log(`✓ Seeded ${testCatalog.length} tests in catalog`);
   console.log(`✓ Seeded ${scheduleSlots.length} schedule slots (7 days)`);
+}
+
+function buildMinimalPdf(): Buffer {
+  const header = Buffer.from('%PDF-1.4\n');
+  const obj1 = Buffer.from('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+  const obj2 = Buffer.from('2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n');
+  const obj3 = Buffer.from('3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >>\nendobj\n');
+
+  const off1 = header.length;
+  const off2 = off1 + obj1.length;
+  const off3 = off2 + obj2.length;
+  const xrefOffset = off3 + obj3.length;
+
+  const xref = Buffer.from(
+    'xref\n' +
+    '0 4\n' +
+    '0000000000 65535 f \r\n' +
+    `${String(off1).padStart(10, '0')} 00000 n \r\n` +
+    `${String(off2).padStart(10, '0')} 00000 n \r\n` +
+    `${String(off3).padStart(10, '0')} 00000 n \r\n` +
+    'trailer\n<< /Size 4 /Root 1 0 R >>\nstartxref\n' +
+    `${xrefOffset}\n` +
+    '%%EOF\n'
+  );
+
+  return Buffer.concat([header, obj1, obj2, obj3, xref]);
+}
+
+function ensureSamplePdf(): string {
+  const uploadsDir = path.resolve(process.cwd(), 'uploads', 'results');
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  const filePath = path.join(uploadsDir, 'sample-result.pdf');
+  if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, buildMinimalPdf());
+  }
+  return '/results/files/sample-result.pdf';
 }
 
 main()

@@ -27,24 +27,27 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
   const [lastResolvedKey, setLastResolvedKey] = useState<string>('');
   const [testsLoaded, setTestsLoaded] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [locationStatus, setLocationStatus] = useState<'idle' | 'requesting' | 'denied'>('idle');
+  const [locationStatus, setLocationStatus] = useState<'idle' | 'requesting' | 'granted' | 'denied'>('idle');
 
   const effectiveSearchQuery = localSearchQuery.trim();
   const [activeTab, setActiveTab] = useState<'tests' | 'labs'>(searchQuery.trim() ? 'tests' : 'labs');
 
+  // Request location once on mount — independent of sortBy
   useEffect(() => {
-    if (sortBy !== 'distance' || userLocation || locationStatus !== 'idle') return;
-    if (!navigator.geolocation) { setLocationStatus('denied'); return; }
+    if (!navigator.geolocation) {
+      setLocationStatus('denied');
+      return;
+    }
     setLocationStatus('requesting');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setLocationStatus('idle');
+        setLocationStatus('granted');
       },
       () => setLocationStatus('denied'),
       { timeout: 10000 },
     );
-  }, [sortBy, userLocation, locationStatus]);
+  }, []);
 
   const requestKey = useMemo(
     () =>
@@ -155,14 +158,14 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-10">
+      <div className="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <Breadcrumb items={[{ label: "Search Results" }]} className="mb-2" />
-          <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150 mb-2">
+          <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150 mb-2 font-medium">
             <ArrowLeft className="w-4 h-4" />
             Back to Home
           </button>
-          <h1 className="text-xl text-gray-900">{effectiveSearchQuery || 'All Available Tests & Labs'}</h1>
+          <h1 className="text-xl font-bold text-gray-900">{effectiveSearchQuery || 'All Available Tests & Labs'}</h1>
         </div>
       </div>
 
@@ -202,7 +205,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
         </div>
 
         {/* Search bar (always visible) */}
-        <div className="bg-white rounded-xl shadow-sm p-3 mb-5">
+        <div className="bg-white rounded-2xl shadow-sm p-3 mb-5 border border-gray-100">
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
               <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -214,7 +217,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                   setActiveTab(e.target.value.trim() ? 'tests' : 'labs');
                 }}
                 placeholder="Search tests or labs..."
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
               />
             </div>
             <div className="relative sm:w-52">
@@ -224,7 +227,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                 value={localCity}
                 onChange={(e) => setLocalCity(e.target.value)}
                 placeholder="Filter by city…"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
               />
             </div>
           </div>
@@ -236,7 +239,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
             {!testsLoaded ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[0, 1, 2, 3].map((i) => (
-                  <div key={i} className={`bg-white rounded-xl shadow-sm p-5 animate-slide-up ${i === 1 ? 'animation-delay-100' : i === 2 ? 'animation-delay-200' : ''}`}>
+                  <div key={i} className={`bg-white rounded-2xl shadow-sm p-5 animate-slide-up ${i === 1 ? 'animation-delay-100' : i === 2 ? 'animation-delay-200' : ''}`}>
                     <div className="flex items-start gap-3 mb-3">
                       <div className="skeleton h-10 w-10 rounded-lg shrink-0" />
                       <div className="flex-1 space-y-2">
@@ -252,7 +255,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                 ))}
               </div>
             ) : tests.length === 0 ? (
-              <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+              <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
                 <FlaskConical className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-xl text-gray-900 mb-2">No tests found</h3>
                 <p className="text-gray-600 mb-4">
@@ -273,15 +276,15 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                   <button
                     key={`${test.name}__${test.category}`}
                     onClick={() => onTestSelect(test)}
-                    className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 text-left flex flex-col gap-3"
+                    className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 text-left flex flex-col gap-3"
                   >
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
                         <FlaskConical className="w-5 h-5 text-blue-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-gray-900 truncate">{test.name}</div>
-                        <div className="text-sm text-gray-500 mt-0.5">{test.category}</div>
+                        <div className="font-semibold text-gray-900 truncate">{test.name}</div>
+                        <div className="text-sm font-medium text-gray-500 mt-0.5">{test.category}</div>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
@@ -307,8 +310,8 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             {/* Sidebar */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-sm p-5 sticky top-[72px]">
-                <h2 className="text-base font-medium text-gray-900 mb-3">Browse Labs</h2>
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sticky top-[72px]">
+                <h2 className="text-base font-semibold text-gray-900 mb-3">Browse Labs</h2>
                 <p className="text-sm text-gray-600 mb-4">
                   Compare prices, ratings, and availability across labs. Click a lab name to view full details.
                 </p>
@@ -341,7 +344,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => setShowFilters(!showFilters)}
-                      className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition ${
+                      className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition font-medium ${
                         showFilters
                           ? 'bg-blue-50 border-blue-600 text-blue-600'
                           : 'border-gray-300 hover:bg-gray-50'
@@ -375,7 +378,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                         const value = e.target.value;
                         if (value === 'price' || value === 'rating' || value === 'distance') setSortBy(value);
                       }}
-                      className="px-4 py-2 border border-gray-300 rounded-lg"
+                      className="px-4 py-2 border border-gray-300 rounded-lg font-medium"
                     >
                       <option value="price">Price (Low to High)</option>
                       <option value="rating">Rating (High to Low)</option>
@@ -386,7 +389,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
 
                 {/* Expandable Filters Panel */}
                 {showFilters && (
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-gray-900">Advanced Filters</h3>
                       {activeFiltersCount > 0 && (
@@ -469,19 +472,13 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                   Getting your location to sort by nearest…
                 </div>
               )}
-              {sortBy === 'distance' && locationStatus === 'denied' && (
-                <div className="flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm mb-4">
-                  <MapPin className="w-4 h-4 flex-shrink-0" />
-                  Location access denied — showing approximate distances instead. Allow location in your browser to sort by actual distance.
-                </div>
-              )}
 
               {/* Lab Cards */}
               <div className="space-y-3">
                 {lastResolvedKey === '' || (isLoading && labs.length === 0) ? (
                   <>
                     {[0, 1, 2].map((i) => (
-                      <div key={i} className={`bg-white rounded-xl shadow-sm p-5 animate-slide-up ${i === 1 ? 'animation-delay-100' : i === 2 ? 'animation-delay-200' : ''}`}>
+                      <div key={i} className={`bg-white rounded-2xl border border-gray-100 shadow-sm p-5 animate-slide-up ${i === 1 ? 'animation-delay-100' : i === 2 ? 'animation-delay-200' : ''}`}>
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1 space-y-2">
                             <div className="skeleton h-5 w-48 rounded" />
@@ -502,7 +499,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                     ))}
                   </>
                 ) : labs.length === 0 ? (
-                  <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+                  <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
                     <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-xl text-gray-900 mb-2">No labs found</h3>
                     <p className="text-gray-600">
@@ -514,12 +511,12 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                     const price = lab.priceForQueryEgp ?? lab.startingFromEgp;
                     const priceLabel = lab.priceForQueryEgp ? 'for this test' : 'starting from';
                     return (
-                      <div key={lab.id} className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                      <div key={lab.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
                             <button
                               onClick={() => onLabSelect(lab)}
-                              className="text-lg text-blue-600 hover:text-blue-700 mb-1.5 flex items-center gap-2"
+                              className="text-lg font-semibold text-blue-600 hover:text-blue-700 mb-1.5 flex items-center gap-2"
                             >
                               {lab.name}
                               <Info className="w-4 h-4" />
@@ -539,7 +536,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-2xl text-blue-600">EGP {price ?? '—'}</div>
+                            <div className="text-2xl font-semibold text-blue-600"><span className="font-bold">EGP</span> {price ?? '—'}</div>
                             <div className="text-gray-500 text-sm">{priceLabel}</div>
                           </div>
                         </div>
@@ -574,7 +571,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                           </div>
                           <button
                             onClick={() => onLabSelect(lab)}
-                            className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            className="px-5 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold"
                           >
                             Book Now
                           </button>

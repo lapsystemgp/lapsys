@@ -181,11 +181,11 @@ export function BookingPage({
     const onlineFlow = effectivePaymentMethod === "Online";
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-8 max-w-md text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
-          <h2 className="text-2xl text-gray-900 mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
             {bookingType === "kit" ? "Kit order placed" : onlineFlow ? "Booking received" : "Booking request sent"}
           </h2>
           <p className="text-gray-600 mb-4 text-sm">
@@ -195,8 +195,8 @@ export function BookingPage({
                 ? "Use the demo payment buttons on your patient dashboard so the lab can confirm this booking."
                 : "Pay in cash when the sample is collected or when you visit the lab."}
           </p>
-          <div className="bg-blue-50 rounded-lg p-4 text-left">
-            <div className="text-gray-900 mb-2">{lab.name}</div>
+          <div className="bg-blue-50 rounded-xl p-4 text-left">
+            <div className="font-semibold text-gray-900 mb-2">{lab.name}</div>
             {bookingType !== "kit" && selectedSlot && (
               <div className="text-gray-600">
                 {formatDay(selectedSlot.startsAt)} at {formatTime(selectedSlot.startsAt)}
@@ -223,7 +223,8 @@ export function BookingPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm">
+      {/* Header sticky bar */}
+      <div className="bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <Breadcrumb
             items={[
@@ -233,19 +234,20 @@ export function BookingPage({
             ]}
             className="mb-2"
           />
-          <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150 mb-2">
+          <button onClick={onBack} className="flex items-center gap-2 font-medium text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150 mb-2">
             <ArrowLeft className="w-4 h-4" />
             Back to Lab Details
           </button>
-          <h1 className="text-xl text-gray-900">Book Your Appointment</h1>
+          <h1 className="text-xl font-bold text-gray-900">Book Your Appointment</h1>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-        <div className="bg-white rounded-xl shadow-sm p-5 mb-4 animate-slide-up">
+        {/* Lab info card */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4 animate-slide-up">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-lg text-gray-900 mb-1.5">{lab.name}</h2>
+              <h2 className="text-lg font-bold text-gray-900 mb-1.5">{lab.name}</h2>
               <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
                 <MapPin className="w-4 h-4" />
                 <span>{lab.address}</span>
@@ -253,13 +255,14 @@ export function BookingPage({
               <div className="text-gray-600 text-sm">{test?.name || "Selected test"}</div>
             </div>
             <div className="text-right">
-              <div className="text-2xl text-blue-600">EGP {basePrice}</div>
+              <div className="text-2xl font-semibold text-blue-600">EGP {basePrice}</div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-5 mb-4 animate-slide-up animation-delay-100">
-          <h3 className="text-base text-gray-900 mb-3">Choose Collection Type</h3>
+        {/* Collection type card */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4 animate-slide-up animation-delay-100">
+          <h3 className="text-base font-semibold text-gray-900 mb-3">Choose Collection Type</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button
               onClick={() => setBookingType("lab")}
@@ -268,7 +271,7 @@ export function BookingPage({
               }`}
             >
               <MapPin className={`w-7 h-7 mx-auto mb-2 ${bookingType === "lab" ? "text-blue-600" : "text-gray-400"}`} />
-              <div className="text-gray-900 mb-0.5">Visit Lab</div>
+              <div className="font-medium text-gray-900 mb-0.5">Visit Lab</div>
               <div className="text-gray-600 text-sm">Come to our facility</div>
             </button>
             <button
@@ -283,7 +286,7 @@ export function BookingPage({
               }`}
             >
               <Home className={`w-7 h-7 mx-auto mb-2 ${bookingType === "home" && lab.homeCollection ? "text-blue-600" : "text-gray-400"}`} />
-              <div className={`mb-0.5 ${lab.homeCollection ? "text-gray-900" : "text-gray-500"}`}>Home Collection</div>
+              <div className={`font-medium mb-0.5 ${lab.homeCollection ? "text-gray-900" : "text-gray-500"}`}>Home Collection</div>
               {lab.homeCollection
                 ? <div className="text-gray-600 text-sm">We come to you (+EGP {HOME_COLLECTION_FEE})</div>
                 : <div className="text-gray-500 text-xs">Not available at this lab</div>
@@ -301,7 +304,7 @@ export function BookingPage({
               }`}
             >
               <Package className={`w-7 h-7 mx-auto mb-2 ${bookingType === "kit" && lab.homeTestKit ? "text-blue-600" : "text-gray-400"}`} />
-              <div className={`mb-0.5 ${lab.homeTestKit ? "text-gray-900" : "text-gray-500"}`}>Home Test Kit</div>
+              <div className={`font-medium mb-0.5 ${lab.homeTestKit ? "text-gray-900" : "text-gray-500"}`}>Home Test Kit</div>
               {lab.homeTestKit
                 ? <div className="text-gray-600 text-sm">Kit shipped to you (+EGP {HOME_KIT_FEE})</div>
                 : <div className="text-gray-500 text-xs">Not available at this lab</div>
@@ -312,8 +315,9 @@ export function BookingPage({
 
         {bookingType !== "kit" && (
           <>
-            <div className="bg-white rounded-xl shadow-sm p-5 mb-4 animate-slide-up animation-delay-200">
-              <h3 className="text-base text-gray-900 mb-3">Select Date</h3>
+            {/* Date selection card */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4 animate-slide-up animation-delay-200">
+              <h3 className="text-base font-semibold text-gray-900 mb-3">Select Date</h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {dates.map((date) => (
                   <button
@@ -323,15 +327,16 @@ export function BookingPage({
                       effectiveSelectedDate === date.key ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
-                    <div className="text-gray-900 text-sm">{date.label}</div>
+                    <div className="font-medium text-gray-900 text-sm">{date.label}</div>
                   </button>
                 ))}
                 {dates.length === 0 && <p className="text-gray-600 col-span-4 text-sm">No available dates in the selected range.</p>}
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm p-5 mb-4 animate-slide-up animation-delay-300">
-              <h3 className="text-base text-gray-900 mb-3">Select Time Slot</h3>
+            {/* Time slot card */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4 animate-slide-up animation-delay-300">
+              <h3 className="text-base font-semibold text-gray-900 mb-3">Select Time Slot</h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {timeSlotsForDate.map((slot) => (
                   <button
@@ -342,7 +347,7 @@ export function BookingPage({
                     }`}
                   >
                     <Clock className={`w-5 h-5 mx-auto mb-1.5 ${selectedSlotId === slot.id ? "text-blue-600" : "text-gray-400"}`} />
-                    <div className="text-gray-900 text-sm">{formatTime(slot.startsAt)}</div>
+                    <div className="font-medium text-gray-900 text-sm">{formatTime(slot.startsAt)}</div>
                   </button>
                 ))}
                 {effectiveSelectedDate && timeSlotsForDate.length === 0 && (
@@ -353,8 +358,9 @@ export function BookingPage({
           </>
         )}
 
+        {/* Home kit info banner */}
         {bookingType === "kit" && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4 flex items-start gap-3 animate-slide-up animation-delay-200">
+          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-4 flex items-start gap-3 animate-slide-up animation-delay-200">
             <Package className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
             <div className="text-sm text-blue-900">
               <p className="font-medium mb-1">How it works</p>
@@ -363,8 +369,9 @@ export function BookingPage({
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-sm p-5 mb-4 animate-slide-up animation-delay-300">
-          <h3 className="text-base text-gray-900 mb-3">Payment</h3>
+        {/* Payment card */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4 animate-slide-up animation-delay-300">
+          <h3 className="text-base font-semibold text-gray-900 mb-3">Payment</h3>
           <p className="text-sm text-gray-600 mb-3">
             This project uses a simulated payment gateway for online payments — no real charges are made.
           </p>
@@ -376,7 +383,7 @@ export function BookingPage({
                 effectivePaymentMethod === "Online" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
               }`}
             >
-              <div className="text-gray-900 font-medium">Pay online (demo)</div>
+              <div className="font-semibold text-gray-900">Pay online (demo)</div>
               <div className="text-gray-600 text-sm">Simulated card payment — complete from your dashboard after booking.</div>
             </button>
             {bookingType === "home" && (
@@ -389,7 +396,7 @@ export function BookingPage({
                     : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <div className="text-gray-900 font-medium">Cash on home sample collection</div>
+                <div className="font-semibold text-gray-900">Cash on home sample collection</div>
                 <div className="text-gray-600 text-sm">Pay the collector when the sample is taken.</div>
               </button>
             )}
@@ -401,7 +408,7 @@ export function BookingPage({
                   effectivePaymentMethod === "CashLabVisit" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <div className="text-gray-900 font-medium">Cash at lab visit</div>
+                <div className="font-semibold text-gray-900">Cash at lab visit</div>
                 <div className="text-gray-600 text-sm">Pay at the reception desk when you attend.</div>
               </button>
             )}
@@ -413,16 +420,17 @@ export function BookingPage({
                   effectivePaymentMethod === "CashOnDelivery" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <div className="text-gray-900 font-medium">Cash on delivery</div>
+                <div className="font-semibold text-gray-900">Cash on delivery</div>
                 <div className="text-gray-600 text-sm">Pay when the kit arrives at your door.</div>
               </button>
             )}
           </div>
         </div>
 
+        {/* Address card */}
         {(bookingType === "home" || bookingType === "kit") && (
-          <div className="bg-white rounded-xl shadow-sm p-5 mb-4 animate-slide-up animation-delay-400">
-            <h3 className="text-base text-gray-900 mb-3">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4 animate-slide-up animation-delay-400">
+            <h3 className="text-base font-semibold text-gray-900 mb-3">
               {bookingType === "kit" ? "Kit Delivery Address" : "Home Address"}
             </h3>
             <textarea
@@ -433,14 +441,15 @@ export function BookingPage({
                   ? "Enter your full delivery address for the kit"
                   : "Enter your complete address for sample collection"
               }
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg resize-none"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
               rows={3}
             />
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-sm p-5 animate-slide-up animation-delay-400">
-          <h3 className="text-base text-gray-900 mb-3">Booking Summary</h3>
+        {/* Booking summary card */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 animate-slide-up animation-delay-400">
+          <h3 className="text-base font-semibold text-gray-900 mb-3">Booking Summary</h3>
           <div className="space-y-3 mb-4">
             <div className="flex justify-between">
               <span className="text-gray-600">Test Price</span>
@@ -459,8 +468,8 @@ export function BookingPage({
               </div>
             )}
             <div className="border-t pt-3 flex justify-between">
-              <span className="text-gray-900">Total Amount</span>
-              <span className="text-2xl text-blue-600">
+              <span className="font-semibold text-gray-900">Total Amount</span>
+              <span className="font-bold text-2xl text-blue-600">
                 EGP {basePrice + (bookingType === "home" ? HOME_COLLECTION_FEE : bookingType === "kit" ? HOME_KIT_FEE : 0)}
               </span>
             </div>
@@ -480,7 +489,7 @@ export function BookingPage({
           <button
             onClick={handleBooking}
             disabled={(bookingType !== "kit" && !effectiveSelectedSlotId) || !!isSubmitting}
-            className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:scale-[0.99] transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="w-full py-3 font-bold bg-blue-600 text-white rounded-xl shadow-sm hover:bg-blue-700 active:scale-[0.99] transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Confirming..." : bookingType === "kit" ? "Order Kit" : "Confirm Booking"}
           </button>

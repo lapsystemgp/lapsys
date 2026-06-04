@@ -140,7 +140,8 @@ export class PatientService {
               createdAt: booking.review.created_at.toISOString(),
             }
           : null,
-        canReview: !booking.review && !!booking.result_file,
+        canReview: !booking.review && !!booking.result_file &&
+          (booking.result_file.status === ResultStatus.Uploaded || booking.result_file.status === ResultStatus.Delivered),
       };
       });
 
@@ -173,9 +174,9 @@ export class PatientService {
     const updated = await this.prisma.patientProfile.update({
       where: { id: patientProfile.id },
       data: {
-        ...(dto.fullName !== undefined ? { full_name: dto.fullName.trim() } : {}),
-        ...(dto.phone !== undefined ? { phone: dto.phone.trim() } : {}),
-        ...(dto.address !== undefined ? { address: dto.address.trim() } : {}),
+        ...(dto.fullName !== undefined && dto.fullName.trim() ? { full_name: dto.fullName.trim() } : {}),
+        ...(dto.phone !== undefined && dto.phone.trim() ? { phone: dto.phone.trim() } : {}),
+        ...(dto.address !== undefined && dto.address.trim() ? { address: dto.address.trim() } : {}),
         ...(dto.labHistorySharing !== undefined ? { lab_history_sharing: dto.labHistorySharing } : {}),
       },
       select: { full_name: true, phone: true, address: true, lab_history_sharing: true },

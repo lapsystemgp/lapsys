@@ -287,6 +287,9 @@ export class LabService {
     if (!file.mimetype.includes('pdf')) {
       throw new BadRequestException('Only PDF files are supported');
     }
+    if (!file.buffer || file.buffer.subarray(0, 4).toString('ascii') !== '%PDF') {
+      throw new BadRequestException('Invalid PDF file');
+    }
 
     const labProfileId = await this.getLabProfileId(userId);
     const booking = await this.prisma.booking.findUnique({
@@ -462,7 +465,7 @@ export class LabService {
         this.prisma.booking.count({
           where: {
             lab_profile_id: labProfileId,
-            schedule_slot_id: { not: null },
+            schedule_slot: { starts_at: { gte: new Date() }, is_active: true },
             status: { in: [BookingStatus.Pending, BookingStatus.Confirmed, BookingStatus.Completed] },
           },
         }),

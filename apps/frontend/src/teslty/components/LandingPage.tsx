@@ -400,25 +400,25 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
             <div>
               <h3 className="text-white mb-4">For Patients</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">Search Tests</a></li>
-                <li><a href="#" className="hover:text-white">Book Appointment</a></li>
-                <li><a href="#" className="hover:text-white">View Results</a></li>
+                <li><a href="/labs" className="hover:text-white">Search Tests</a></li>
+                <li><a href="/" className="hover:text-white">Book Appointment</a></li>
+                <li><a href="/patient/dashboard" className="hover:text-white">View Results</a></li>
               </ul>
             </div>
             <div>
               <h3 className="text-white mb-4">For Labs</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">Register Your Lab</a></li>
-                <li><a href="#" className="hover:text-white">Dashboard</a></li>
-                <li><a href="#" className="hover:text-white">Analytics</a></li>
+                <li><a href="/register" className="hover:text-white">Register Your Lab</a></li>
+                <li><a href="/lab/dashboard" className="hover:text-white">Dashboard</a></li>
+                <li><a href="/lab/dashboard" className="hover:text-white">Analytics</a></li>
               </ul>
             </div>
             <div>
               <h3 className="text-white mb-4">Support</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">Help Center</a></li>
-                <li><a href="#" className="hover:text-white">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white">Terms of Service</a></li>
+                <li><span className="text-gray-400">Help Center</span></li>
+                <li><span className="text-gray-400">Privacy Policy</span></li>
+                <li><span className="text-gray-400">Terms of Service</span></li>
               </ul>
             </div>
           </div>

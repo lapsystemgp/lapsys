@@ -18,6 +18,9 @@ export default function LabsClient() {
       initialSort={initialSort}
       initialCity={initialCity}
       onLabSelect={(lab) => router.push(`/labs/${lab.id}`)}
+      onTestSelect={(test) =>
+        router.push(`/tests/${encodeURIComponent(test.name)}?category=${encodeURIComponent(test.category)}`)
+      }
       onBack={() => router.push("/")}
     />
   );

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import {
   Search, TestTube, Calendar, Home, Star, Shield, Activity,
   User, LayoutDashboard, LogOut, Menu, X, Award, CheckCircle2,
-  ArrowRight, ChevronRight, FlaskConical,
+  ArrowRight, ChevronRight,
 } from 'lucide-react';
 import { MapPin, Clock } from 'lucide-react';
 import type { Page, UserRole } from '../types';
@@ -297,30 +297,6 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
         </div>
       </section>
 
-      {/* Stats Strip */}
-      <section className="bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            {[
-              { value: '50+', label: 'Partner Labs', icon: <TestTube className="w-5 h-5" /> },
-              { value: '200+', label: 'Available Tests', icon: <FlaskConical className="w-5 h-5" /> },
-              { value: '4.8★', label: 'Average Rating', icon: <Star className="w-5 h-5" /> },
-              { value: '10K+', label: 'Happy Patients', icon: <Activity className="w-5 h-5" /> },
-            ].map(({ value, label, icon }) => (
-              <div key={label} className="text-center group cursor-default">
-                <div className="flex justify-center mb-2">
-                  <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-200">
-                    {icon}
-                  </div>
-                </div>
-                <div className="text-2xl sm:text-3xl font-bold text-gray-900">{value}</div>
-                <div className="text-xs sm:text-sm text-gray-500 font-medium mt-0.5">{label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Features Section */}
       <section id="features" className="py-12 sm:py-16 lg:py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -533,25 +509,23 @@ export function LandingPage({ onSearch, onNavigate, userRole, currentUserLabel, 
             <div>
               <h3 className="text-white font-semibold mb-4">For Patients</h3>
               <ul className="space-y-2.5 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Search Tests</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Book Appointment</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">View Results</a></li>
+                <li><a href="/labs" className="hover:text-white transition-colors">Search Tests</a></li>
+                <li><a href="/" className="hover:text-white transition-colors">Book Appointment</a></li>
+                <li><a href="/patient/dashboard" className="hover:text-white transition-colors">View Results</a></li>
               </ul>
             </div>
             <div>
               <h3 className="text-white font-semibold mb-4">For Labs</h3>
               <ul className="space-y-2.5 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Register Your Lab</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Dashboard</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Analytics</a></li>
+                <li><a href="/register" className="hover:text-white transition-colors">Register Your Lab</a></li>
+                <li><a href="/lab/dashboard" className="hover:text-white transition-colors">Dashboard</a></li>
+                <li><a href="/lab/dashboard" className="hover:text-white transition-colors">Analytics</a></li>
               </ul>
             </div>
             <div>
               <h3 className="text-white font-semibold mb-4">Support</h3>
               <ul className="space-y-2.5 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+                <li><span className="text-gray-400">Terms of Service</span></li>
               </ul>
             </div>
           </div>

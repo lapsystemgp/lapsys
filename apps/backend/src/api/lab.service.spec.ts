@@ -99,7 +99,7 @@ describe('LabService', () => {
           mimetype: 'application/pdf',
           originalname: 'result.pdf',
           size: 123,
-          buffer: Buffer.from('x'),
+          buffer: Buffer.from('%PDF-1.4 test'),
         } as UploadedLabFile,
         { summary: 'summary' },
       ),
@@ -145,7 +145,7 @@ describe('LabService', () => {
         mimetype: 'application/pdf',
         originalname: 'result.pdf',
         size: 123,
-        buffer: Buffer.from('x'),
+        buffer: Buffer.from('%PDF-1.4 test'),
       } as UploadedLabFile,
       { summary: 'All good', highlights: '{"h":1}' },
     );

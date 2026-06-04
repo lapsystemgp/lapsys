@@ -1,7 +1,7 @@
 import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
 import { LabOnboardingStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { clampFloat, clampInt, haversineKm, parseBoolean, parseCsv, placeholderDistanceKm } from './public-utils';
+import { clampFloat, clampInt, haversineKm, parseBoolean, parseCsv } from './public-utils';
 
 type PublicLabCard = {
   id: string;
@@ -13,7 +13,7 @@ type PublicLabCard = {
   homeTestKit: boolean;
   rating: number | null;
   reviews: number;
-  distanceKm: number;
+  distanceKm: number | null;
   testsAvailable: number;
   startingFromEgp: number | null;
   priceForQueryEgp: number | null;
@@ -53,6 +53,7 @@ export class PublicLabsController {
   async listLabs(@Query() query: Record<string, string | undefined>) {
     const q = (query.q ?? '').trim();
     const labName = (query.labName ?? '').trim();
+    const city = (query.city ?? '').trim();
 
     const page = clampInt(query.page, { min: 1, max: 500, defaultValue: 1 });
     const pageSize = clampInt(query.pageSize, { min: 1, max: 50, defaultValue: 12 });
@@ -73,6 +74,7 @@ export class PublicLabsController {
       ...(homeCollection === undefined ? {} : { home_collection: homeCollection }),
       ...(minRating > 0 ? { rating_average: { gte: minRating } } : {}),
       ...(labName.length > 0 ? { lab_name: { contains: normalizeContains(labName), mode: 'insensitive' } } : {}),
+      ...(city.length > 0 ? { address: { contains: city, mode: 'insensitive' } } : {}),
       ...(accreditations.length > 0
         ? {
             OR: accreditations.map((token) => ({
@@ -93,16 +95,24 @@ export class PublicLabsController {
 
     const baseLabIds = baseLabs.map((lab) => lab.id);
 
-    const qToken = q.length > 0 ? normalizeContains(q) : '';
+    const stopwords = new Set(['test', 'tests']);
+    const rawTokens = q.split(/\s+/).filter(Boolean);
+    const filteredTokens = rawTokens.filter((t) => !stopwords.has(t.toLowerCase()));
+    const tokens = filteredTokens.length > 0 ? filteredTokens : rawTokens;
 
-    // If q is present, show labs matching either lab name OR test catalog.
+    // If q is present, show labs matching either lab name/address OR test catalog.
     let allowedLabIds = new Set<string>(baseLabIds);
     let minPriceForQueryByLab = new Map<string, number>();
 
-    if (qToken.length > 0) {
-      const nameMatchLabIds = new Set(
+    if (tokens.length > 0) {
+      const nameAndAddressMatchLabIds = new Set(
         baseLabs
-          .filter((lab) => lab.lab_name.toLowerCase().includes(qToken.toLowerCase()))
+          .filter((lab) =>
+            tokens.every((t) => {
+              const lower = t.toLowerCase();
+              return lab.lab_name.toLowerCase().includes(lower) || lab.address.toLowerCase().includes(lower);
+            }),
+          )
           .map((lab) => lab.id),
       );
 
@@ -111,17 +121,19 @@ export class PublicLabsController {
         where: {
           lab_profile_id: { in: baseLabIds },
           is_active: true,
-          OR: [
-            { name: { contains: qToken, mode: 'insensitive' } },
-            { category: { contains: qToken, mode: 'insensitive' } },
-            { description: { contains: qToken, mode: 'insensitive' } },
-          ],
+          AND: tokens.map((t) => ({
+            OR: [
+              { name: { contains: t, mode: 'insensitive' } },
+              { category: { contains: t, mode: 'insensitive' } },
+              { description: { contains: t, mode: 'insensitive' } },
+            ],
+          })),
         },
         _min: { price_egp: true },
       });
 
       const testMatchLabIds = new Set(byTest.map((row) => row.lab_profile_id));
-      allowedLabIds = new Set([...nameMatchLabIds, ...testMatchLabIds]);
+      allowedLabIds = new Set([...nameAndAddressMatchLabIds, ...testMatchLabIds]);
 
       for (const row of byTest) {
         if (typeof row._min.price_egp === 'number') {
@@ -156,11 +168,11 @@ export class PublicLabsController {
         const distanceKm =
           hasUserLocation && lab.latitude != null && lab.longitude != null
             ? haversineKm(userLat, userLng, lab.latitude, lab.longitude)
-            : placeholderDistanceKm(lab.id);
+            : null;
         const starting = startingMinPrice.get(lab.id);
         const startingFromEgp = starting?.minPrice ?? null;
         const testsAvailable = starting?.testsCount ?? 0;
-        const priceForQueryEgp = qToken.length > 0 ? (minPriceForQueryByLab.get(lab.id) ?? null) : null;
+        const priceForQueryEgp = tokens.length > 0 ? (minPriceForQueryByLab.get(lab.id) ?? null) : null;
 
         return {
           id: lab.id,
@@ -179,9 +191,9 @@ export class PublicLabsController {
           imageEmoji: pickEmoji(lab.id),
         };
       })
-      .filter((card) => card.distanceKm <= maxDistanceKm)
+      .filter((card) => card.distanceKm === null || card.distanceKm <= maxDistanceKm)
       .filter((card) => {
-        const effectivePrice = qToken.length > 0 ? card.priceForQueryEgp ?? card.startingFromEgp : card.startingFromEgp;
+        const effectivePrice = tokens.length > 0 ? card.priceForQueryEgp ?? card.startingFromEgp : card.startingFromEgp;
         if (effectivePrice === null) return false;
         return effectivePrice <= maxPriceEgp;
       });
@@ -193,11 +205,11 @@ export class PublicLabsController {
         return br - ar;
       }
       if (sort === 'distance') {
-        return a.distanceKm - b.distanceKm;
+        return (a.distanceKm ?? Number.MAX_SAFE_INTEGER) - (b.distanceKm ?? Number.MAX_SAFE_INTEGER);
       }
 
-      const ap = qToken.length > 0 ? a.priceForQueryEgp ?? a.startingFromEgp : a.startingFromEgp;
-      const bp = qToken.length > 0 ? b.priceForQueryEgp ?? b.startingFromEgp : b.startingFromEgp;
+      const ap = tokens.length > 0 ? a.priceForQueryEgp ?? a.startingFromEgp : a.startingFromEgp;
+      const bp = tokens.length > 0 ? b.priceForQueryEgp ?? b.startingFromEgp : b.startingFromEgp;
       return (ap ?? Number.MAX_SAFE_INTEGER) - (bp ?? Number.MAX_SAFE_INTEGER);
     });
 
@@ -236,16 +248,23 @@ export class PublicLabsController {
 
     if (!lab) throw new NotFoundException('Lab not found');
 
+    const detailStopwords = new Set(['test', 'tests']);
+    const detailRawTokens = q.split(/\s+/).filter(Boolean);
+    const detailFiltered = detailRawTokens.filter((t) => !detailStopwords.has(t.toLowerCase()));
+    const detailTokens = detailFiltered.length > 0 ? detailFiltered : detailRawTokens;
+
     const testsWhere: Prisma.LabTestWhereInput = {
       lab_profile_id: lab.id,
       is_active: true,
-      ...(q.length > 0
+      ...(detailTokens.length > 0
         ? {
-            OR: [
-              { name: { contains: q, mode: 'insensitive' } },
-              { category: { contains: q, mode: 'insensitive' } },
-              { description: { contains: q, mode: 'insensitive' } },
-            ],
+            AND: detailTokens.map((t) => ({
+              OR: [
+                { name: { contains: t, mode: 'insensitive' } },
+                { category: { contains: t, mode: 'insensitive' } },
+                { description: { contains: t, mode: 'insensitive' } },
+              ],
+            })),
           }
         : {}),
       ...(category.length > 0 && category !== 'all' ? { category } : {}),
@@ -285,7 +304,7 @@ export class PublicLabsController {
       homeTestKit: lab.home_test_kit,
       rating: lab.rating_average ?? null,
       reviews: lab.review_count ?? 0,
-      distanceKm: placeholderDistanceKm(lab.id),
+      distanceKm: null,
       testsAvailable: totalCount,
       startingFromEgp: null,
       priceForQueryEgp: null,

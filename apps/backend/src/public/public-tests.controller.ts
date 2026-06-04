@@ -13,16 +13,23 @@ export class PublicTestsController {
     const page = clampInt(query.page, { min: 1, max: 500, defaultValue: 1 });
     const pageSize = clampInt(query.pageSize, { min: 1, max: 50, defaultValue: 12 });
 
+    const stopwords = new Set(['test', 'tests']);
+    const rawTokens = q.split(/\s+/).filter(Boolean);
+    const filteredTokens = rawTokens.filter((t) => !stopwords.has(t.toLowerCase()));
+    const tokens = filteredTokens.length > 0 ? filteredTokens : rawTokens;
+
     const where: Prisma.LabTestWhereInput = {
       is_active: true,
       lab_profile: { onboarding_status: LabOnboardingStatus.Active },
-      ...(q.length > 0
+      ...(tokens.length > 0
         ? {
-            OR: [
-              { name: { contains: q, mode: 'insensitive' } },
-              { category: { contains: q, mode: 'insensitive' } },
-              { description: { contains: q, mode: 'insensitive' } },
-            ],
+            AND: tokens.map((t) => ({
+              OR: [
+                { name: { contains: t, mode: 'insensitive' } },
+                { category: { contains: t, mode: 'insensitive' } },
+                { description: { contains: t, mode: 'insensitive' } },
+              ],
+            })),
           }
         : {}),
     };
@@ -45,6 +52,72 @@ export class PublicTestsController {
     }));
 
     return { items, pagination: { page, pageSize, totalCount } };
+  }
+
+  @Get('by-name')
+  async getTestByName(@Query() query: Record<string, string>) {
+    const name = (query.name ?? '').trim();
+    const category = (query.category ?? '').trim();
+
+    if (!name) throw new NotFoundException('name param required');
+
+    const tests = await this.prisma.labTest.findMany({
+      where: {
+        name: { equals: name, mode: 'insensitive' },
+        ...(category ? { category: { equals: category, mode: 'insensitive' } } : {}),
+        is_active: true,
+        lab_profile: { onboarding_status: LabOnboardingStatus.Active },
+      },
+      select: {
+        id: true,
+        name: true,
+        category: true,
+        price_egp: true,
+        description: true,
+        preparation: true,
+        turnaround_time: true,
+        parameters_count: true,
+        lab_profile: {
+          select: {
+            id: true,
+            lab_name: true,
+            address: true,
+            rating_average: true,
+            review_count: true,
+            home_collection: true,
+            home_test_kit: true,
+            accreditation: true,
+            turnaround_time: true,
+          },
+        },
+      },
+      orderBy: { price_egp: 'asc' },
+    });
+
+    if (!tests.length) throw new NotFoundException('Test not found');
+
+    const ref = tests[0];
+    return {
+      name: ref.name,
+      category: ref.category,
+      description: ref.description ?? null,
+      preparation: ref.preparation ?? null,
+      turnaroundTime: ref.turnaround_time ?? null,
+      parametersCount: ref.parameters_count ?? null,
+      labs: tests.map((t) => ({
+        labTestId: t.id,
+        labId: t.lab_profile.id,
+        labName: t.lab_profile.lab_name,
+        address: t.lab_profile.address,
+        priceEgp: t.price_egp,
+        rating: t.lab_profile.rating_average ?? null,
+        reviews: t.lab_profile.review_count,
+        homeCollection: t.lab_profile.home_collection,
+        homeTestKit: t.lab_profile.home_test_kit,
+        accreditation: t.lab_profile.accreditation ?? null,
+        turnaroundTime: t.lab_profile.turnaround_time ?? null,
+      })),
+    };
   }
 
   @Get(':labTestId')

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Star, MessageSquare } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Breadcrumb } from "../../../components/Breadcrumb";
@@ -17,15 +17,14 @@ import {
   updateLabProfile,
   updateLabTest,
   type LabPatientContextResponse,
-  type LabStructuredPanelInput,
   type LabWorkspaceResponse,
   uploadLabResult,
-  upsertLabStructuredResults,
 } from "../../../lib/labApi";
+import { fetchPublicLabDetail, type PublicReview } from "../../../lib/publicApi";
 import { useSession } from "../../../components/SessionProvider";
 import { useToast } from "../../../components/ToastProvider";
 
-type Tab = "bookings" | "tests" | "results" | "schedule" | "analytics" | "settings";
+type Tab = "bookings" | "tests" | "results" | "schedule" | "analytics" | "reviews" | "settings";
 
 function formatDateTime(value: string) {
   const date = new Date(value);
@@ -66,8 +65,7 @@ export default function LabDashboardPage() {
   const [editingTest, setEditingTest] = useState({ name: "", category: "", priceEgp: "" });
   const [newSlot, setNewSlot] = useState({ startsAt: "", endsAt: "", capacity: "1" });
   const [uploadState, setUploadState] = useState<Record<string, { summary: string; file: File | null }>>({});
-  const [structuredJsonByBooking, setStructuredJsonByBooking] = useState<Record<string, string>>({});
-  const [structuredSubmittingId, setStructuredSubmittingId] = useState<string | null>(null);
+
   const [cashActionId, setCashActionId] = useState<string | null>(null);
   const [kitActionId, setKitActionId] = useState<string | null>(null);
   const [kitTrackingInputs, setKitTrackingInputs] = useState<Record<string, string>>({});
@@ -75,6 +73,9 @@ export default function LabDashboardPage() {
 
   const [patientContext, setPatientContext] = useState<LabPatientContextResponse | null>(null);
   const [patientContextLoading, setPatientContextLoading] = useState(false);
+  const [reviewItems, setReviewItems] = useState<PublicReview[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsLabId, setReviewsLabId] = useState<string | null>(null);
 
   const loadWorkspace = useCallback(async () => {
     setLoading(true);
@@ -99,6 +100,19 @@ export default function LabDashboardPage() {
   useEffect(() => {
     loadWorkspace();
   }, [loadWorkspace]);
+
+  useEffect(() => {
+    if (tab !== "reviews" || !workspace?.lab.id) return;
+    if (reviewsLabId === workspace.lab.id) return;
+    setReviewsLoading(true);
+    fetchPublicLabDetail(workspace.lab.id)
+      .then((res) => {
+        setReviewItems(res.reviewItems ?? []);
+        setReviewsLabId(workspace.lab.id);
+      })
+      .catch(() => {})
+      .finally(() => setReviewsLoading(false));
+  }, [tab, workspace?.lab.id, reviewsLabId]);
 
   const bookingsByStatus = useMemo(() => {
     const pending = workspace?.bookings.filter((booking) => booking.status === "Pending") ?? [];
@@ -284,46 +298,6 @@ export default function LabDashboardPage() {
     }
   };
 
-  const defaultStructuredTemplate = (scheduledAt: string) =>
-    JSON.stringify(
-      {
-        panels: [
-          {
-            name: "Chemistry",
-            testDate: scheduledAt,
-            observations: [
-              { name: "Fasting glucose", canonicalCode: "GLUCOSE_FASTING", value: 95, unit: "mg/dL", refLow: 70, refHigh: 100 },
-              { name: "HbA1c", canonicalCode: "HBA1C", value: 5.2, unit: "%", refLow: 4, refHigh: 5.6 },
-            ],
-          },
-        ],
-      },
-      null,
-      2,
-    );
-
-  const handleSaveStructured = async (bookingId: string) => {
-    const raw = structuredJsonByBooking[bookingId]?.trim();
-    if (!raw) {
-      toast.error("Paste structured JSON before saving.");
-      return;
-    }
-    setStructuredSubmittingId(bookingId);
-    try {
-      const parsed = JSON.parse(raw) as { panels?: unknown };
-      if (!parsed.panels || !Array.isArray(parsed.panels)) {
-        throw new Error("Invalid shape");
-      }
-      await upsertLabStructuredResults(bookingId, parsed.panels as LabStructuredPanelInput[]);
-      await loadWorkspace();
-      toast.success("Structured results saved.");
-    } catch {
-      toast.error("Structured JSON must match { panels: [...] } — upload the PDF first.");
-    } finally {
-      setStructuredSubmittingId(null);
-    }
-  };
-
   const openPatientContext = async (bookingId: string) => {
     setPatientContextLoading(true);
     setPatientContext(null);
@@ -380,7 +354,7 @@ export default function LabDashboardPage() {
       <main className="max-w-7xl mx-auto px-4 py-5">
         <Breadcrumb items={[{ label: "Lab Dashboard" }]} className="mb-4" />
         <div className="flex gap-1.5 mb-5 p-1 bg-white border border-gray-200 rounded-xl w-fit flex-wrap">
-          {(["bookings", "tests", "results", "schedule", "analytics", "settings"] as Tab[]).map((item) => (
+          {(["bookings", "tests", "results", "schedule", "analytics", "reviews", "settings"] as Tab[]).map((item) => (
             <button
               key={item}
               onClick={() => setTab(item)}
@@ -636,8 +610,6 @@ export default function LabDashboardPage() {
                   .filter((booking) => booking.status === "Confirmed" || booking.status === "Completed")
                   .map((booking) => {
                     const state = uploadState[booking.id] ?? { summary: "", file: null };
-                    const structuredDraft =
-                      structuredJsonByBooking[booking.id] ?? defaultStructuredTemplate(booking.scheduledAt);
                     return (
                       <div key={booking.id} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-4">
                         <h2 className="text-lg text-gray-900">{booking.test.name}</h2>
@@ -683,43 +655,6 @@ export default function LabDashboardPage() {
                           </button>
                         </div>
 
-                        <div className="border-t border-gray-100 pt-4">
-                          <p className="text-sm font-medium text-gray-900 mb-2">Structured results (after PDF upload)</p>
-                          <p className="text-xs text-gray-600 mb-2">
-                            Optional JSON for longitudinal charts. Canonical codes include GLUCOSE_FASTING, HBA1C, TSH,
-                            FT4, CREATININE.
-                          </p>
-                          <textarea
-                            value={structuredJsonByBooking[booking.id] ?? structuredDraft}
-                            onChange={(event) =>
-                              setStructuredJsonByBooking((prev) => ({ ...prev, [booking.id]: event.target.value }))
-                            }
-                            rows={12}
-                            className="w-full font-mono text-xs px-3 py-2 border border-gray-300 rounded-lg"
-                          />
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setStructuredJsonByBooking((prev) => ({
-                                  ...prev,
-                                  [booking.id]: defaultStructuredTemplate(booking.scheduledAt),
-                                }))
-                              }
-                              className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
-                            >
-                              Reset template
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleSaveStructured(booking.id)}
-                              disabled={structuredSubmittingId === booking.id}
-                              className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 text-sm"
-                            >
-                              {structuredSubmittingId === booking.id ? "Saving..." : "Save structured results"}
-                            </button>
-                          </div>
-                        </div>
                       </div>
                     );
                   })}
@@ -749,6 +684,56 @@ export default function LabDashboardPage() {
                       </button>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {tab === "reviews" && (
+              <div key="reviews" className="animate-fade-in">
+                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                  <div className="flex items-center gap-2 mb-5">
+                    <MessageSquare className="w-5 h-5 text-blue-600" />
+                    <h2 className="text-lg text-gray-900">Patient Reviews</h2>
+                    {!reviewsLoading && (
+                      <span className="text-sm text-gray-500">({reviewItems.length} published)</span>
+                    )}
+                  </div>
+                  {reviewsLoading ? (
+                    <div className="space-y-3">
+                      {[0, 1, 2].map((i) => (
+                        <div key={i} className="border border-gray-100 rounded-lg p-4">
+                          <div className="skeleton h-4 w-32 mb-2 rounded" />
+                          <div className="skeleton h-4 w-full rounded" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : reviewItems.length === 0 ? (
+                    <p className="text-gray-500">No published reviews yet. Reviews appear here once a patient submits one after receiving their results.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {reviewItems.map((review) => (
+                        <div key={review.id} className="border border-gray-100 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm">
+                                {review.patientName[0].toUpperCase()}
+                              </div>
+                              <span className="text-gray-900">{review.patientName}</span>
+                            </div>
+                            <div className="flex items-center gap-0.5">
+                              {[1, 2, 3, 4, 5].map((v) => (
+                                <Star key={v} className={`w-4 h-4 ${v <= review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />
+                              ))}
+                            </div>
+                          </div>
+                          {review.comment && <p className="text-gray-700 text-sm">{review.comment}</p>}
+                          <p className="text-gray-400 text-xs mt-2">
+                            {new Date(review.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

@@ -25,6 +25,14 @@ export type PublicLabListResponse = {
   pagination: { page: number; pageSize: number; totalCount: number };
 };
 
+export type PublicReview = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+  patientName: string;
+};
+
 export type PublicLabDetailResponse = {
   lab: PublicLabCard;
   tests: Array<{
@@ -38,6 +46,7 @@ export type PublicLabDetailResponse = {
     parametersCount: number | null;
   }>;
   pagination: { page: number; pageSize: number; totalCount: number };
+  reviewItems: PublicReview[];
 };
 
 export type PublicTestResponse = {
@@ -84,7 +93,8 @@ export type TestOfferLab = {
   homeTestKit: boolean;
   accreditation: string | null;
   turnaroundTime: string | null;
-  distanceKm: number | null;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 export type TestOffersResponse = {
@@ -162,9 +172,9 @@ export async function fetchPublicTests(params: { q?: string; page?: number; page
   );
 }
 
-export async function fetchTestOffers(params: { name: string; category?: string; userLat?: number; userLng?: number }) {
+export async function fetchTestOffers(params: { name: string; category?: string }) {
   return await apiFetch<TestOffersResponse>(
-    `/public/tests/by-name${toQueryString({ name: params.name, category: params.category, userLat: params.userLat, userLng: params.userLng })}`,
+    `/public/tests/by-name${toQueryString({ name: params.name, category: params.category })}`,
   );
 }
 

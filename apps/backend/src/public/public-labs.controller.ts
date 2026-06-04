@@ -1,5 +1,5 @@
 import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
-import { LabOnboardingStatus, Prisma } from '@prisma/client';
+import { LabOnboardingStatus, Prisma, ReviewStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { clampFloat, clampInt, haversineKm, parseBoolean, parseCsv } from './public-utils';
 
@@ -23,6 +23,14 @@ type PublicLabCard = {
   imageEmoji: string | null;
 };
 
+type PublicReview = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+  patientName: string;
+};
+
 type PublicLabDetail = {
   lab: PublicLabCard;
   tests: Array<{
@@ -36,6 +44,7 @@ type PublicLabDetail = {
     parametersCount: number | null;
   }>;
   pagination: { page: number; pageSize: number; totalCount: number };
+  reviewItems: PublicReview[];
 };
 
 function normalizeContains(input: string) {
@@ -251,6 +260,37 @@ export class PublicLabsController {
 
     if (!lab) throw new NotFoundException('Lab not found');
 
+    const rawReviews = await this.prisma.review.findMany({
+      where: { lab_profile_id: labProfileId, status: ReviewStatus.Published },
+      orderBy: { created_at: 'desc' },
+      take: 50,
+      select: {
+        id: true,
+        rating: true,
+        comment: true,
+        created_at: true,
+        patient_profile: { select: { full_name: true } },
+      },
+    });
+
+    const reviewItems: PublicReview[] = rawReviews.map((r) => {
+      const fullName = r.patient_profile.full_name?.trim() ?? '';
+      const parts = fullName.split(/\s+/).filter(Boolean);
+      const patientName =
+        parts.length === 0
+          ? 'Anonymous'
+          : parts.length === 1
+            ? parts[0]
+            : `${parts[0]} ${parts[1][0]}.`;
+      return {
+        id: r.id,
+        rating: r.rating,
+        comment: r.comment ?? null,
+        createdAt: r.created_at.toISOString(),
+        patientName,
+      };
+    });
+
     const detailStopwords = new Set(['test', 'tests']);
     const detailRawTokens = q.split(/\s+/).filter(Boolean);
     const detailFiltered = detailRawTokens.filter((t) => !detailStopwords.has(t.toLowerCase()));
@@ -330,6 +370,7 @@ export class PublicLabsController {
         parametersCount: test.parameters_count ?? null,
       })),
       pagination: { page, pageSize, totalCount },
+      reviewItems,
     };
   }
 }

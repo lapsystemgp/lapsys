@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, MapPin, Star, Clock, Home, Phone, Mail, Award, Calendar } from 'lucide-react';
-import type { PublicLabCard } from '../../lib/publicApi';
+import { ArrowLeft, MapPin, Star, Clock, Home, Phone, Mail, Award, Calendar, MessageSquare } from 'lucide-react';
+import type { PublicLabCard, PublicReview } from '../../lib/publicApi';
 import { Breadcrumb } from '../../components/Breadcrumb';
 
 type LabDetailsTest = {
@@ -17,12 +17,13 @@ type LabDetailsTest = {
 interface LabDetailsPageProps {
   lab?: PublicLabCard | null;
   tests: LabDetailsTest[];
+  reviewItems?: PublicReview[];
   isLoading?: boolean;
   onBack: () => void;
   onBookTest: (lab: PublicLabCard, test: LabDetailsTest) => void;
 }
 
-export function LabDetailsPage({ lab, tests, isLoading, onBack, onBookTest }: LabDetailsPageProps) {
+export function LabDetailsPage({ lab, tests, reviewItems = [], isLoading, onBack, onBookTest }: LabDetailsPageProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   // Scroll to top when component mounts
@@ -187,6 +188,45 @@ export function LabDetailsPage({ lab, tests, isLoading, onBack, onBookTest }: La
           </div>
 
         </div>
+
+        {/* Reviews */}
+        {reviewItems.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="flex items-center gap-2 mb-6">
+              <MessageSquare className="w-5 h-5 text-blue-600" />
+              <h2 className="text-2xl text-gray-900">Patient Reviews</h2>
+              <span className="text-gray-500">({reviewItems.length})</span>
+            </div>
+            <div className="space-y-4">
+              {reviewItems.map((review) => (
+                <div key={review.id} className="border border-gray-100 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-medium">
+                        {review.patientName[0].toUpperCase()}
+                      </div>
+                      <span className="text-gray-900 font-medium">{review.patientName}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  {review.comment && (
+                    <p className="text-gray-600 text-sm mt-2">{review.comment}</p>
+                  )}
+                  <p className="text-gray-400 text-xs mt-2">
+                    {new Date(review.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Test Catalog */}
         <div className="bg-white rounded-xl shadow-sm p-6">

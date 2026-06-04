@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Star } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Breadcrumb } from "../../../components/Breadcrumb";
@@ -453,33 +453,34 @@ export default function PatientDashboardPage() {
 
                         {result.review ? (
                           <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                            <p className="text-green-800">Your review: {result.review.rating}/5</p>
-                            {result.review.comment && <p className="text-green-700 mt-1">{result.review.comment}</p>}
+                            <p className="text-sm text-green-700 mb-1">Your review</p>
+                            <div className="flex items-center gap-0.5">
+                              {[1, 2, 3, 4, 5].map((v) => (
+                                <Star key={v} className={`w-5 h-5 ${v <= result.review!.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />
+                              ))}
+                            </div>
+                            {result.review.comment && <p className="text-green-800 mt-2">{result.review.comment}</p>}
                           </div>
                         ) : canSubmitReview ? (
                           <div className="p-4 border border-gray-200 rounded-lg">
                             <p className="text-gray-900 mb-3">Rate this lab</p>
-                            <div className="flex items-center gap-3 mb-3">
-                              <label className="text-sm text-gray-600">Rating</label>
-                              <select
-                                value={draft.rating}
-                                onChange={(event) =>
-                                  setReviewDrafts((prev) => ({
-                                    ...prev,
-                                    [result.bookingId]: {
-                                      rating: Number(event.target.value),
-                                      comment: draft.comment,
-                                    },
-                                  }))
-                                }
-                                className="px-3 py-2 border border-gray-300 rounded-lg"
-                              >
-                                {[5, 4, 3, 2, 1].map((value) => (
-                                  <option key={value} value={value}>
-                                    {value}
-                                  </option>
-                                ))}
-                              </select>
+                            <div className="flex items-center gap-1 mb-3">
+                              {[1, 2, 3, 4, 5].map((value) => (
+                                <button
+                                  key={value}
+                                  type="button"
+                                  onClick={() =>
+                                    setReviewDrafts((prev) => ({
+                                      ...prev,
+                                      [result.bookingId]: { rating: value, comment: draft.comment },
+                                    }))
+                                  }
+                                  className="p-0.5 hover:scale-110 transition-transform"
+                                  aria-label={`Rate ${value} star${value !== 1 ? "s" : ""}`}
+                                >
+                                  <Star className={`w-7 h-7 ${value <= draft.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300 hover:text-yellow-300"}`} />
+                                </button>
+                              ))}
                             </div>
                             <textarea
                               value={draft.comment}

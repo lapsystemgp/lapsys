@@ -36,6 +36,7 @@ export default function LabDetailsRoute() {
     <LabDetailsPage
       lab={data?.lab}
       tests={data?.tests ?? []}
+      reviewItems={data?.reviewItems ?? []}
       isLoading={isLoading}
       onBack={() => router.push("/labs")}
       onBookTest={(selectedLab, test) => {

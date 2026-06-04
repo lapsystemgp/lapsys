@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { createReadStream } from 'node:fs';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -19,10 +20,11 @@ export type UploadedLabFile = {
 
 export interface LabFileStorageAdapter {
   saveResultFile(file: UploadedLabFile): Promise<StoredLabFile>;
+  streamFile(fileUrl: string): Promise<NodeJS.ReadableStream>;
 }
 
 type S3SendClient = {
-  send: (command: unknown) => Promise<unknown>;
+  send: (command: unknown) => Promise<{ Body?: NodeJS.ReadableStream }>;
 };
 
 type S3SdkModule = {
@@ -42,6 +44,7 @@ type S3SdkModule = {
     Body: Buffer;
     ContentType: string;
   }) => unknown;
+  GetObjectCommand: new (input: { Bucket: string; Key: string }) => unknown;
 };
 
 export function loadS3Sdk(): S3SdkModule {
@@ -62,15 +65,23 @@ class LocalDiskLabStorageAdapter implements LabFileStorageAdapter {
     return {
       fileName: file.originalname || safeName,
       fileUrl: `/results/files/${safeName}`,
-      mimeType: 'application/pdf',
+      mimeType: file.mimetype || 'application/pdf',
       sizeBytes: file.size,
     };
+  }
+
+  async streamFile(fileUrl: string): Promise<NodeJS.ReadableStream> {
+    const safeName = path.basename(fileUrl);
+    const filePath = path.resolve(this.baseDir, safeName);
+    await fs.access(filePath);
+    return createReadStream(filePath);
   }
 }
 
 class S3CompatibleLabStorageAdapter implements LabFileStorageAdapter {
   private readonly s3Client: S3SendClient;
   private readonly PutObjectCommand: S3SdkModule['PutObjectCommand'];
+  private readonly GetObjectCommand: S3SdkModule['GetObjectCommand'];
   private readonly bucket: string;
   private readonly region: string;
   private readonly endpoint: string | undefined;
@@ -85,7 +96,7 @@ class S3CompatibleLabStorageAdapter implements LabFileStorageAdapter {
     const accessKeyId = this.readRequiredEnv('AWS_ACCESS_KEY_ID');
     const secretAccessKey = this.readRequiredEnv('AWS_SECRET_ACCESS_KEY');
     const sessionToken = process.env.AWS_SESSION_TOKEN?.trim() || undefined;
-    const { S3Client, PutObjectCommand } = s3SdkLoader();
+    const { S3Client, PutObjectCommand, GetObjectCommand } = s3SdkLoader();
 
     this.s3Client = new S3Client({
       region: this.region,
@@ -98,6 +109,7 @@ class S3CompatibleLabStorageAdapter implements LabFileStorageAdapter {
       },
     });
     this.PutObjectCommand = PutObjectCommand;
+    this.GetObjectCommand = GetObjectCommand;
   }
 
   async saveResultFile(file: UploadedLabFile): Promise<StoredLabFile> {
@@ -110,16 +122,30 @@ class S3CompatibleLabStorageAdapter implements LabFileStorageAdapter {
         Bucket: this.bucket,
         Key: objectKey,
         Body: file.buffer,
-        ContentType: 'application/pdf',
+        ContentType: file.mimetype || 'application/pdf',
       }),
     );
 
     return {
       fileName: file.originalname || path.basename(objectKey),
       fileUrl: this.resolveFileUrl(objectKey),
-      mimeType: 'application/pdf',
+      mimeType: file.mimetype || 'application/pdf',
       sizeBytes: file.size,
     };
+  }
+
+  async streamFile(fileUrl: string): Promise<NodeJS.ReadableStream> {
+    const key = this.extractObjectKey(fileUrl);
+    const result = await this.s3Client.send(new this.GetObjectCommand({ Bucket: this.bucket, Key: key }));
+    if (!result.Body) throw new Error(`S3 object has no body: ${key}`);
+    return result.Body;
+  }
+
+  private extractObjectKey(fileUrl: string): string {
+    // Object key always starts with 'results/' regardless of URL format
+    const idx = fileUrl.indexOf('/results/');
+    if (idx === -1) throw new Error(`Cannot extract S3 key from URL: ${fileUrl}`);
+    return fileUrl.slice(idx + 1);
   }
 
   private sanitizeBaseName(value: string) {
@@ -163,5 +189,9 @@ export class LabStorageService {
 
   async saveResultFile(file: UploadedLabFile) {
     return await this.adapter.saveResultFile(file);
+  }
+
+  async streamFile(fileUrl: string) {
+    return await this.adapter.streamFile(fileUrl);
   }
 }

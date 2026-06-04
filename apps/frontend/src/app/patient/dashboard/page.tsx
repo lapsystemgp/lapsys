@@ -89,7 +89,6 @@ function KitStatusBar({ kitStatus, kitTrackingNumber }: { kitStatus: string | nu
 }
 
 function resolveResultFileUrl(fileUrl: string) {
-  if (/^https?:\/\//i.test(fileUrl)) return fileUrl;
   return `${API_BASE_URL}${fileUrl.startsWith("/") ? "" : "/"}${fileUrl}`;
 }
 
@@ -218,32 +217,32 @@ export default function PatientDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header — #1: frosted glass border */}
       <header className="bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="space-y-1">
-            {/* Back to Home — #2: font-medium */}
-            <button
-              onClick={() => router.push("/")}
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150 font-medium"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Home
-            </button>
+        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Avatar */}
+            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-sm">
+              {(user?.patient_profile?.full_name || user?.email || 'P').charAt(0).toUpperCase()}
+            </div>
             <div>
-              {/* Page title — #3: font-bold */}
-              <h1 className="text-xl text-gray-900 font-bold">Patient Workspace</h1>
-              {/* User email/name — #4: font-medium */}
-              <p className="text-sm text-gray-500 font-medium">{user?.patient_profile?.full_name || user?.email}</p>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base font-bold text-gray-900">{user?.patient_profile?.full_name || user?.email}</h1>
+                <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full">Patient</span>
+              </div>
+              <button
+                onClick={() => router.push("/")}
+                className="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600 hover:-translate-x-0.5 transition-all duration-150 font-medium mt-0.5"
+              >
+                <ArrowLeft className="w-3 h-3" />
+                Back to Home
+              </button>
             </div>
           </div>
           <div className="flex gap-2">
-            {/* Browse Labs — #5: font-medium */}
-            <button onClick={() => router.push("/labs")} className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+            <button onClick={() => router.push("/labs")} className="px-3 py-1.5 text-sm border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-blue-300 transition-all duration-150 font-medium text-gray-700">
               Browse Labs
             </button>
-            {/* Logout — #5: font-medium */}
-            <button onClick={handleLogout} className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+            <button onClick={handleLogout} className="px-3 py-1.5 text-sm border border-gray-200 rounded-xl hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-150 font-medium text-gray-700">
               Logout
             </button>
           </div>
@@ -252,6 +251,23 @@ export default function PatientDashboardPage() {
 
       <main className="max-w-6xl mx-auto px-4 py-5">
         <Breadcrumb items={[{ label: "Patient Dashboard" }]} className="mb-4" />
+        {/* Quick stats */}
+        {workspace && (
+          <div className="grid grid-cols-3 gap-3 mb-5">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
+              <div className="text-2xl font-bold text-gray-900">{allBookings.length}</div>
+              <div className="text-xs text-gray-500 mt-0.5">Total Bookings</div>
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
+              <div className="text-2xl font-bold text-blue-600">{workspace.bookings.upcoming.length}</div>
+              <div className="text-xs text-gray-500 mt-0.5">Upcoming</div>
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
+              <div className="text-2xl font-bold text-green-600">{workspace.results.length}</div>
+              <div className="text-xs text-gray-500 mt-0.5">Results</div>
+            </div>
+          </div>
+        )}
         {/* Tab pills — #6: font-semibold active, font-medium inactive */}
         <div className="flex gap-1.5 mb-5 p-1 bg-white border border-gray-200 rounded-xl w-fit">
           {(["bookings", "results", "trends", "profile"] as const).map((t) => (
@@ -303,7 +319,7 @@ export default function PatientDashboardPage() {
                 ) : (
                   allBookings.map((booking) => (
                     // Booking card — #7: rounded-2xl
-                    <div key={booking.id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                    <div key={booking.id} className={`bg-white rounded-2xl p-5 shadow-sm border hover:shadow-md transition-all duration-200 ${booking.status === 'Confirmed' ? 'border-l-4 border-l-green-500 border-gray-200' : booking.status === 'Pending' ? 'border-l-4 border-l-yellow-400 border-gray-200' : booking.status === 'Cancelled' ? 'border-l-4 border-l-gray-400 border-gray-200' : 'border-gray-200'}`}>
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           {/* Booking test name — #8: font-bold */}

@@ -2,19 +2,18 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { createReadStream } from 'node:fs';
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
 import type { Response } from 'express';
 import { ResultStatus } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
+import { LabStorageService } from './lab-storage.service';
 
 type RequestWithUser = {
   user?: { id?: string; role?: string };
@@ -22,20 +21,22 @@ type RequestWithUser = {
 
 @Controller('results')
 export class ResultsDownloadController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly labStorage: LabStorageService,
+  ) {}
 
-  @Get('files/:filename')
+  @Get('files/:id')
   @UseGuards(JwtAuthGuard)
   async downloadResultFile(
-    @Param('filename') filename: string,
+    @Param('id') id: string,
     @Req() req: RequestWithUser,
     @Res() res: Response,
   ) {
     const userId = req.user?.id ?? '';
-    const safeName = path.basename(filename);
 
-    const resultFile = await this.prisma.resultFile.findFirst({
-      where: { file_url: `/results/files/${safeName}` },
+    const resultFile = await this.prisma.resultFile.findUnique({
+      where: { id },
       include: {
         booking: {
           include: {
@@ -63,20 +64,26 @@ export class ResultsDownloadController {
       }
     }
 
-    const filePath = path.resolve(process.cwd(), 'uploads', 'results', safeName);
-
+    let stream: NodeJS.ReadableStream;
     try {
-      await fs.access(filePath);
+      stream = await this.labStorage.streamFile(resultFile.file_url);
     } catch {
-      throw new NotFoundException('File not found on disk');
+      throw new NotFoundException('File not found in storage');
     }
 
-    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Type', resultFile.mime_type || 'application/pdf');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader(
       'Content-Disposition',
       `attachment; filename="${resultFile.file_name.replace(/"/g, '')}"`,
     );
-    createReadStream(filePath).pipe(res);
+
+    stream.on('error', () => {
+      if (!res.headersSent) {
+        throw new InternalServerErrorException('Stream error');
+      }
+    });
+
+    (stream as NodeJS.ReadableStream & { pipe: (dest: Response) => void }).pipe(res);
   }
 }

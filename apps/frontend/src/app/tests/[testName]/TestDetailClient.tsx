@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -97,24 +97,64 @@ export default function TestDetailClient() {
     return () => { isMounted = false; };
   }, [testName, category]);
 
-  const requestLocation = () => {
-    if (!navigator.geolocation) {
-      setFilters((f) => (f.sort === "nearest" ? { ...f, sort: "price" } : f));
-      return;
+  const watchIdRef = useRef<number | null>(null);
+  const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const stopWatching = () => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
     }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      },
-      () => {
-        setFilters((f) => (f.sort === "nearest" ? { ...f, sort: "price" } : f));
-      },
-      { timeout: 8000 },
-    );
+    if (fallbackTimerRef.current !== null) {
+      clearTimeout(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
+    }
   };
 
-  // Request location on mount
-  useEffect(() => { requestLocation(); }, []);
+  const fallBackToPriceSort = () =>
+    setFilters((f) => (f.sort === "nearest" ? { ...f, sort: "price" } : f));
+
+  const requestLocation = () => {
+    if (!navigator.geolocation) {
+      fallBackToPriceSort();
+      return;
+    }
+    stopWatching();
+
+    let settled = false;
+    // watchPosition fires as soon as ANY fix arrives — more reliable than a
+    // one-shot getCurrentPosition, which times out when Core Location is slow.
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        if (settled) return;
+        settled = true;
+        stopWatching();
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      (err) => {
+        // Only a permission denial is terminal — keep watching through transient errors.
+        if (err.code === err.PERMISSION_DENIED) {
+          settled = true;
+          stopWatching();
+          fallBackToPriceSort();
+        }
+      },
+      { enableHighAccuracy: false, timeout: 27000, maximumAge: 600000 },
+    );
+
+    fallbackTimerRef.current = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      stopWatching();
+      fallBackToPriceSort();
+    }, 30000);
+  };
+
+  // Request location on mount; stop watching on unmount
+  useEffect(() => {
+    requestLocation();
+    return () => stopWatching();
+  }, []);
 
   // Watch for permission changes — auto-retry when user grants after initial denial
   useEffect(() => {

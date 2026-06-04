@@ -41,6 +41,7 @@ describe('LabStorageService', () => {
     const service = new LabStorageService(() => ({
       S3Client: jest.fn().mockImplementation(() => ({ send: sendMock })),
       PutObjectCommand: jest.fn().mockImplementation((input) => input),
+      GetObjectCommand: jest.fn().mockImplementation((input) => input),
     }));
     const stored = await service.saveResultFile({
       originalname: 'cbc report.pdf',

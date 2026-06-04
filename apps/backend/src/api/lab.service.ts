@@ -371,7 +371,7 @@ export class LabService {
       bookingId: booking.id,
       resultStatus: result.status,
       fileName: result.file_name,
-      fileUrl: result.file_url,
+      fileUrl: `/results/files/${result.id}`,
     };
     this.auditLogService.log('lab.result_uploaded', {
       labUserId: userId,

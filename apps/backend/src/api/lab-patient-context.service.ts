@@ -137,7 +137,7 @@ export class LabPatientContextService {
       }
 
       const pdfAvailable = isThisLab && !!b.result_file && !!b.result_file.file_url;
-      const pdfUrl = pdfAvailable ? b.result_file!.file_url : null;
+      const pdfUrl = pdfAvailable ? `/results/files/${b.result_file!.id}` : null;
 
       return {
         bookingId: b.id,

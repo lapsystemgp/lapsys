@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { ArrowLeft, MapPin, Star, Clock, Home, SlidersHorizontal, Info, Search, FlaskConical, ChevronRight } from 'lucide-react';
 import { fetchPublicLabs, fetchPublicTests, type PublicLabCard, type PublicTestCard } from '../../lib/publicApi';
 import { Breadcrumb } from '../../components/Breadcrumb';
@@ -32,26 +32,62 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
   const effectiveSearchQuery = localSearchQuery.trim();
   const [activeTab, setActiveTab] = useState<'tests' | 'labs'>(searchQuery.trim() ? 'tests' : 'labs');
 
+  const watchIdRef = useRef<number | null>(null);
+  const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const stopWatching = () => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    if (fallbackTimerRef.current !== null) {
+      clearTimeout(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
+    }
+  };
+
   const requestLocation = () => {
     if (!navigator.geolocation) { setLocationStatus('unavailable'); return; }
+    stopWatching();
     setLocationStatus('requesting');
-    navigator.geolocation.getCurrentPosition(
+
+    let settled = false;
+    // watchPosition keeps the location subsystem active and fires as soon as ANY
+    // fix arrives — far more reliable than a one-shot getCurrentPosition, which
+    // tends to time out on desktops where Core Location is slow on first call.
+    watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
+        if (settled) return;
+        settled = true;
+        stopWatching();
         setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocationStatus('granted');
       },
       (err) => {
-        // Distinguish the failure reason — a timeout or unavailable fix is NOT a denial
-        if (err.code === err.PERMISSION_DENIED) setLocationStatus('denied');
-        else if (err.code === err.TIMEOUT) setLocationStatus('timeout');
-        else setLocationStatus('unavailable');
+        // Only a permission denial is terminal — keep watching through transient
+        // unavailable/timeout errors until our own fallback timer gives up.
+        if (err.code === err.PERMISSION_DENIED) {
+          settled = true;
+          stopWatching();
+          setLocationStatus('denied');
+        }
       },
-      { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 },
+      { enableHighAccuracy: false, timeout: 27000, maximumAge: 600000 },
     );
+
+    fallbackTimerRef.current = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      stopWatching();
+      setLocationStatus('timeout');
+    }, 30000);
   };
 
-  // Request location on mount
-  useEffect(() => { requestLocation(); }, []);
+  // Request location on mount; stop watching on unmount
+  useEffect(() => {
+    requestLocation();
+    return () => stopWatching();
+  }, []);
 
   // Watch for permission changes (user grants after initial denial)
   useEffect(() => {
@@ -177,45 +213,66 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-10 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <Breadcrumb items={[{ label: "Search Results" }]} className="mb-2" />
-          <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150 mb-2 font-medium">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </button>
-          <h1 className="text-xl font-bold text-gray-900">{effectiveSearchQuery || 'All Available Tests & Labs'}</h1>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-4">
+          {/* Brand */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+              <FlaskConical className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-lg font-bold text-gray-900 hidden sm:block">Tes<span className="text-blue-600">Tly</span></span>
+          </div>
+          <div className="w-px h-8 bg-gray-200 hidden sm:block" />
+          {/* Nav */}
+          <div className="flex-1 min-w-0">
+            <Breadcrumb items={[{ label: "Search Results" }]} className="mb-1" />
+            <div className="flex items-center gap-3">
+              <button onClick={onBack} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150 text-sm font-medium">
+                <ArrowLeft className="w-4 h-4" />
+                Home
+              </button>
+              <span className="text-gray-300">/</span>
+              <h1 className="text-sm font-semibold text-gray-900 truncate">{effectiveSearchQuery || 'All Tests & Labs'}</h1>
+            </div>
+          </div>
+          {/* Count badge */}
+          {lastResolvedKey !== '' && (
+            <div className="shrink-0 flex items-center gap-2 text-sm text-gray-500">
+              <span className="hidden sm:inline">Found</span>
+              <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full font-semibold text-xs">{labs.length + tests.length} results</span>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
         {/* Tabs */}
-        <div className="flex gap-1 mb-5 border-b border-gray-200">
+        <div className="flex gap-1 mb-5 p-1 bg-white border border-gray-200 rounded-xl w-fit">
           <button
             onClick={() => setActiveTab('tests')}
-            className={`px-5 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            className={`px-5 py-2 text-sm rounded-lg transition-all duration-150 ${
               activeTab === 'tests'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? 'bg-blue-600 text-white shadow-sm font-semibold'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 font-medium'
             }`}
           >
             Tests
             {testsLoaded && tests.length > 0 && (
-              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${activeTab === 'tests' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
+              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${activeTab === 'tests' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'}`}>
                 {tests.length}
               </span>
             )}
           </button>
           <button
             onClick={() => setActiveTab('labs')}
-            className={`px-5 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            className={`px-5 py-2 text-sm rounded-lg transition-all duration-150 ${
               activeTab === 'labs'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? 'bg-blue-600 text-white shadow-sm font-semibold'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 font-medium'
             }`}
           >
             Labs
             {lastResolvedKey !== '' && labs.length > 0 && (
-              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${activeTab === 'labs' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
+              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${activeTab === 'labs' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'}`}>
                 {labs.length}
               </span>
             )}
@@ -328,24 +385,38 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             {/* Sidebar */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sticky top-[72px]">
-                <h2 className="text-base font-semibold text-gray-900 mb-3">Browse Labs</h2>
-                <p className="text-sm text-gray-600 mb-4">
-                  Compare prices, ratings, and availability across labs. Click a lab name to view full details.
-                </p>
-                {testsLoaded && tests.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-gray-100">
-                    <p className="text-sm text-gray-500 mb-2">Also found:</p>
-                    <button
-                      onClick={() => setActiveTab('tests')}
-                      className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
-                    >
-                      <FlaskConical className="w-4 h-4" />
-                      {tests.length} matching test{tests.length !== 1 ? 's' : ''}
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden sticky top-[72px]">
+                <div className="h-1.5 bg-gradient-to-r from-blue-600 to-blue-400" />
+                <div className="p-5">
+                  <h2 className="text-base font-bold text-gray-900 mb-2">Browse Labs</h2>
+                  <p className="text-sm text-gray-500 mb-4 leading-relaxed">
+                    Compare prices, ratings, and availability. Click a lab name to see full details.
+                  </p>
+                  {lastResolvedKey !== '' && labs.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      <div className="bg-blue-50 rounded-xl p-3 text-center">
+                        <div className="text-xl font-bold text-blue-600">{labs.length}</div>
+                        <div className="text-xs text-blue-700">Labs Found</div>
+                      </div>
+                      <div className="bg-gray-50 rounded-xl p-3 text-center">
+                        <div className="text-xl font-bold text-gray-700">{labs.filter(l => l.homeCollection).length}</div>
+                        <div className="text-xs text-gray-500">Home Collection</div>
+                      </div>
+                    </div>
+                  )}
+                  {testsLoaded && tests.length > 0 && (
+                    <div className="pt-3 border-t border-gray-100">
+                      <button
+                        onClick={() => setActiveTab('tests')}
+                        className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        <FlaskConical className="w-4 h-4" />
+                        {tests.length} matching test{tests.length !== 1 ? 's' : ''}
+                        <ChevronRight className="w-3.5 h-3.5 ml-auto" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -553,7 +624,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                     const price = lab.priceForQueryEgp ?? lab.startingFromEgp;
                     const priceLabel = lab.priceForQueryEgp ? 'for this test' : 'starting from';
                     return (
-                      <div key={lab.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                      <div key={lab.id} className={`bg-white rounded-2xl border shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ${lab.homeCollection ? 'border-l-4 border-l-green-500 border-gray-100' : 'border-gray-100'}`}>
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
                             <button
@@ -577,9 +648,9 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                               )}
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="text-2xl font-semibold text-blue-600"><span className="font-bold">EGP</span> {price ?? '—'}</div>
-                            <div className="text-gray-500 text-sm">{priceLabel}</div>
+                          <div className="text-right shrink-0">
+                            <div className="text-2xl font-bold text-blue-600">EGP {price ?? '—'}</div>
+                            <div className="text-gray-400 text-xs mt-0.5">{priceLabel}</div>
                           </div>
                         </div>
 

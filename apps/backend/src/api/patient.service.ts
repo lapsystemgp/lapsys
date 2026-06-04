@@ -119,7 +119,7 @@ export class PatientService {
           ? {
               id: booking.result_file.id,
               fileName: booking.result_file.file_name,
-              fileUrl: booking.result_file.file_url,
+              fileUrl: `/results/files/${booking.result_file.id}`,
               mimeType: booking.result_file.mime_type,
               sizeBytes: booking.result_file.size_bytes,
               uploadedAt: booking.result_file.uploaded_at.toISOString(),
@@ -265,5 +265,20 @@ export class PatientService {
       status: review.status,
       createdAt: review.created_at.toISOString(),
     };
+  }
+
+  async recomputeLabRating(tx: any, labProfileId: string) {
+    const aggregate = await tx.review.aggregate({
+      where: { lab_profile_id: labProfileId, status: ReviewStatus.Published },
+      _count: { _all: true },
+      _avg: { rating: true },
+    });
+    await tx.labProfile.update({
+      where: { id: labProfileId },
+      data: {
+        review_count: aggregate._count._all ?? 0,
+        rating_average: aggregate._avg.rating ?? null,
+      },
+    });
   }
 }

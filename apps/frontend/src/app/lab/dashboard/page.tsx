@@ -38,7 +38,6 @@ function formatDateTime(value: string) {
 }
 
 function resolveLabPdfUrl(fileUrl: string) {
-  if (/^https?:\/\//i.test(fileUrl)) return fileUrl;
   return `${API_BASE_URL}${fileUrl.startsWith("/") ? "" : "/"}${fileUrl}`;
 }
 

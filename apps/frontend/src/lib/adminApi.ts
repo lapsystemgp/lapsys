@@ -106,3 +106,13 @@ export type AdminPatientRecord = {
 export async function fetchAdminPatients() {
   return await apiFetch<{ items: AdminPatientRecord[] }>("/admin/patients");
 }
+
+export type AdminChartData = {
+  bookingVolume: { date: string; count: number }[];
+  revenueByCity: { city: string; revenue: number }[];
+  popularTests: { name: string; count: number }[];
+};
+
+export async function fetchAdminChartData() {
+  return await apiFetch<AdminChartData>("/admin/analytics/charts");
+}

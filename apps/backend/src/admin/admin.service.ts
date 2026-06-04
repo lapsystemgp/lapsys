@@ -215,6 +215,68 @@ export class AdminService {
     };
   }
 
+  async getChartData(userId: string) {
+    await this.assertAdmin(userId);
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
+    thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+    const [recentBookings, paidBookings, allBookingsForTests] = await Promise.all([
+      this.prisma.booking.findMany({
+        where: { created_at: { gte: thirtyDaysAgo } },
+        select: { created_at: true },
+      }),
+      this.prisma.booking.findMany({
+        where: { payment_status: 'Paid' },
+        select: {
+          total_price_egp: true,
+          lab_profile: { select: { city: true } },
+        },
+      }),
+      this.prisma.booking.findMany({
+        select: { lab_test: { select: { name: true } } },
+      }),
+    ]);
+
+    // Booking volume per day — fill zeros for days with no bookings
+    const volumeMap = new Map<string, number>();
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(thirtyDaysAgo);
+      d.setDate(d.getDate() + i);
+      volumeMap.set(d.toISOString().slice(0, 10), 0);
+    }
+    for (const b of recentBookings) {
+      const key = b.created_at.toISOString().slice(0, 10);
+      if (volumeMap.has(key)) volumeMap.set(key, (volumeMap.get(key) ?? 0) + 1);
+    }
+    const bookingVolume = Array.from(volumeMap.entries()).map(([date, count]) => ({ date, count }));
+
+    // Revenue by city (paid bookings only)
+    const cityMap = new Map<string, number>();
+    for (const b of paidBookings) {
+      const city = b.lab_profile.city ?? 'Unknown';
+      cityMap.set(city, (cityMap.get(city) ?? 0) + b.total_price_egp);
+    }
+    const revenueByCity = Array.from(cityMap.entries())
+      .map(([city, revenue]) => ({ city, revenue }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 8);
+
+    // Popular tests by total bookings
+    const testMap = new Map<string, number>();
+    for (const b of allBookingsForTests) {
+      const name = b.lab_test.name;
+      testMap.set(name, (testMap.get(name) ?? 0) + 1);
+    }
+    const popularTests = Array.from(testMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8);
+
+    return { bookingVolume, revenueByCity, popularTests };
+  }
+
   async setLabOnboardingStatus(
     userId: string,
     labProfileId: string,

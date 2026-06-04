@@ -18,16 +18,29 @@ import { Breadcrumb } from "../../../components/Breadcrumb";
 import { ApiError } from "../../../lib/api";
 import {
   fetchAdminAggregateStats,
+  fetchAdminChartData,
   fetchAdminPatients,
   fetchAdminRecentPayments,
   fetchAdminWorkspace,
   setAdminLabOnboardingStatus,
   type AdminAggregateStats,
+  type AdminChartData,
   type AdminLabOnboardingStatus,
   type AdminPatientRecord,
   type AdminPaymentRecord,
   type AdminWorkspaceResponse,
 } from "../../../lib/adminApi";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { useSession } from "../../../components/SessionProvider";
 import { useToast } from "../../../components/ToastProvider";
 
@@ -64,6 +77,7 @@ export default function AdminDashboardPage() {
   const [aggregateStats, setAggregateStats] = useState<AdminAggregateStats | null>(null);
   const [paymentRows, setPaymentRows] = useState<AdminPaymentRecord[]>([]);
   const [patients, setPatients] = useState<AdminPatientRecord[]>([]);
+  const [chartData, setChartData] = useState<AdminChartData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("labApprovals");
   const [labStatusFilter, setLabStatusFilter] = useState<"All" | AdminLabOnboardingStatus>("All");
@@ -75,16 +89,18 @@ export default function AdminDashboardPage() {
   const loadWorkspace = useCallback(async () => {
     setLoading(true);
     try {
-      const [response, payments, stats, patientsRes] = await Promise.all([
+      const [response, payments, stats, patientsRes, charts] = await Promise.all([
         fetchAdminWorkspace(),
         fetchAdminRecentPayments(),
         fetchAdminAggregateStats(),
         fetchAdminPatients(),
+        fetchAdminChartData(),
       ]);
       setWorkspace(response);
       setPaymentRows(payments.items);
       setAggregateStats(stats);
       setPatients(patientsRes.items);
+      setChartData(charts);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) { router.push("/login"); return; }
       if (err instanceof ApiError && err.status === 403) { router.push("/unauthorized"); return; }
@@ -144,12 +160,6 @@ export default function AdminDashboardPage() {
       else map.set(row.labName, { bookings: 1, revenue: row.totalPriceEgp });
     }
     return Array.from(map.entries()).map(([name, d]) => ({ name, ...d })).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
-  }, [paymentRows]);
-
-  const topTests = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const row of paymentRows) map.set(row.testName, (map.get(row.testName) ?? 0) + 1);
-    return Array.from(map.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 5);
   }, [paymentRows]);
 
   const tabs: { key: Tab; label: string; icon: ReactNode; badge?: number }[] = [
@@ -264,7 +274,7 @@ export default function AdminDashboardPage() {
                 />
               )}
               {activeTab === "allBookings" && <AllBookingsTab bookings={paymentRows} />}
-              {activeTab === "analytics" && <AnalyticsTab topLabs={topLabs} topTests={topTests} />}
+              {activeTab === "analytics" && <AnalyticsTab topLabs={topLabs} chartData={chartData} />}
             </div>
           </div>
         )}
@@ -577,48 +587,161 @@ function AllBookingsTab({ bookings }: { bookings: AdminPaymentRecord[] }) {
 /* ── Analytics Tab ── */
 function AnalyticsTab({
   topLabs,
-  topTests,
+  chartData,
 }: {
   topLabs: { name: string; bookings: number; revenue: number }[];
-  topTests: { name: string; count: number }[];
+  chartData: AdminChartData | null;
 }) {
+  const volumeData = chartData?.bookingVolume ?? [];
+  const cityData = chartData?.revenueByCity ?? [];
+  const testsData = chartData?.popularTests ?? [];
+
+  const formatDay = (date: string) =>
+    new Date(date).toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+
   return (
-    <div>
-      <h2 className="text-lg font-bold text-gray-900 mb-5">Platform Analytics</h2>
+    <div className="space-y-6">
+      <h2 className="text-lg font-bold text-gray-900">Platform Analytics</h2>
+
+      {/* Booking Volume */}
+      <div className="border border-gray-100 rounded-2xl p-5">
+        <h3 className="font-bold text-gray-900 mb-1">Booking Volume</h3>
+        <p className="text-xs text-gray-400 mb-4">Daily bookings over the last 30 days</p>
+        {volumeData.every((d) => d.count === 0) ? (
+          <p className="text-gray-400 text-sm py-6 text-center">No booking data yet.</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={volumeData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="volGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.18} />
+                  <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis
+                dataKey="date"
+                tickFormatter={formatDay}
+                tick={{ fontSize: 11, fill: "#9ca3af" }}
+                interval={4}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                allowDecimals={false}
+                tick={{ fontSize: 11, fill: "#9ca3af" }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip
+                formatter={(v: number) => [v, "Bookings"]}
+                labelFormatter={(l: string) => formatDay(l)}
+                contentStyle={{ borderRadius: 10, border: "1px solid #e5e7eb", fontSize: 12 }}
+              />
+              <Area
+                type="monotone"
+                dataKey="count"
+                stroke="#7c3aed"
+                strokeWidth={2}
+                fill="url(#volGrad)"
+                dot={false}
+                activeDot={{ r: 4, fill: "#7c3aed" }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      {/* Revenue by City + Popular Tests */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="border border-gray-100 rounded-2xl p-5">
-          <h3 className="font-bold text-gray-900 mb-4">Top Performing Labs</h3>
-          {topLabs.length === 0 ? (
-            <p className="text-gray-400 text-sm">No booking data yet.</p>
+          <h3 className="font-bold text-gray-900 mb-1">Revenue by City</h3>
+          <p className="text-xs text-gray-400 mb-4">Paid bookings only (EGP)</p>
+          {cityData.length === 0 ? (
+            <p className="text-gray-400 text-sm py-6 text-center">No revenue data yet.</p>
           ) : (
-            <div className="space-y-4">
-              {topLabs.map((lab) => (
-                <div key={lab.name} className="flex items-start justify-between">
-                  <div>
-                    <p className="text-gray-900 font-semibold">{lab.name}</p>
-                    <p className="text-xs text-gray-400 font-medium">{lab.bookings} bookings</p>
-                  </div>
-                  <span className="text-green-600 font-bold">EGP {lab.revenue.toLocaleString()}</span>
-                </div>
-              ))}
-            </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={cityData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                <XAxis
+                  dataKey="city"
+                  tick={{ fontSize: 11, fill: "#9ca3af" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`}
+                  tick={{ fontSize: 11, fill: "#9ca3af" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  formatter={(v: number) => [`EGP ${v.toLocaleString()}`, "Revenue"]}
+                  contentStyle={{ borderRadius: 10, border: "1px solid #e5e7eb", fontSize: 12 }}
+                />
+                <Bar dataKey="revenue" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           )}
         </div>
+
         <div className="border border-gray-100 rounded-2xl p-5">
-          <h3 className="font-bold text-gray-900 mb-4">Most Popular Tests</h3>
-          {topTests.length === 0 ? (
-            <p className="text-gray-400 text-sm">No booking data yet.</p>
+          <h3 className="font-bold text-gray-900 mb-1">Most Popular Tests</h3>
+          <p className="text-xs text-gray-400 mb-4">All-time booking count</p>
+          {testsData.length === 0 ? (
+            <p className="text-gray-400 text-sm py-6 text-center">No test data yet.</p>
           ) : (
-            <div className="space-y-4">
-              {topTests.map((test) => (
-                <div key={test.name} className="flex items-center justify-between">
-                  <p className="text-gray-900 font-medium">{test.name}</p>
-                  <span className="text-blue-600 font-bold">{test.count} tests</span>
-                </div>
-              ))}
-            </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart
+                data={testsData}
+                layout="vertical"
+                margin={{ top: 4, right: 16, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
+                <XAxis
+                  type="number"
+                  allowDecimals={false}
+                  tick={{ fontSize: 11, fill: "#9ca3af" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  width={110}
+                  tick={{ fontSize: 11, fill: "#6b7280" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  formatter={(v: number) => [v, "Bookings"]}
+                  contentStyle={{ borderRadius: 10, border: "1px solid #e5e7eb", fontSize: 12 }}
+                />
+                <Bar dataKey="count" fill="#0ea5e9" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           )}
         </div>
+      </div>
+
+      {/* Top Performing Labs */}
+      <div className="border border-gray-100 rounded-2xl p-5">
+        <h3 className="font-bold text-gray-900 mb-4">Top Performing Labs</h3>
+        {topLabs.length === 0 ? (
+          <p className="text-gray-400 text-sm">No booking data yet.</p>
+        ) : (
+          <div className="space-y-4">
+            {topLabs.map((lab) => (
+              <div key={lab.name} className="flex items-start justify-between">
+                <div>
+                  <p className="text-gray-900 font-semibold">{lab.name}</p>
+                  <p className="text-xs text-gray-400 font-medium">{lab.bookings} bookings</p>
+                </div>
+                <span className="text-green-600 font-bold">EGP {lab.revenue.toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

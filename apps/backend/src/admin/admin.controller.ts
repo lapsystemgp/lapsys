@@ -44,4 +44,9 @@ export class AdminController {
   listRecentPayments(@Req() req: RequestWithUser) {
     return this.adminService.listRecentPayments(req.user?.id ?? '');
   }
+
+  @Get('analytics/charts')
+  getChartData(@Req() req: RequestWithUser) {
+    return this.adminService.getChartData(req.user?.id ?? '');
+  }
 }

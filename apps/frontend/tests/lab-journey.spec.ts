@@ -4,7 +4,7 @@ test.describe('Lab Journey', () => {
   test('Lab can login and view schedule', async ({ page }) => {
     await page.goto('/login');
     
-    await page.fill('input[name="email"]', 'alaflabs@testly.com');
+    await page.fill('input[name="email"]', 'alborglaboratories@testly.com');
     await page.fill('input[name="password"]', 'password123');
     await page.click('button[type="submit"]');
 

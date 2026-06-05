@@ -63,7 +63,7 @@ After running `npm run db:seed`, your database will be seeded with comprehensive
   - Review recent platform transactions, including cash and online payments.
 
 ### 2. Lab Administration Flow
-- **Active Lab Login**: `alaflabs@testly.com`
+- **Active Lab Login**: `alborglaboratories@testly.com`
   - Navigate to `/lab` (Dashboard). Experience the schedule view where there is an existing booking assigned to "Mazen Amir".
   - You can manage test catalogs, update pricing, and upload PDF results for upcoming patient visits.
 - **Pending Lab Login**: `pendinglab@testly.com`

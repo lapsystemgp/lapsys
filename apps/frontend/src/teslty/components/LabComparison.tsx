@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
-import { ArrowLeft, MapPin, Star, Clock, Home, SlidersHorizontal, Info, Search, FlaskConical, ChevronRight } from 'lucide-react';
+import { AlertCircle, ArrowLeft, MapPin, Star, Clock, Home, SlidersHorizontal, Info, Search, FlaskConical, ChevronRight } from 'lucide-react';
 import { fetchPublicLabs, fetchPublicTests, type PublicLabCard, type PublicTestCard } from '../../lib/publicApi';
 import { Breadcrumb } from '../../components/Breadcrumb';
 
@@ -26,6 +26,10 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
   const [tests, setTests] = useState<PublicTestCard[]>([]);
   const [lastResolvedKey, setLastResolvedKey] = useState<string>('');
   const [testsLoaded, setTestsLoaded] = useState(false);
+  const [testsError, setTestsError] = useState(false);
+  const [labsError, setLabsError] = useState(false);
+  const [testsRetryKey, setTestsRetryKey] = useState(0);
+  const [labsRetryKey, setLabsRetryKey] = useState(0);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState<'idle' | 'requesting' | 'granted' | 'denied' | 'unavailable' | 'timeout'>('idle');
 
@@ -138,6 +142,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
   useEffect(() => {
     let isMounted = true;
     setTestsLoaded(false);
+    setTestsError(false);
     fetchPublicTests({ q: effectiveSearchQuery || undefined, pageSize: 50 })
       .then((res) => {
         if (!isMounted) return;
@@ -147,10 +152,11 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
       .catch(() => {
         if (!isMounted) return;
         setTests([]);
+        setTestsError(true);
         setTestsLoaded(true);
       });
     return () => { isMounted = false; };
-  }, [effectiveSearchQuery]);
+  }, [effectiveSearchQuery, testsRetryKey]);
 
   useEffect(() => {
     let isMounted = true;
@@ -171,15 +177,17 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
       .then((res) => {
         if (!isMounted) return;
         setLabs(res.items);
+        setLabsError(false);
         setLastResolvedKey(requestKey);
       })
       .catch(() => {
         if (!isMounted) return;
         setLabs([]);
+        setLabsError(true);
         setLastResolvedKey(requestKey);
       });
     return () => { isMounted = false; };
-  }, [effectiveSearchQuery, homeCollectionOnly, maxDistance, maxPrice, minRating, requestKey, selectedAccreditations, sortBy, userLocation]);
+  }, [effectiveSearchQuery, homeCollectionOnly, labsRetryKey, maxDistance, maxPrice, minRating, requestKey, selectedAccreditations, sortBy, userLocation]);
 
   const availableAccreditations = useMemo(
     () => [...new Set(labs.map((l) => l.accreditation).filter((a): a is string => a != null))].sort(),
@@ -328,6 +336,18 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                     </div>
                   </div>
                 ))}
+              </div>
+            ) : testsError ? (
+              <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
+                <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+                <h3 className="text-xl text-gray-900 mb-2">Something went wrong</h3>
+                <p className="text-gray-600 mb-4">We couldn&apos;t load tests right now. Check your connection and try again.</p>
+                <button
+                  onClick={() => setTestsRetryKey((k) => k + 1)}
+                  className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Retry
+                </button>
               </div>
             ) : tests.length === 0 ? (
               <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
@@ -611,6 +631,18 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
                       </div>
                     ))}
                   </>
+                ) : labsError ? (
+                  <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
+                    <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+                    <h3 className="text-xl text-gray-900 mb-2">Something went wrong</h3>
+                    <p className="text-gray-600 mb-4">We couldn&apos;t load labs right now. Check your connection and try again.</p>
+                    <button
+                      onClick={() => { setLastResolvedKey(''); setLabsRetryKey((k) => k + 1); }}
+                      className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Retry
+                    </button>
+                  </div>
                 ) : labs.length === 0 ? (
                   <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
                     <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />

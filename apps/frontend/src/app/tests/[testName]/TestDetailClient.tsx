@@ -16,6 +16,7 @@ import {
   Navigation,
 } from "lucide-react";
 import { fetchTestOffers, type TestOffersResponse, type TestOfferLab } from "../../../lib/publicApi";
+import { ApiError } from "../../../lib/api";
 import { Breadcrumb } from "../../../components/Breadcrumb";
 
 type SortKey = "nearest" | "price" | "rating";
@@ -70,6 +71,8 @@ export default function TestDetailClient() {
   const [data, setData] = useState<TestOffersResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
@@ -83,19 +86,24 @@ export default function TestDetailClient() {
     let isMounted = true;
     setIsLoading(true);
     setNotFound(false);
+    setFetchError(false);
     fetchTestOffers({ name: testName, category })
       .then((res) => {
         if (!isMounted) return;
         setData(res);
         setIsLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
         if (!isMounted) return;
-        setNotFound(true);
+        if (err instanceof ApiError && err.status === 404) {
+          setNotFound(true);
+        } else {
+          setFetchError(true);
+        }
         setIsLoading(false);
       });
     return () => { isMounted = false; };
-  }, [testName, category]);
+  }, [testName, category, retryKey]);
 
   const watchIdRef = useRef<number | null>(null);
   const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -281,6 +289,32 @@ export default function TestDetailClient() {
               <div className="skeleton h-10 w-36 rounded-lg" />
             </div>
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-sm p-12 text-center max-w-md">
+          <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+          <h2 className="text-xl font-medium text-gray-900 mb-2">Something went wrong</h2>
+          <p className="text-gray-600 mb-6">We couldn&apos;t load this test right now. Check your connection and try again.</p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => setRetryKey((k) => k + 1)}
+              className="px-5 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => router.back()}
+              className="px-5 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-semibold"
+            >
+              Go Back
+            </button>
+          </div>
         </div>
       </div>
     );

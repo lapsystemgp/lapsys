@@ -109,7 +109,7 @@ export default function LabDashboardPage() {
         setReviewItems(res.reviewItems ?? []);
         setReviewsLabId(workspace.lab.id);
       })
-      .catch(() => {})
+      .catch(() => { toast.error("Could not load reviews."); })
       .finally(() => setReviewsLoading(false));
   }, [tab, workspace?.lab.id, reviewsLabId]);
 

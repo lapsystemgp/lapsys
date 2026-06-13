@@ -116,6 +116,130 @@ Lab emails are derived from the lab name (lowercase, no spaces). All use passwor
   - **Result History**: Navigate to `/patient` (Patient Dashboard) then click on **My Results**. The system is seeded with a historical structured CBC exam snippet comparing past vs current glucose values.
   - **Payment Handling**: The patient history includes a simulated failed/cancelled booking due to a failed PayMob online payment, which you can observe in the bookings list.
 
+---
+
+## Running the Mobile App (Flutter)
+
+### Prerequisites
+
+| Tool | Version | Install |
+|---|---|---|
+| Flutter SDK | 3.44+ | https://flutter.dev/docs/get-started/install |
+| Xcode | 15+ | Mac App Store (iOS simulator) |
+| Android Studio | Hedgehog+ | https://developer.android.com/studio (Android emulator) |
+| CocoaPods | 1.15+ | `sudo gem install cocoapods` |
+
+Verify your setup:
+```bash
+flutter doctor
+```
+
+### Mobile environment
+
+The Flutter app reads `API_BASE_URL` at build time. No `.env` file is needed — the default values are already correct for local development:
+
+| Platform | Default base URL |
+|---|---|
+| iOS Simulator | `http://localhost:3001` |
+| Android Emulator | `http://10.0.2.2:3001` |
+
+To override, pass `--dart-define` when running:
+```bash
+# iOS (default already correct)
+flutter run --dart-define=API_BASE_URL=http://localhost:3001
+
+# Android emulator (default already correct)
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3001
+```
+
+### Step 1 — Start the backend first
+
+```bash
+cd apps/backend
+npm run start:dev
+```
+
+Wait until you see:
+```
+[NestApplication] Nest application successfully started
+[NotificationsService] Firebase Admin SDK initialised — push notifications enabled.
+```
+
+The backend must be running before launching the app, or the login screen will fail to connect.
+
+### Step 2 — Launch an emulator
+
+**iOS Simulator (Mac only):**
+```bash
+# List available simulators
+flutter emulators
+
+# Launch the iOS simulator
+flutter emulators --launch apple_ios_simulator
+```
+
+**Android Emulator:**
+```bash
+# List available emulators
+flutter emulators
+
+# Launch (replace with your emulator id from the list above)
+flutter emulators --launch Medium_Phone_API_36.1
+```
+
+Or open the emulator from Android Studio: **Device Manager → Play button**.
+
+### Step 3 — Install dependencies & run
+
+```bash
+cd apps/mobile
+
+# Install Dart packages
+flutter pub get
+
+# Confirm your device/emulator is detected
+flutter devices
+
+# Run on iOS Simulator
+flutter run -d <simulator-device-id>
+
+# Run on Android Emulator
+flutter run -d <emulator-device-id>
+```
+
+To find the device id, copy it from `flutter devices` output (e.g. `5B1D1389-4893-4F28-8C09-F0C56CAF43C6` for iOS or `emulator-5554` for Android).
+
+### Mobile demo accounts
+
+Use the same accounts listed in the Patient Flow section above. Primary demo:
+
+| Field | Value |
+|---|---|
+| Email | `patient@testly.com` |
+| Password | `password123` |
+
+On first login the app will show a **notification permission sheet** (Phase 5). Tap **Enable notifications** to grant FCM permission.
+
+### Push notifications (FCM) setup
+
+Push notifications require real Firebase credentials. Add this to `apps/backend/.env`:
+```env
+FCM_SERVICE_ACCOUNT_JSON='{ ...paste your firebase-adminsdk service account JSON here as a single line... }'
+```
+
+Get the file from [Firebase Console](https://console.firebase.google.com) → Project Settings → Service Accounts → Generate new private key. Minify it to a single line before pasting (the value must not contain literal newlines).
+
+> **Note:** The iOS Simulator does not support APNs (Apple Push Notifications), so FCM tokens are not issued on simulator. Push notifications can only be end-to-end tested on a real device. All other app features work normally on the simulator.
+
+### Run mobile tests
+
+```bash
+cd apps/mobile
+flutter test
+```
+
+---
+
 ## (Optional) Frontend API base URL
 By default the frontend uses `http://localhost:3001`. To override, create `apps/frontend/.env.local` using `apps/frontend/.env.local.example`.
 

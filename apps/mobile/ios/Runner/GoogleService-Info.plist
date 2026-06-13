@@ -3,28 +3,28 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>placeholder-replace-with-real-api-key</string>
+	<string>AIzaSyAmwDmVnoHsqKMjLNAEOu7Z8w07qne0tvQ</string>
 	<key>GCM_SENDER_ID</key>
-	<string>000000000000</string>
+	<string>35446803460</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.testly.app.testly</string>
 	<key>PROJECT_ID</key>
-	<string>testly-placeholder</string>
+	<string>lapsystemnotify</string>
 	<key>STORAGE_BUCKET</key>
-	<string>testly-placeholder.appspot.com</string>
+	<string>lapsystemnotify.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
-	<false/>
+	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
-	<false/>
+	<false></false>
 	<key>IS_APPINVITE_ENABLED</key>
-	<true/>
+	<true></true>
 	<key>IS_GCM_ENABLED</key>
-	<true/>
+	<true></true>
 	<key>IS_SIGNIN_ENABLED</key>
-	<true/>
+	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:000000000000:ios:0000000000000000000000</string>
+	<string>1:35446803460:ios:a5bd38e0b1f2147a9af951</string>
 </dict>
 </plist>

@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "000000000000",
-    "project_id": "testly-placeholder",
-    "storage_bucket": "testly-placeholder.appspot.com"
+    "project_number": "35446803460",
+    "project_id": "lapsystemnotify",
+    "storage_bucket": "lapsystemnotify.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "mobilesdk_app_id": "1:35446803460:android:fc156ca042501d659af951",
         "android_client_info": {
           "package_name": "com.testly.app.testly"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "placeholder-replace-with-real-api-key"
+          "current_key": "AIzaSyD4HA9HT6yaMY_4OW4qWVft6a0NdD7mREs"
         }
       ],
       "services": {

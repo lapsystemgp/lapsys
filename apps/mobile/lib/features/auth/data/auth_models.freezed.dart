@@ -21,7 +21,9 @@ LabProfile _$LabProfileFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$LabProfile {
   String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'lab_name')
   String get labName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'onboarding_status')
   LabOnboardingStatus get onboardingStatus =>
       throw _privateConstructorUsedError;
 
@@ -41,7 +43,11 @@ abstract class $LabProfileCopyWith<$Res> {
           LabProfile value, $Res Function(LabProfile) then) =
       _$LabProfileCopyWithImpl<$Res, LabProfile>;
   @useResult
-  $Res call({String id, String labName, LabOnboardingStatus onboardingStatus});
+  $Res call(
+      {String id,
+      @JsonKey(name: 'lab_name') String labName,
+      @JsonKey(name: 'onboarding_status')
+      LabOnboardingStatus onboardingStatus});
 }
 
 /// @nodoc
@@ -88,7 +94,11 @@ abstract class _$$LabProfileImplCopyWith<$Res>
       __$$LabProfileImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String id, String labName, LabOnboardingStatus onboardingStatus});
+  $Res call(
+      {String id,
+      @JsonKey(name: 'lab_name') String labName,
+      @JsonKey(name: 'onboarding_status')
+      LabOnboardingStatus onboardingStatus});
 }
 
 /// @nodoc
@@ -130,8 +140,8 @@ class __$$LabProfileImplCopyWithImpl<$Res>
 class _$LabProfileImpl implements _LabProfile {
   const _$LabProfileImpl(
       {required this.id,
-      required this.labName,
-      required this.onboardingStatus});
+      @JsonKey(name: 'lab_name') required this.labName,
+      @JsonKey(name: 'onboarding_status') required this.onboardingStatus});
 
   factory _$LabProfileImpl.fromJson(Map<String, dynamic> json) =>
       _$$LabProfileImplFromJson(json);
@@ -139,8 +149,10 @@ class _$LabProfileImpl implements _LabProfile {
   @override
   final String id;
   @override
+  @JsonKey(name: 'lab_name')
   final String labName;
   @override
+  @JsonKey(name: 'onboarding_status')
   final LabOnboardingStatus onboardingStatus;
 
   @override
@@ -182,7 +194,8 @@ class _$LabProfileImpl implements _LabProfile {
 abstract class _LabProfile implements LabProfile {
   const factory _LabProfile(
       {required final String id,
-      required final String labName,
+      @JsonKey(name: 'lab_name') required final String labName,
+      @JsonKey(name: 'onboarding_status')
       required final LabOnboardingStatus onboardingStatus}) = _$LabProfileImpl;
 
   factory _LabProfile.fromJson(Map<String, dynamic> json) =
@@ -191,8 +204,10 @@ abstract class _LabProfile implements LabProfile {
   @override
   String get id;
   @override
+  @JsonKey(name: 'lab_name')
   String get labName;
   @override
+  @JsonKey(name: 'onboarding_status')
   LabOnboardingStatus get onboardingStatus;
 
   /// Create a copy of LabProfile
@@ -210,6 +225,7 @@ PatientProfile _$PatientProfileFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$PatientProfile {
   String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'full_name')
   String? get fullName => throw _privateConstructorUsedError;
 
   /// Serializes this PatientProfile to a JSON map.
@@ -228,7 +244,7 @@ abstract class $PatientProfileCopyWith<$Res> {
           PatientProfile value, $Res Function(PatientProfile) then) =
       _$PatientProfileCopyWithImpl<$Res, PatientProfile>;
   @useResult
-  $Res call({String id, String? fullName});
+  $Res call({String id, @JsonKey(name: 'full_name') String? fullName});
 }
 
 /// @nodoc
@@ -270,7 +286,7 @@ abstract class _$$PatientProfileImplCopyWith<$Res>
       __$$PatientProfileImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String id, String? fullName});
+  $Res call({String id, @JsonKey(name: 'full_name') String? fullName});
 }
 
 /// @nodoc
@@ -305,7 +321,8 @@ class __$$PatientProfileImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$PatientProfileImpl implements _PatientProfile {
-  const _$PatientProfileImpl({required this.id, this.fullName});
+  const _$PatientProfileImpl(
+      {required this.id, @JsonKey(name: 'full_name') this.fullName});
 
   factory _$PatientProfileImpl.fromJson(Map<String, dynamic> json) =>
       _$$PatientProfileImplFromJson(json);
@@ -313,6 +330,7 @@ class _$PatientProfileImpl implements _PatientProfile {
   @override
   final String id;
   @override
+  @JsonKey(name: 'full_name')
   final String? fullName;
 
   @override
@@ -353,8 +371,9 @@ class _$PatientProfileImpl implements _PatientProfile {
 
 abstract class _PatientProfile implements PatientProfile {
   const factory _PatientProfile(
-      {required final String id,
-      final String? fullName}) = _$PatientProfileImpl;
+          {required final String id,
+          @JsonKey(name: 'full_name') final String? fullName}) =
+      _$PatientProfileImpl;
 
   factory _PatientProfile.fromJson(Map<String, dynamic> json) =
       _$PatientProfileImpl.fromJson;
@@ -362,6 +381,7 @@ abstract class _PatientProfile implements PatientProfile {
   @override
   String get id;
   @override
+  @JsonKey(name: 'full_name')
   String? get fullName;
 
   /// Create a copy of PatientProfile
@@ -381,7 +401,9 @@ mixin _$AuthUser {
   String get id => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
   UserRole get role => throw _privateConstructorUsedError;
+  @JsonKey(name: 'lab_profile')
   LabProfile? get labProfile => throw _privateConstructorUsedError;
+  @JsonKey(name: 'patient_profile')
   PatientProfile? get patientProfile => throw _privateConstructorUsedError;
 
   /// Serializes this AuthUser to a JSON map.
@@ -403,8 +425,8 @@ abstract class $AuthUserCopyWith<$Res> {
       {String id,
       String email,
       UserRole role,
-      LabProfile? labProfile,
-      PatientProfile? patientProfile});
+      @JsonKey(name: 'lab_profile') LabProfile? labProfile,
+      @JsonKey(name: 'patient_profile') PatientProfile? patientProfile});
 
   $LabProfileCopyWith<$Res>? get labProfile;
   $PatientProfileCopyWith<$Res>? get patientProfile;
@@ -496,8 +518,8 @@ abstract class _$$AuthUserImplCopyWith<$Res>
       {String id,
       String email,
       UserRole role,
-      LabProfile? labProfile,
-      PatientProfile? patientProfile});
+      @JsonKey(name: 'lab_profile') LabProfile? labProfile,
+      @JsonKey(name: 'patient_profile') PatientProfile? patientProfile});
 
   @override
   $LabProfileCopyWith<$Res>? get labProfile;
@@ -556,8 +578,8 @@ class _$AuthUserImpl implements _AuthUser {
       {required this.id,
       required this.email,
       required this.role,
-      this.labProfile,
-      this.patientProfile});
+      @JsonKey(name: 'lab_profile') this.labProfile,
+      @JsonKey(name: 'patient_profile') this.patientProfile});
 
   factory _$AuthUserImpl.fromJson(Map<String, dynamic> json) =>
       _$$AuthUserImplFromJson(json);
@@ -569,8 +591,10 @@ class _$AuthUserImpl implements _AuthUser {
   @override
   final UserRole role;
   @override
+  @JsonKey(name: 'lab_profile')
   final LabProfile? labProfile;
   @override
+  @JsonKey(name: 'patient_profile')
   final PatientProfile? patientProfile;
 
   @override
@@ -618,7 +642,8 @@ abstract class _AuthUser implements AuthUser {
       {required final String id,
       required final String email,
       required final UserRole role,
-      final LabProfile? labProfile,
+      @JsonKey(name: 'lab_profile') final LabProfile? labProfile,
+      @JsonKey(name: 'patient_profile')
       final PatientProfile? patientProfile}) = _$AuthUserImpl;
 
   factory _AuthUser.fromJson(Map<String, dynamic> json) =
@@ -631,8 +656,10 @@ abstract class _AuthUser implements AuthUser {
   @override
   UserRole get role;
   @override
+  @JsonKey(name: 'lab_profile')
   LabProfile? get labProfile;
   @override
+  @JsonKey(name: 'patient_profile')
   PatientProfile? get patientProfile;
 
   /// Create a copy of AuthUser
@@ -649,7 +676,9 @@ LoginResponse _$LoginResponseFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$LoginResponse {
+  @JsonKey(name: 'access_token')
   String get accessToken => throw _privateConstructorUsedError;
+  @JsonKey(name: 'refresh_token')
   String get refreshToken => throw _privateConstructorUsedError;
   AuthUser get user => throw _privateConstructorUsedError;
 
@@ -669,7 +698,10 @@ abstract class $LoginResponseCopyWith<$Res> {
           LoginResponse value, $Res Function(LoginResponse) then) =
       _$LoginResponseCopyWithImpl<$Res, LoginResponse>;
   @useResult
-  $Res call({String accessToken, String refreshToken, AuthUser user});
+  $Res call(
+      {@JsonKey(name: 'access_token') String accessToken,
+      @JsonKey(name: 'refresh_token') String refreshToken,
+      AuthUser user});
 
   $AuthUserCopyWith<$Res> get user;
 }
@@ -728,7 +760,10 @@ abstract class _$$LoginResponseImplCopyWith<$Res>
       __$$LoginResponseImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String accessToken, String refreshToken, AuthUser user});
+  $Res call(
+      {@JsonKey(name: 'access_token') String accessToken,
+      @JsonKey(name: 'refresh_token') String refreshToken,
+      AuthUser user});
 
   @override
   $AuthUserCopyWith<$Res> get user;
@@ -772,16 +807,18 @@ class __$$LoginResponseImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$LoginResponseImpl implements _LoginResponse {
   const _$LoginResponseImpl(
-      {required this.accessToken,
-      required this.refreshToken,
+      {@JsonKey(name: 'access_token') required this.accessToken,
+      @JsonKey(name: 'refresh_token') required this.refreshToken,
       required this.user});
 
   factory _$LoginResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$LoginResponseImplFromJson(json);
 
   @override
+  @JsonKey(name: 'access_token')
   final String accessToken;
   @override
+  @JsonKey(name: 'refresh_token')
   final String refreshToken;
   @override
   final AuthUser user;
@@ -825,16 +862,18 @@ class _$LoginResponseImpl implements _LoginResponse {
 
 abstract class _LoginResponse implements LoginResponse {
   const factory _LoginResponse(
-      {required final String accessToken,
-      required final String refreshToken,
+      {@JsonKey(name: 'access_token') required final String accessToken,
+      @JsonKey(name: 'refresh_token') required final String refreshToken,
       required final AuthUser user}) = _$LoginResponseImpl;
 
   factory _LoginResponse.fromJson(Map<String, dynamic> json) =
       _$LoginResponseImpl.fromJson;
 
   @override
+  @JsonKey(name: 'access_token')
   String get accessToken;
   @override
+  @JsonKey(name: 'refresh_token')
   String get refreshToken;
   @override
   AuthUser get user;

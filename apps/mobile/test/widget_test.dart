@@ -1,30 +1,45 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// Smoke test — verifies the app boots without crashing.
+// Full feature tests live in test/features/.
 
-import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:testly/features/auth/application/session_notifier.dart';
+import 'package:testly/features/auth/presentation/login_screen.dart';
+import 'package:testly/l10n/app_localizations.dart';
 
-import 'package:testly/main.dart';
+class _FakeSession extends SessionNotifier {
+  @override
+  Future<void> restore() async {}
+  @override
+  Future<void> login({required String email, required String password, required String selectedRole}) async {}
+  @override
+  Future<void> logout() async {}
+}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('LoginScreen renders without errors', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sessionNotifierProvider.overrideWith(() => _FakeSession()),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: [Locale('en')],
+          home: LoginScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('TesTly'), findsOneWidget);
+    expect(find.text('Login'), findsWidgets);
   });
 }

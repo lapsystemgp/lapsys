@@ -9,16 +9,16 @@ part of 'auth_models.dart';
 _$LabProfileImpl _$$LabProfileImplFromJson(Map<String, dynamic> json) =>
     _$LabProfileImpl(
       id: json['id'] as String,
-      labName: json['labName'] as String,
+      labName: json['lab_name'] as String,
       onboardingStatus:
-          $enumDecode(_$LabOnboardingStatusEnumMap, json['onboardingStatus']),
+          $enumDecode(_$LabOnboardingStatusEnumMap, json['onboarding_status']),
     );
 
 Map<String, dynamic> _$$LabProfileImplToJson(_$LabProfileImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'labName': instance.labName,
-      'onboardingStatus':
+      'lab_name': instance.labName,
+      'onboarding_status':
           _$LabOnboardingStatusEnumMap[instance.onboardingStatus]!,
     };
 
@@ -32,14 +32,14 @@ const _$LabOnboardingStatusEnumMap = {
 _$PatientProfileImpl _$$PatientProfileImplFromJson(Map<String, dynamic> json) =>
     _$PatientProfileImpl(
       id: json['id'] as String,
-      fullName: json['fullName'] as String?,
+      fullName: json['full_name'] as String?,
     );
 
 Map<String, dynamic> _$$PatientProfileImplToJson(
         _$PatientProfileImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'fullName': instance.fullName,
+      'full_name': instance.fullName,
     };
 
 _$AuthUserImpl _$$AuthUserImplFromJson(Map<String, dynamic> json) =>
@@ -47,13 +47,13 @@ _$AuthUserImpl _$$AuthUserImplFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       email: json['email'] as String,
       role: $enumDecode(_$UserRoleEnumMap, json['role']),
-      labProfile: json['labProfile'] == null
+      labProfile: json['lab_profile'] == null
           ? null
-          : LabProfile.fromJson(json['labProfile'] as Map<String, dynamic>),
-      patientProfile: json['patientProfile'] == null
+          : LabProfile.fromJson(json['lab_profile'] as Map<String, dynamic>),
+      patientProfile: json['patient_profile'] == null
           ? null
           : PatientProfile.fromJson(
-              json['patientProfile'] as Map<String, dynamic>),
+              json['patient_profile'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$$AuthUserImplToJson(_$AuthUserImpl instance) =>
@@ -61,8 +61,8 @@ Map<String, dynamic> _$$AuthUserImplToJson(_$AuthUserImpl instance) =>
       'id': instance.id,
       'email': instance.email,
       'role': _$UserRoleEnumMap[instance.role]!,
-      'labProfile': instance.labProfile,
-      'patientProfile': instance.patientProfile,
+      'lab_profile': instance.labProfile,
+      'patient_profile': instance.patientProfile,
     };
 
 const _$UserRoleEnumMap = {
@@ -73,14 +73,14 @@ const _$UserRoleEnumMap = {
 
 _$LoginResponseImpl _$$LoginResponseImplFromJson(Map<String, dynamic> json) =>
     _$LoginResponseImpl(
-      accessToken: json['accessToken'] as String,
-      refreshToken: json['refreshToken'] as String,
+      accessToken: json['access_token'] as String,
+      refreshToken: json['refresh_token'] as String,
       user: AuthUser.fromJson(json['user'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$$LoginResponseImplToJson(_$LoginResponseImpl instance) =>
     <String, dynamic>{
-      'accessToken': instance.accessToken,
-      'refreshToken': instance.refreshToken,
+      'access_token': instance.accessToken,
+      'refresh_token': instance.refreshToken,
       'user': instance.user,
     };

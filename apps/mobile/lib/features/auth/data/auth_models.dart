@@ -29,8 +29,8 @@ enum LabOnboardingStatus {
 class LabProfile with _$LabProfile {
   const factory LabProfile({
     required String id,
-    required String labName,
-    required LabOnboardingStatus onboardingStatus,
+    @JsonKey(name: 'lab_name') required String labName,
+    @JsonKey(name: 'onboarding_status') required LabOnboardingStatus onboardingStatus,
   }) = _LabProfile;
 
   factory LabProfile.fromJson(Map<String, dynamic> json) =>
@@ -41,7 +41,7 @@ class LabProfile with _$LabProfile {
 class PatientProfile with _$PatientProfile {
   const factory PatientProfile({
     required String id,
-    String? fullName,
+    @JsonKey(name: 'full_name') String? fullName,
   }) = _PatientProfile;
 
   factory PatientProfile.fromJson(Map<String, dynamic> json) =>
@@ -54,8 +54,8 @@ class AuthUser with _$AuthUser {
     required String id,
     required String email,
     required UserRole role,
-    LabProfile? labProfile,
-    PatientProfile? patientProfile,
+    @JsonKey(name: 'lab_profile') LabProfile? labProfile,
+    @JsonKey(name: 'patient_profile') PatientProfile? patientProfile,
   }) = _AuthUser;
 
   factory AuthUser.fromJson(Map<String, dynamic> json) =>
@@ -65,8 +65,8 @@ class AuthUser with _$AuthUser {
 @freezed
 class LoginResponse with _$LoginResponse {
   const factory LoginResponse({
-    required String accessToken,
-    required String refreshToken,
+    @JsonKey(name: 'access_token') required String accessToken,
+    @JsonKey(name: 'refresh_token') required String refreshToken,
     required AuthUser user,
   }) = _LoginResponse;
 

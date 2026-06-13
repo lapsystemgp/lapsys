@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/auth/application/session_notifier.dart';
 import '../../features/auth/data/auth_models.dart';
+import '../../features/notifications/application/notification_service.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/lab_pending_screen.dart';
@@ -39,12 +40,23 @@ abstract final class Routes {
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final notifier = _SessionListenable(ref);
+  final notifier = _RouterListenable(ref);
 
   return GoRouter(
     initialLocation: Routes.login,
     refreshListenable: notifier,
     redirect: (context, state) {
+      // Consume a pending deep-link from a notification tap (terminated-state cold start).
+      final pendingRoute = ref.read(pendingNotificationRouteProvider);
+      if (pendingRoute != null) {
+        ref.read(pendingNotificationRouteProvider.notifier).state = null;
+        // Only deep-link if the user is authenticated.
+        final sessionStatus = ref.read(sessionNotifierProvider).status;
+        if (sessionStatus == SessionStatus.authenticated) {
+          return pendingRoute;
+        }
+      }
+
       final session = ref.read(sessionNotifierProvider);
       final status = session.status;
       final user = session.user;
@@ -195,8 +207,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
-class _SessionListenable extends ChangeNotifier {
-  _SessionListenable(Ref ref) {
+// Fires the router refresh on both session changes and incoming notification
+// deep links so the redirect logic can consume pendingNotificationRouteProvider.
+class _RouterListenable extends ChangeNotifier {
+  _RouterListenable(Ref ref) {
     ref.listen(sessionNotifierProvider, (_, __) => notifyListeners());
+    ref.listen(pendingNotificationRouteProvider, (_, __) => notifyListeners());
   }
 }

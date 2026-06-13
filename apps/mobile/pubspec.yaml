@@ -65,6 +65,9 @@ dependencies:
   # Date/number formatting
   intl: ^0.20.2
 
+  # Timezone support for scheduled local notifications
+  timezone: ^0.9.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

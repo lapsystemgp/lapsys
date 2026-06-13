@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/booking_models.dart';
 import '../data/booking_repository.dart';
+import '../../../../features/notifications/application/notification_service.dart';
 
 enum BookingStep { type, slot, address, payment, confirm, submitting, done, error }
 
@@ -148,8 +149,10 @@ class BookingFlowNotifier
       if (state.selectedPayment == PaymentMethod.online) {
         final paid = await repo.demoPayment(booking.id, 'success');
         state = state.copyWith(result: paid, step: BookingStep.done);
+        _maybSchedulePrepReminder(paid);
       } else {
         state = state.copyWith(result: booking, step: BookingStep.done);
+        _maybSchedulePrepReminder(booking);
       }
     } catch (e) {
       state = state.copyWith(
@@ -157,6 +160,20 @@ class BookingFlowNotifier
         errorMessage: e.toString(),
       );
     }
+  }
+
+  void _maybSchedulePrepReminder(BookingItem booking) {
+    final preparation = arg.preparation;
+    if (preparation == null || preparation.isEmpty) return;
+    final scheduledAt = DateTime.tryParse(booking.scheduledAt);
+    if (scheduledAt == null) return;
+
+    ref.read(notificationServiceProvider).schedulePrepReminder(
+          bookingId: booking.id,
+          testName: arg.testName,
+          preparation: preparation,
+          scheduledAt: scheduledAt,
+        );
   }
 }
 

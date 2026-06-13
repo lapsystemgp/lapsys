@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/storage/secure_token_store.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../features/notifications/application/notification_service.dart';
 import '../data/auth_models.dart';
 import '../data/auth_repository.dart';
 
@@ -25,6 +26,8 @@ class SessionNotifier extends Notifier<SessionState> {
 
   AuthRepository get _repo => ref.read(authRepositoryProvider);
   SecureTokenStore get _tokenStore => ref.read(secureTokenStoreProvider);
+  NotificationService get _notifications =>
+      ref.read(notificationServiceProvider);
 
   /// Called at app start — reads stored tokens and validates them against /auth/me.
   Future<void> restore() async {
@@ -65,6 +68,8 @@ class SessionNotifier extends Notifier<SessionState> {
         status: SessionStatus.authenticated,
         user: user,
       );
+      // Register this device for push notifications.
+      _notifications.registerDeviceForUser();
     } on ApiException catch (e) {
       state = state.copyWith(
         status: SessionStatus.unauthenticated,
@@ -75,6 +80,8 @@ class SessionNotifier extends Notifier<SessionState> {
   }
 
   Future<void> logout() async {
+    // Unregister device token before clearing local state.
+    await _notifications.unregisterDevice();
     final refreshToken = await _tokenStore.getRefreshToken();
     try {
       await _repo.logout(refreshToken: refreshToken);

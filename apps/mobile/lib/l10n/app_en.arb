@@ -1,0 +1,54 @@
+{
+  "@@locale": "en",
+  "appTitle": "TesTly",
+  "@appTitle": { "description": "Application name" },
+
+  "login": "Login",
+  "logout": "Logout",
+  "register": "Register",
+  "email": "Email",
+  "password": "Password",
+  "continueAsPatient": "Continue as Patient",
+  "continueAsLab": "Continue as Lab",
+  "rolePatient": "Patient",
+  "roleLab": "Lab",
+  "noAccount": "Don't have an account?",
+  "alreadyHaveAccount": "Already have an account?",
+
+  "biometricPrompt": "Authenticate to continue",
+  "biometricReason": "Use biometrics to unlock TesTly",
+
+  "labPendingTitle": "Account Pending Approval",
+  "labPendingBody": "Your lab account is under review. You'll be notified once approved.",
+
+  "adminMobileUnsupported": "Admin panel is available on the web only.",
+  "openWebApp": "Open Web App",
+
+  "loading": "Loading…",
+  "retry": "Retry",
+  "error": "Something went wrong",
+  "noResults": "No results found",
+
+  "patientTabLabs": "Labs",
+  "patientTabBookings": "Bookings",
+  "patientTabResults": "Results",
+  "patientTabTrends": "Trends",
+  "patientTabProfile": "Profile",
+
+  "labTabDashboard": "Dashboard",
+  "labTabAnalytics": "Analytics",
+  "labTabReviews": "Reviews",
+  "labTabBookings": "Bookings",
+
+  "fullName": "Full Name",
+  "phone": "Phone",
+  "address": "Address",
+  "labName": "Lab Name",
+  "registerPatient": "Register as Patient",
+  "registerLab": "Register as Lab",
+
+  "egp": "EGP",
+  "validationRequired": "This field is required",
+  "validationEmail": "Enter a valid email",
+  "validationPasswordLength": "Password must be at least 8 characters"
+}

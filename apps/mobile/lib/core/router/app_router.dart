@@ -19,6 +19,12 @@ import '../../features/patient/results/presentation/result_detail_screen.dart';
 import '../../features/patient/profile/presentation/profile_screen.dart';
 import '../../features/patient/workspace/data/workspace_models.dart';
 import '../../features/lab/presentation/lab_shell.dart';
+import '../../features/lab/presentation/dashboard_screen.dart';
+import '../../features/lab/presentation/lab_bookings_screen.dart';
+import '../../features/lab/presentation/lab_booking_detail_screen.dart';
+import '../../features/lab/presentation/analytics_screen.dart';
+import '../../features/lab/presentation/reviews_screen.dart';
+import '../../features/lab/data/lab_workspace_models.dart';
 
 abstract final class Routes {
   static const login = '/login';
@@ -160,19 +166,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: Routes.labShell,
-            builder: (_, __) => const _ComingSoonScreen(title: 'Dashboard'),
+            builder: (_, __) => const DashboardScreen(),
           ),
           GoRoute(
             path: '/lab/analytics',
-            builder: (_, __) => const _ComingSoonScreen(title: 'Analytics'),
+            builder: (_, __) => const AnalyticsScreen(),
           ),
           GoRoute(
             path: '/lab/reviews',
-            builder: (_, __) => const _ComingSoonScreen(title: 'Reviews'),
+            builder: (_, __) => const ReviewsScreen(),
           ),
           GoRoute(
             path: '/lab/bookings',
-            builder: (_, __) => const _ComingSoonScreen(title: 'Bookings'),
+            builder: (_, __) => const LabBookingsScreen(),
+            routes: [
+              GoRoute(
+                path: ':bookingId',
+                builder: (_, state) => LabBookingDetailScreen(
+                  bookingId: state.pathParameters['bookingId']!,
+                  initial: state.extra as LabBookingItem?,
+                ),
+              ),
+            ],
           ),
         ],
       ),

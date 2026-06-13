@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth } from '@nestjs/swagger';
 import { Response, Request } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -71,11 +72,12 @@ export class AuthController {
       );
     }
 
-    const { access_token, user: userData } = await this.authService.login(
+    const { access_token, refresh_token, user: userData } = await this.authService.login(
       result as { id: string; email: string; role: Role },
     );
     this.auditLogService.log('auth.login', { userId: userData.id, role: userData.role });
 
+    // Web clients use the HTTP-only cookie; mobile clients use the token from the response body.
     response.cookie(AUTH_COOKIE_NAME, access_token, {
       httpOnly: true,
       path: '/',
@@ -84,7 +86,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
     });
 
-    return { message: 'Login successful', user: userData };
+    return { message: 'Login successful', user: userData, access_token, refresh_token };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -102,12 +104,28 @@ export class AuthController {
     return this.authService.getCurrentUser(userId);
   }
 
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Rotate refresh token and issue a new access token (mobile)' })
+  @ApiResponse({ status: 200, description: 'New token pair issued' })
+  @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
+  async refresh(@Body() dto: RefreshTokenDto) {
+    const tokens = await this.authService.refreshAccessToken(dto.refresh_token);
+    return tokens;
+  }
+
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Logout (clears session cookie)' })
+  @ApiOperation({ summary: 'Logout (clears session cookie and revokes refresh token)' })
   @ApiResponse({ status: 200, description: 'Logged out' })
-  logout(@Res({ passthrough: true }) response: Response) {
+  async logout(
+    @Res({ passthrough: true }) response: Response,
+    @Body() body: { refresh_token?: string },
+  ) {
     response.clearCookie(AUTH_COOKIE_NAME, { path: '/' });
+    if (body?.refresh_token) {
+      await this.authService.revokeRefreshToken(body.refresh_token);
+    }
     this.auditLogService.log('auth.logout', {});
     return { message: 'Logged out' };
   }

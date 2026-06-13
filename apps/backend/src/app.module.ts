@@ -5,6 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { PrismaService } from './prisma/prisma.service';
+import { NotificationsModule } from './notifications/notifications.module';
+import { NotificationsService } from './notifications/notifications.service';
 
 import { LabController } from './api/lab.controller';
 import { PatientController } from './api/patient.controller';
@@ -37,9 +39,12 @@ import { ResultsDownloadController } from './api/results-download.controller';
         DATABASE_URL: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
         LAB_STORAGE_DRIVER: Joi.string().valid('local', 's3').default('local'),
+        CORS_ORIGIN: Joi.string().default('http://localhost:3000'),
+        FCM_SERVICE_ACCOUNT_JSON: Joi.string().optional(),
       }),
     }),
     AuthModule,
+    NotificationsModule,
   ],
   controllers: [
     AppController,
@@ -55,6 +60,7 @@ import { ResultsDownloadController } from './api/results-download.controller';
   providers: [
     AppService,
     PrismaService,
+    NotificationsService,
     BookingsService,
     PatientService,
     LabService,

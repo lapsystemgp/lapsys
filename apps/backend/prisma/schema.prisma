@@ -22,6 +22,8 @@ model User {
   lab_profile     LabProfile?
   status_events   BookingStatusEvent[]
   result_files    ResultFile[]         @relation("ResultFilesUploadedBy")
+  refresh_tokens  RefreshToken[]
+  device_tokens   DeviceToken[]
 }
 
 enum Role {
@@ -339,4 +341,30 @@ model FaqEntry {
   is_active  Boolean  @default(true)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model RefreshToken {
+  id         String   @id @default(uuid())
+  user_id    String
+  token_hash String   @unique
+  expires_at DateTime
+  revoked    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model DeviceToken {
+  id         String   @id @default(uuid())
+  user_id    String
+  fcm_token  String   @unique
+  platform   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
 }

@@ -9,10 +9,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UpdatePatientProfileDto } from './dto/update-patient-profile.dto';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { normalizeResultHighlights } from './result-highlights.util';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class PatientService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   async getWorkspace(userId: string) {
     const patientProfile = await this.prisma.patientProfile.findUnique({
@@ -257,6 +261,20 @@ export class PatientService {
 
       return createdReview;
     });
+
+    // Notify the lab of the new review
+    const labUser = await this.prisma.labProfile.findUnique({
+      where: { id: review.lab_profile_id },
+      select: { user_id: true },
+    });
+    if (labUser) {
+      const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+      this.notificationsService.sendToUser(labUser.user_id, {
+        title: 'New Review',
+        body: `A patient rated you ${stars}${review.comment ? ': ' + review.comment.slice(0, 80) : ''}.`,
+        data: { type: 'new_review', labProfileId: review.lab_profile_id },
+      });
+    }
 
     return {
       id: review.id,

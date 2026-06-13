@@ -51,7 +51,8 @@ describe('LabService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new LabService(prismaMock, bookingsServiceMock, storageMock, auditMock);
+    const notifMock = { sendToUser: jest.fn() } as any;
+    service = new LabService(prismaMock, bookingsServiceMock, storageMock, auditMock, notifMock);
   });
 
   it('rejects schedule slot with invalid range', async () => {
@@ -157,7 +158,13 @@ describe('LabService', () => {
 
   it('marks delivered status and completes booking', async () => {
     prismaMock.labProfile.findUnique.mockResolvedValue({ id: 'lab-1' });
-    prismaMock.booking.findUnique.mockResolvedValue({ id: 'booking-1', lab_profile_id: 'lab-1' });
+    // First call: ownership check. Second call: notification lookup.
+    prismaMock.booking.findUnique
+      .mockResolvedValueOnce({ id: 'booking-1', lab_profile_id: 'lab-1' })
+      .mockResolvedValueOnce({
+        lab_test: { name: 'CBC' },
+        patient_profile: { user_id: 'patient-user-1' },
+      });
     prismaMock.resultFile.findUnique.mockResolvedValue({ id: 'result-1' });
 
     const tx = {

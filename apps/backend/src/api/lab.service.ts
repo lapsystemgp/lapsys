@@ -19,6 +19,7 @@ import { UploadResultDto } from './dto/upload-result.dto';
 import { SetResultStatusDto } from './dto/set-result-status.dto';
 import { LabStorageService, UploadedLabFile } from './lab-storage.service';
 import { AuditLogService } from '../common/services/audit-log.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class LabService {
@@ -27,6 +28,7 @@ export class LabService {
     private readonly bookingsService: BookingsService,
     private readonly labStorageService: LabStorageService,
     private readonly auditLogService: AuditLogService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async getWorkspace(userId: string) {
@@ -432,6 +434,25 @@ export class LabService {
       bookingId: booking.id,
       resultStatus: response.resultStatus,
     });
+
+    // Notify patient when their result is delivered
+    if (dto.status === ResultStatus.Delivered) {
+      const fullBooking = await this.prisma.booking.findUnique({
+        where: { id: booking.id },
+        select: {
+          lab_test: { select: { name: true } },
+          patient_profile: { select: { user_id: true } },
+        },
+      });
+      if (fullBooking) {
+        this.notificationsService.sendToUser(fullBooking.patient_profile.user_id, {
+          title: 'Result Ready',
+          body: `Your ${fullBooking.lab_test.name} result is ready. Tap to view.`,
+          data: { type: 'result_delivered', bookingId: booking.id },
+        });
+      }
+    }
+
     return response;
   }
 

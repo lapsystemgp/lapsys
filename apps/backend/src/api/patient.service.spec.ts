@@ -16,6 +16,7 @@ describe('PatientService', () => {
       aggregate: jest.fn(),
     },
     labProfile: {
+      findUnique: jest.fn(),
       update: jest.fn(),
     },
     $transaction: jest.fn(),
@@ -25,7 +26,8 @@ describe('PatientService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new PatientService(prismaMock);
+    const notifMock = { sendToUser: jest.fn() } as any;
+    service = new PatientService(prismaMock, notifMock);
   });
 
   it('throws when non-patient updates profile', async () => {

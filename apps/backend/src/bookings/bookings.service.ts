@@ -19,6 +19,7 @@ import { AvailabilityQueryDto } from './dto/availability-query.dto';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateKitStatusDto } from './dto/update-kit-status.dto';
 import { AuditLogService } from '../common/services/audit-log.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 type BookingWithRelations = {
   id: string;
@@ -63,6 +64,7 @@ export class BookingsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLogService: AuditLogService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async getAvailability(query: AvailabilityQueryDto) {
@@ -283,6 +285,20 @@ export class BookingsService {
       paymentMethod: response.paymentMethod,
       paymentStatus: response.paymentStatus,
     });
+
+    // Notify the lab that a new booking arrived
+    const labUser = await this.prisma.labProfile.findUnique({
+      where: { id: created.lab_profile.id },
+      select: { user_id: true },
+    });
+    if (labUser) {
+      this.notificationsService.sendToUser(labUser.user_id, {
+        title: 'New Booking',
+        body: `New booking for ${created.lab_test.name} from a patient.`,
+        data: { type: 'new_booking', bookingId: response.id },
+      });
+    }
+
     return response;
   }
 
@@ -638,6 +654,23 @@ export class BookingsService {
       status: response.status,
       paymentStatus: response.paymentStatus,
     });
+
+    // Notify the patient of the confirmation or rejection
+    const patientUser = await this.prisma.patientProfile.findUnique({
+      where: { id: updated.patient_profile.id },
+      select: { user_id: true },
+    });
+    if (patientUser) {
+      const isConfirmed = status === BookingStatus.Confirmed;
+      this.notificationsService.sendToUser(patientUser.user_id, {
+        title: isConfirmed ? 'Booking Confirmed' : 'Booking Rejected',
+        body: isConfirmed
+          ? `Your booking for ${updated.lab_test.name} has been confirmed.`
+          : `Your booking for ${updated.lab_test.name} was not accepted. You can book again.`,
+        data: { type: 'booking_status', bookingId: response.id, status },
+      });
+    }
+
     return response;
   }
 
@@ -794,6 +827,26 @@ export class BookingsService {
       labUserId: userId,
       kitStatus: dto.kitStatus,
     });
+
+    // Notify the patient when their kit ships
+    if (dto.kitStatus === KitStatus.Shipped) {
+      const patientUser = await this.prisma.patientProfile.findUnique({
+        where: { id: (updated as BookingWithRelations).patient_profile.id },
+        select: { user_id: true },
+      });
+      if (patientUser) {
+        this.notificationsService.sendToUser(patientUser.user_id, {
+          title: 'Kit Shipped',
+          body: 'Your test kit is on the way!',
+          data: {
+            type: 'kit_shipped',
+            bookingId: response.id,
+            trackingNumber: dto.trackingNumber ?? '',
+          },
+        });
+      }
+    }
+
     return response;
   }
 }

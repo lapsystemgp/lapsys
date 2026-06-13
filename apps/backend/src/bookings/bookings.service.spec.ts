@@ -11,6 +11,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { BookingsService } from './bookings.service';
 import { AuditLogService } from '../common/services/audit-log.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 function bookingRecord(overrides?: Partial<any>) {
   return {
@@ -109,6 +110,10 @@ describe('BookingsService', () => {
           provide: AuditLogService,
           useValue: { log: jest.fn() },
         },
+        {
+          provide: NotificationsService,
+          useValue: { sendToUser: jest.fn() },
+        },
       ],
     }).compile();
 
@@ -174,13 +179,24 @@ describe('BookingsService', () => {
       id: 'test-1',
       price_egp: 450,
       lab_profile_id: 'lab-profile-1',
-      lab_profile: { home_collection: true },
+      lab_profile: { home_collection: true, home_test_kit: false },
     });
     prismaMock.labScheduleSlot.findFirst.mockResolvedValue({
       id: 'slot-1',
       starts_at: new Date('2099-01-01T09:00:00.000Z'),
     });
-    prismaMock.booking.findFirst.mockResolvedValue({ id: 'booking-existing' });
+    // $transaction must run the callback so the conflict check inside it fires
+    prismaMock.$transaction.mockImplementation(async (cb: any) => {
+      const tx = {
+        booking: {
+          findFirst: jest.fn().mockResolvedValue({ id: 'booking-existing' }),
+          create: jest.fn(),
+          findUniqueOrThrow: jest.fn(),
+        },
+        bookingStatusEvent: { create: jest.fn() },
+      };
+      return cb(tx);
+    });
 
     await expect(
       service.createBooking('patient-1', {
@@ -421,6 +437,8 @@ describe('BookingsService', () => {
         booking_type: BookingType.HomeTestKit,
         kit_status: KitStatus.AwaitingShipment,
         status: BookingStatus.Confirmed,
+        payment_method: PaymentMethod.CashOnDelivery,
+        payment_status: PaymentStatus.Pending,
       });
 
       const updated = bookingRecord({
@@ -430,6 +448,8 @@ describe('BookingsService', () => {
         schedule_slot: null,
       });
       prismaMock.booking.update.mockResolvedValue(updated);
+      // Second findUnique call is the notification patient lookup — return null so push silently skips
+      prismaMock.patientProfile.findUnique.mockResolvedValue(null);
 
       const result = await service.updateKitStatus('lab-user-1', 'booking-1', {
         kitStatus: KitStatus.Shipped,

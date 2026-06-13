@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../trends/data/health_profile_models.dart';
 import 'workspace_models.dart';
 
 class PatientRepository {
@@ -54,6 +55,22 @@ class PatientRepository {
         'rating': rating,
         if (comment != null) 'comment': comment,
       });
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<HealthProfileResponse> getHealthProfile({
+    String range = '12m',
+    String groupBy = 'analyte',
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/patient/health-profile',
+        queryParameters: {'range': range, 'groupBy': groupBy},
+      );
+      return HealthProfileResponse.fromJson(
+          response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }

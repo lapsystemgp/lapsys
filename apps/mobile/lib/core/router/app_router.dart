@@ -17,6 +17,7 @@ import '../../features/patient/bookings/presentation/booking_detail_screen.dart'
 import '../../features/patient/results/presentation/results_screen.dart';
 import '../../features/patient/results/presentation/result_detail_screen.dart';
 import '../../features/patient/profile/presentation/profile_screen.dart';
+import '../../features/patient/trends/presentation/trends_screen.dart';
 import '../../features/patient/workspace/data/workspace_models.dart';
 import '../../features/lab/presentation/lab_shell.dart';
 import '../../features/lab/presentation/dashboard_screen.dart';
@@ -149,8 +150,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           // Trends tab (Phase 4)
           GoRoute(
             path: '/patient/trends',
-            builder: (_, __) =>
-                const _ComingSoonScreen(title: 'Health Trends'),
+            builder: (_, __) => const TrendsScreen(),
           ),
           // Profile tab
           GoRoute(
@@ -194,30 +194,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
-
-class _ComingSoonScreen extends StatelessWidget {
-  final String title;
-
-  const _ComingSoonScreen({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.construction, size: 64),
-            const SizedBox(height: 16),
-            Text('$title — coming in a future phase',
-                style: Theme.of(context).textTheme.titleMedium),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class _SessionListenable extends ChangeNotifier {
   _SessionListenable(Ref ref) {

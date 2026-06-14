@@ -50,5 +50,275 @@
   "egp": "EGP",
   "validationRequired": "This field is required",
   "validationEmail": "Enter a valid email",
-  "validationPasswordLength": "Password must be at least 8 characters"
+  "validationPasswordLength": "Password must be at least 8 characters",
+
+  "apply": "Apply",
+  "cancel": "Cancel",
+  "submit": "Submit",
+  "continueAction": "Continue",
+  "bookNow": "Book Now",
+  "book": "Book",
+  "viewLab": "View Lab",
+  "sortBy": "Sort by",
+  "enable": "Enable",
+  "tryAgain": "Try Again",
+  "notNow": "Not now",
+  "date": "Date",
+  "time": "Time",
+  "total": "Total",
+  "payment": "Payment",
+  "typeLabel": "Type",
+  "price": "Price",
+  "rating": "Rating",
+  "slot": "Slot",
+  "document": "Document",
+
+  "homeCollection": "Home collection",
+  "homeTestKit": "Home Test Kit",
+  "labVisit": "Lab Visit",
+  "homeCollectionOnly": "Home collection only",
+
+  "findTestOrLab": "Find a Test or Lab",
+  "labFilters": "Lab filters",
+  "searchHint": "Search tests (e.g. CBC) or labs…",
+  "testsTab": "Tests",
+  "labsTab": "Labs",
+  "bestRating": "Best rating",
+  "lowestPrice": "Lowest price",
+  "nearest": "Nearest",
+  "noTestsFound": "No tests found",
+  "tryDifferentTestName": "Try a different test name",
+  "noLabsFound": "No labs found",
+  "tryAdjustingFilters": "Try adjusting your search or filters",
+  "fromPriceEgp": "From {price} EGP",
+  "@fromPriceEgp": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "labCount": "{count, plural, =1{1 lab} other{{count} labs}}",
+  "@labCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "distanceKm": "{distance} km",
+  "@distanceKm": {
+    "placeholders": {
+      "distance": { "type": "String" }
+    }
+  },
+
+  "labsOfferingTest": "Labs offering {testName}",
+  "@labsOfferingTest": {
+    "placeholders": {
+      "testName": { "type": "String" }
+    }
+  },
+  "noLabsOfferTest": "No labs offer this test yet",
+  "resultsIn": "Results in {turnaround}",
+  "@resultsIn": {
+    "placeholders": {
+      "turnaround": { "type": "String" }
+    }
+  },
+  "parametersCount": "{count, plural, =1{1 parameter} other{{count} parameters}}",
+  "@parametersCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "atLabsCount": "{count, plural, =1{At 1 lab} other{At {count} labs}}",
+  "@atLabsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "enableLocationForSort": "Enable location to sort labs by how near they are.",
+  "noTestsAvailable": "No tests available",
+  "noReviewsYet": "No reviews yet",
+
+  "chooseBookingType": "Choose booking type",
+  "chooseTimeSlot": "Choose a time slot",
+  "enterHomeAddress": "Enter home address",
+  "paymentMethod": "Payment method",
+  "confirmBookingStep": "Confirm booking",
+  "processingEllipsis": "Processing…",
+  "bookingConfirmedBang": "Booking confirmed!",
+  "bookingFailed": "Booking failed",
+  "howToTakeTest": "How would you like to take this test?",
+  "visitLabInPerson": "Visit the lab in person",
+  "phlebotomistVisitsHome": "A phlebotomist visits your home",
+  "kitShippedSelfCollect": "Kit shipped to you; self-collect sample",
+  "noSlotsAvailable7Days": "No slots available in the next 7 days",
+  "continueWithoutSlot": "Continue without a slot",
+  "enterAddressForService": "Enter the address for the service:",
+  "homeAddressLabel": "Home address",
+  "streetApartmentCityHint": "Street, apartment, city…",
+  "addressRequired": "Address is required",
+  "paymentOnlineDemo": "Online (demo)",
+  "paymentCashAtLab": "Cash at lab",
+  "paymentCashOnCollection": "Cash on collection",
+  "paymentCashOnDelivery": "Cash on delivery",
+  "bookingCreatedFor": "Your booking for {testName} at {labName} has been created.",
+  "@bookingCreatedFor": {
+    "placeholders": {
+      "testName": { "type": "String" },
+      "labName": { "type": "String" }
+    }
+  },
+  "viewMyBookings": "View My Bookings",
+  "backToLabs": "Back to Labs",
+  "confirmBookingButton": "Confirm Booking",
+
+  "myBookings": "My Bookings",
+  "upcoming": "Upcoming",
+  "past": "Past",
+  "noUpcomingBookings": "No upcoming bookings",
+  "noPastBookings": "No past bookings",
+  "statusPending": "Pending",
+  "statusConfirmed": "Confirmed",
+  "statusCompleted": "Completed",
+  "statusCancelled": "Cancelled",
+  "statusRejected": "Rejected",
+
+  "bookingDetail": "Booking Detail",
+  "cancelFailed": "Cancel failed: {error}",
+  "@cancelFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "paymentSuccessful": "Payment successful!",
+  "paymentFailedMsg": "Payment failed: {error}",
+  "@paymentFailedMsg": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "cancelBooking": "Cancel Booking",
+  "retryPayment": "Retry Payment",
+  "payStatus": "Pay status",
+  "payStatusPending": "Pending",
+  "payStatusPaid": "Paid",
+  "payStatusFailed": "Failed",
+  "payStatusRefunded": "Refunded",
+  "kitTracking": "Kit Tracking",
+  "trackingNumber": "Tracking #{number}",
+  "@trackingNumber": {
+    "placeholders": {
+      "number": { "type": "String" }
+    }
+  },
+  "awaitingShipment": "Awaiting shipment",
+  "kitShipped": "Kit shipped",
+  "kitDelivered": "Kit delivered",
+  "sampleReceived": "Sample received",
+  "statusHistory": "Status History",
+
+  "myProfile": "My Profile",
+  "account": "Account",
+  "personalInfo": "Personal info",
+  "nameRequired": "Name is required",
+  "privacy": "Privacy",
+  "shareHistoryAcrossLabs": "Share history across labs",
+  "enableCrossLabTrends": "Enable cross-lab health trends and comparisons",
+  "allLabsSeeHistory": "All labs you have tested with can see your full history to power trend charts.",
+  "onlyTestingLabSeesResult": "Only the lab that performed a test can see that result.",
+  "saveChanges": "Save Changes",
+  "profileUpdated": "Profile updated",
+  "saveFailed": "Save failed: {error}",
+  "@saveFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "signOut": "Sign Out",
+
+  "myResults": "My Results",
+  "noResultsYet": "No results yet",
+  "completedTestsWillAppear": "Completed tests will appear here",
+  "resultStatusPending": "Pending",
+  "resultStatusUploaded": "Uploaded",
+  "resultStatusDelivered": "Delivered",
+  "resultStatusStructured": "Structured",
+
+  "result": "Result",
+  "resultDetail": "Result Detail",
+  "sharePdf": "Share PDF",
+  "writeReview": "Write a Review",
+  "rateExperience": "Rate your experience at {labName}",
+  "@rateExperience": {
+    "placeholders": {
+      "labName": { "type": "String" }
+    }
+  },
+  "commentOptional": "Comment (optional)",
+  "reviewSubmitted": "Review submitted!",
+  "failedToSubmit": "Failed to submit: {error}",
+  "@failedToSubmit": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "summary": "Summary",
+  "yourReview": "Your Review",
+  "couldNotOpenDocument": "Could not open document: {error}",
+  "@couldNotOpenDocument": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "healthTrends": "Health Trends",
+  "period3mo": "3 mo",
+  "period6mo": "6 mo",
+  "period12mo": "12 mo",
+  "periodAll": "All",
+  "byAnalyte": "By Analyte",
+  "byTest": "By Test",
+  "noTrendsInPeriod": "No trends in the selected period. Try a wider time range.",
+  "noStructuredDataYet": "No structured data yet",
+  "structuredDataExplanation": "When labs enter your test values as structured data, trends and charts will appear here.",
+  "recentReadings": "Recent readings",
+  "trendRising": "Rising",
+  "trendFalling": "Falling",
+  "trendStable": "Stable",
+  "trendNotEnoughData": "Not enough data",
+  "pdfOnlyResults": "PDF-only results",
+  "pdfOnlyResultsDesc": "These results have a PDF but no structured data for trending.",
+  "low": "Low",
+  "high": "High",
+
+  "totalBookings": "Total Bookings",
+  "pendingResults": "Pending Results",
+  "revenue": "Revenue",
+  "slotCapacityUsed": "Slot Capacity Used",
+  "labStaffCollectSamples": "Lab staff collect samples at patient's home",
+  "shipKitToPatientAddress": "Ship kit to patient's address",
+  "saveCapabilities": "Save Capabilities",
+  "capabilitiesUpdated": "Capabilities updated",
+  "capabilities": "Capabilities",
+  "failedWithError": "Failed: {error}",
+  "@failedWithError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "stayUpToDate": "Stay up to date",
+  "notificationPermissionBody": "Get instant alerts when your booking is confirmed, results are ready, or your kit ships — and reminders the evening before tests that need preparation.",
+  "enableNotifications": "Enable notifications",
+
+  "authenticateToUnlock": "Authenticate to unlock TesTly",
+  "authenticateButton": "Authenticate",
+
+  "security": "Security",
+  "biometricUnlock": "Biometric unlock",
+  "biometricUnlockSubtitle": "Require biometrics to open the app",
+
+  "noPendingBookings": "No pending bookings",
+  "noConfirmedBookings": "No confirmed bookings",
+  "noBookingsYet": "No bookings yet",
+  "resultMarkedDelivered": "Result marked as delivered"
 }

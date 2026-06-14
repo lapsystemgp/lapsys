@@ -7,6 +7,7 @@ import '../../booking/data/booking_models.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class LabDetailScreen extends ConsumerWidget {
   final String labId;
@@ -61,6 +62,7 @@ class _LabDetailViewState extends State<_LabDetailView>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final lab = widget.detail.lab;
     final theme = Theme.of(context);
 
@@ -118,9 +120,9 @@ class _LabDetailViewState extends State<_LabDetailView>
                           visualDensity: VisualDensity.compact,
                         ),
                       if (lab.homeCollection)
-                        const Chip(
-                          avatar: Icon(Icons.home, size: 16),
-                          label: Text('Home collection'),
+                        Chip(
+                          avatar: const Icon(Icons.home, size: 16),
+                          label: Text(l10n.homeCollection),
                           visualDensity: VisualDensity.compact,
                         ),
                     ],
@@ -134,9 +136,9 @@ class _LabDetailViewState extends State<_LabDetailView>
             delegate: _TabBarDelegate(
               TabBar(
                 controller: _tabs,
-                tabs: const [
-                  Tab(text: 'Tests'),
-                  Tab(text: 'Reviews'),
+                tabs: [
+                  Tab(text: l10n.testsTab),
+                  Tab(text: l10n.labTabReviews),
                 ],
               ),
             ),
@@ -165,10 +167,11 @@ class _TestsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (tests.isEmpty) {
-      return const EmptyState(
+      return EmptyState(
         icon: Icons.science_outlined,
-        message: 'No tests available',
+        message: l10n.noTestsAvailable,
       );
     }
     return ListView.separated(
@@ -188,6 +191,7 @@ class _TestTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return ListTile(
@@ -239,7 +243,7 @@ class _TestTile extends StatelessWidget {
                 preparation: test.preparation,
               ),
             ),
-            child: const Text('Book'),
+            child: Text(l10n.book),
           ),
         ],
       ),
@@ -254,10 +258,11 @@ class _ReviewsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (reviews.isEmpty) {
-      return const EmptyState(
+      return EmptyState(
         icon: Icons.rate_review_outlined,
-        message: 'No reviews yet',
+        message: l10n.noReviewsYet,
       );
     }
     return ListView.separated(

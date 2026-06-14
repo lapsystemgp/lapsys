@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../workspace/application/workspace_provider.dart';
 import '../../workspace/data/workspace_models.dart';
 import '../../booking/data/booking_models.dart';
@@ -55,8 +56,9 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
       if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Cancel failed: $e')));
+            .showSnackBar(SnackBar(content: Text(l10n.cancelFailed(e.toString()))));
       }
     } finally {
       if (mounted) setState(() => _cancelling = false);
@@ -71,15 +73,17 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
           .demoPayment(widget.bookingId, 'success');
       ref.invalidate(workspaceProvider);
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment successful!')),
+          SnackBar(content: Text(l10n.paymentSuccessful)),
         );
         context.pop();
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Payment failed: $e')));
+            .showSnackBar(SnackBar(content: Text(l10n.paymentFailedMsg(e.toString()))));
       }
     } finally {
       if (mounted) setState(() => _paying = false);
@@ -88,6 +92,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // Try to find the latest version from workspace
     final workspace = ref.watch(workspaceProvider).valueOrNull;
     if (workspace != null) {
@@ -105,13 +110,13 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
     if (booking == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Booking Detail')),
+        appBar: AppBar(title: Text(l10n.bookingDetail)),
         body: const LoadingIndicator(),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Booking Detail')),
+      appBar: AppBar(title: Text(l10n.bookingDetail)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -131,7 +136,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
               OutlinedButton.icon(
                 onPressed: _cancel,
                 icon: const Icon(Icons.cancel_outlined),
-                label: const Text('Cancel Booking'),
+                label: Text(l10n.cancelBooking),
               ),
           ],
           if (booking.paymentStatus == PaymentStatus.failed) ...[
@@ -142,7 +147,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
               FilledButton.icon(
                 onPressed: _retryPayment,
                 icon: const Icon(Icons.payment),
-                label: const Text('Retry Payment'),
+                label: Text(l10n.retryPayment),
               ),
           ],
         ],
@@ -158,6 +163,7 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final date = DateFormat('EEEE, d MMMM yyyy')
         .format(DateTime.parse(booking.scheduledAt).toLocal());
     final time = DateFormat('h:mm a')
@@ -178,7 +184,7 @@ class _InfoCard extends StatelessWidget {
                           .titleMedium
                           ?.copyWith(fontWeight: FontWeight.w600)),
                 ),
-                _statusBadge(context, booking.status),
+                _statusBadge(context, booking.status, l10n),
               ],
             ),
             const SizedBox(height: 4),
@@ -188,14 +194,14 @@ class _InfoCard extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.outline)),
             const Divider(height: 24),
-            _row(context, 'Date', date),
-            _row(context, 'Time', time),
-            _row(context, 'Type', _typeLabel(booking.bookingType)),
+            _row(context, l10n.date, date),
+            _row(context, l10n.time, time),
+            _row(context, l10n.typeLabel, _typeLabel(booking.bookingType, l10n)),
             if (booking.homeAddress != null)
-              _row(context, 'Address', booking.homeAddress!),
-            _row(context, 'Payment', _paymentLabel(booking.paymentMethod)),
-            _row(context, 'Pay status', _payStatusLabel(booking.paymentStatus)),
-            _row(context, 'Total', '${booking.totalPriceEgp} EGP'),
+              _row(context, l10n.address, booking.homeAddress!),
+            _row(context, l10n.payment, _paymentLabel(booking.paymentMethod, l10n)),
+            _row(context, l10n.payStatus, _payStatusLabel(booking.paymentStatus, l10n)),
+            _row(context, l10n.total, '${booking.totalPriceEgp} EGP'),
           ],
         ),
       ),
@@ -222,13 +228,13 @@ class _InfoCard extends StatelessWidget {
     );
   }
 
-  Widget _statusBadge(BuildContext context, BookingStatus status) {
+  Widget _statusBadge(BuildContext context, BookingStatus status, AppLocalizations l10n) {
     final (label, color) = switch (status) {
-      BookingStatus.pending => ('Pending', Colors.orange),
-      BookingStatus.confirmed => ('Confirmed', Colors.blue),
-      BookingStatus.completed => ('Completed', Colors.green),
-      BookingStatus.cancelled => ('Cancelled', Colors.grey),
-      BookingStatus.rejected => ('Rejected', Colors.red),
+      BookingStatus.pending => (l10n.statusPending, Colors.orange),
+      BookingStatus.confirmed => (l10n.statusConfirmed, Colors.blue),
+      BookingStatus.completed => (l10n.statusCompleted, Colors.green),
+      BookingStatus.cancelled => (l10n.statusCancelled, Colors.grey),
+      BookingStatus.rejected => (l10n.statusRejected, Colors.red),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -242,29 +248,29 @@ class _InfoCard extends StatelessWidget {
     );
   }
 
-  String _typeLabel(BookingType t) {
+  String _typeLabel(BookingType t, AppLocalizations l10n) {
     return switch (t) {
-      BookingType.labVisit => 'Lab Visit',
-      BookingType.homeCollection => 'Home Collection',
-      BookingType.homeTestKit => 'Home Test Kit',
+      BookingType.labVisit => l10n.labVisit,
+      BookingType.homeCollection => l10n.homeCollection,
+      BookingType.homeTestKit => l10n.homeTestKit,
     };
   }
 
-  String _paymentLabel(PaymentMethod m) {
+  String _paymentLabel(PaymentMethod m, AppLocalizations l10n) {
     return switch (m) {
-      PaymentMethod.online => 'Online',
-      PaymentMethod.cashLabVisit => 'Cash at lab',
-      PaymentMethod.cashHomeCollection => 'Cash on collection',
-      PaymentMethod.cashOnDelivery => 'Cash on delivery',
+      PaymentMethod.online => l10n.paymentOnlineDemo,
+      PaymentMethod.cashLabVisit => l10n.paymentCashAtLab,
+      PaymentMethod.cashHomeCollection => l10n.paymentCashOnCollection,
+      PaymentMethod.cashOnDelivery => l10n.paymentCashOnDelivery,
     };
   }
 
-  String _payStatusLabel(PaymentStatus s) {
+  String _payStatusLabel(PaymentStatus s, AppLocalizations l10n) {
     return switch (s) {
-      PaymentStatus.pending => 'Pending',
-      PaymentStatus.paid => 'Paid',
-      PaymentStatus.failed => 'Failed',
-      PaymentStatus.refunded => 'Refunded',
+      PaymentStatus.pending => l10n.payStatusPending,
+      PaymentStatus.paid => l10n.payStatusPaid,
+      PaymentStatus.failed => l10n.payStatusFailed,
+      PaymentStatus.refunded => l10n.payStatusRefunded,
     };
   }
 }
@@ -276,11 +282,12 @@ class _KitTrackingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final steps = [
-      ('AwaitingShipment', 'Awaiting shipment', KitStatus.awaitingShipment),
-      ('Shipped', 'Kit shipped', KitStatus.shipped),
-      ('Delivered', 'Kit delivered', KitStatus.delivered),
-      ('SampleReceived', 'Sample received', KitStatus.sampleReceived),
+      ('AwaitingShipment', l10n.awaitingShipment, KitStatus.awaitingShipment),
+      ('Shipped', l10n.kitShipped, KitStatus.shipped),
+      ('Delivered', l10n.kitDelivered, KitStatus.delivered),
+      ('SampleReceived', l10n.sampleReceived, KitStatus.sampleReceived),
     ];
 
     final currentIndex = steps.indexWhere((s) => s.$3 == booking.kitStatus);
@@ -295,13 +302,13 @@ class _KitTrackingCard extends StatelessWidget {
               children: [
                 const Icon(Icons.local_shipping_outlined),
                 const SizedBox(width: 8),
-                Text('Kit Tracking',
+                Text(l10n.kitTracking,
                     style: Theme.of(context).textTheme.titleSmall),
               ],
             ),
             if (booking.kitTrackingNumber != null) ...[
               const SizedBox(height: 4),
-              Text('Tracking #${booking.kitTrackingNumber}',
+              Text(l10n.trackingNumber(booking.kitTrackingNumber!),
                   style: Theme.of(context)
                       .textTheme
                       .bodySmall
@@ -345,13 +352,14 @@ class _TimelineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Status History',
+            Text(l10n.statusHistory,
                 style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 12),
             ...entries.reversed.map((e) {

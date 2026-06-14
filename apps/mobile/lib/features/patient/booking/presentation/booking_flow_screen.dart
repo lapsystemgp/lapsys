@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../application/booking_flow_notifier.dart';
 import '../data/booking_models.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
@@ -15,10 +16,11 @@ class BookingFlowScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final flow = ref.watch(bookingFlowProvider(params));
     final notifier = ref.read(bookingFlowProvider(params).notifier);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_stepTitle(flow.step)),
+        title: Text(_stepTitle(l10n, flow.step)),
         leading: flow.step == BookingStep.type
             ? const BackButton()
             : IconButton(
@@ -30,16 +32,16 @@ class BookingFlowScreen extends ConsumerWidget {
     );
   }
 
-  String _stepTitle(BookingStep step) {
+  String _stepTitle(AppLocalizations l10n, BookingStep step) {
     return switch (step) {
-      BookingStep.type => 'Choose booking type',
-      BookingStep.slot => 'Choose a time slot',
-      BookingStep.address => 'Enter home address',
-      BookingStep.payment => 'Payment method',
-      BookingStep.confirm => 'Confirm booking',
-      BookingStep.submitting => 'Processing…',
-      BookingStep.done => 'Booking confirmed!',
-      BookingStep.error => 'Booking failed',
+      BookingStep.type => l10n.chooseBookingType,
+      BookingStep.slot => l10n.chooseTimeSlot,
+      BookingStep.address => l10n.enterHomeAddress,
+      BookingStep.payment => l10n.paymentMethod,
+      BookingStep.confirm => l10n.confirmBookingStep,
+      BookingStep.submitting => l10n.processingEllipsis,
+      BookingStep.done => l10n.bookingConfirmedBang,
+      BookingStep.error => l10n.bookingFailed,
     };
   }
 
@@ -70,32 +72,33 @@ class _TypeStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         _BookingSummaryCard(params: params),
         const SizedBox(height: 16),
-        Text('How would you like to take this test?',
+        Text(l10n.howToTakeTest,
             style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
         _TypeOption(
           icon: Icons.local_hospital_outlined,
-          title: 'Lab Visit',
-          subtitle: 'Visit the lab in person',
+          title: l10n.labVisit,
+          subtitle: l10n.visitLabInPerson,
           onTap: () => notifier.selectType(BookingType.labVisit),
         ),
         if (params.supportsHomeCollection)
           _TypeOption(
             icon: Icons.home_outlined,
-            title: 'Home Collection',
-            subtitle: 'A phlebotomist visits your home',
+            title: l10n.homeCollection,
+            subtitle: l10n.phlebotomistVisitsHome,
             onTap: () => notifier.selectType(BookingType.homeCollection),
           ),
         if (params.supportsHomeTestKit)
           _TypeOption(
             icon: Icons.local_shipping_outlined,
-            title: 'Home Test Kit',
-            subtitle: 'Kit shipped to you; self-collect sample',
+            title: l10n.homeTestKit,
+            subtitle: l10n.kitShippedSelfCollect,
             onTap: () => notifier.selectType(BookingType.homeTestKit),
           ),
       ],
@@ -141,6 +144,7 @@ class _SlotStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (flow.slotsLoading) return const LoadingIndicator();
 
     if (flow.slots.isEmpty) {
@@ -150,11 +154,11 @@ class _SlotStep extends StatelessWidget {
           children: [
             const Icon(Icons.event_busy, size: 48),
             const SizedBox(height: 12),
-            const Text('No slots available in the next 7 days'),
+            Text(l10n.noSlotsAvailable7Days),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: notifier.skipSlot,
-              child: const Text('Continue without a slot'),
+              child: Text(l10n.continueWithoutSlot),
             ),
           ],
         ),
@@ -213,23 +217,24 @@ class _AddressStepState extends State<_AddressStep> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Form(
       key: _formKey,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('Enter the address for the service:'),
+          Text(l10n.enterAddressForService),
           const SizedBox(height: 16),
           TextFormField(
             controller: _ctrl,
-            decoration: const InputDecoration(
-              labelText: 'Home address',
-              hintText: 'Street, apartment, city…',
-              prefixIcon: Icon(Icons.home_outlined),
+            decoration: InputDecoration(
+              labelText: l10n.homeAddressLabel,
+              hintText: l10n.streetApartmentCityHint,
+              prefixIcon: const Icon(Icons.home_outlined),
             ),
             maxLines: 3,
             validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Address is required' : null,
+                (v == null || v.trim().isEmpty) ? l10n.addressRequired : null,
           ),
           const SizedBox(height: 24),
           FilledButton(
@@ -238,7 +243,7 @@ class _AddressStepState extends State<_AddressStep> {
                 widget.notifier.submitAddress(_ctrl.text.trim());
               }
             },
-            child: const Text('Continue'),
+            child: Text(l10n.continueAction),
           ),
         ],
       ),
@@ -256,6 +261,7 @@ class _PaymentStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final type = flow.selectedType;
     final options = [
       PaymentMethod.online,
@@ -271,7 +277,7 @@ class _PaymentStep extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 10),
           child: ListTile(
             leading: Icon(_paymentIcon(m)),
-            title: Text(_paymentLabel(m)),
+            title: Text(_paymentLabel(l10n, m)),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => notifier.selectPayment(m),
           ),
@@ -284,11 +290,11 @@ class _PaymentStep extends StatelessWidget {
       ? Icons.credit_card
       : Icons.payments_outlined;
 
-  String _paymentLabel(PaymentMethod m) => switch (m) {
-        PaymentMethod.online => 'Online (demo)',
-        PaymentMethod.cashLabVisit => 'Cash at lab',
-        PaymentMethod.cashHomeCollection => 'Cash on collection',
-        PaymentMethod.cashOnDelivery => 'Cash on delivery',
+  String _paymentLabel(AppLocalizations l10n, PaymentMethod m) => switch (m) {
+        PaymentMethod.online => l10n.paymentOnlineDemo,
+        PaymentMethod.cashLabVisit => l10n.paymentCashAtLab,
+        PaymentMethod.cashHomeCollection => l10n.paymentCashOnCollection,
+        PaymentMethod.cashOnDelivery => l10n.paymentCashOnDelivery,
       };
 }
 
@@ -307,6 +313,7 @@ class _ConfirmStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) {
+    final l10n = AppLocalizations.of(ctx)!;
     final p = flow.params;
 
     return ListView(
@@ -320,17 +327,17 @@ class _ConfirmStep extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _Row('Type', _typeLabel(flow.selectedType)),
+                _Row(l10n.typeLabel, _typeLabel(l10n, flow.selectedType)),
                 if (flow.selectedSlot != null)
                   _Row(
-                    'Slot',
+                    l10n.slot,
                     DateFormat('EEE d MMM · h:mm a').format(
                         DateTime.parse(flow.selectedSlot!.startsAt).toLocal()),
                   ),
                 if (flow.homeAddress != null)
-                  _Row('Address', flow.homeAddress!),
-                _Row('Payment', _paymentLabel(flow.selectedPayment)),
-                _Row('Total', '${p.priceEgp} EGP'),
+                  _Row(l10n.address, flow.homeAddress!),
+                _Row(l10n.payment, _paymentLabel(l10n, flow.selectedPayment)),
+                _Row(l10n.total, '${p.priceEgp} EGP'),
               ],
             ),
           ),
@@ -338,24 +345,24 @@ class _ConfirmStep extends StatelessWidget {
         const SizedBox(height: 24),
         FilledButton(
           onPressed: notifier.confirm,
-          child: const Text('Confirm Booking'),
+          child: Text(l10n.confirmBookingButton),
         ),
       ],
     );
   }
 
-  String _typeLabel(BookingType? t) => switch (t) {
-        BookingType.labVisit => 'Lab Visit',
-        BookingType.homeCollection => 'Home Collection',
-        BookingType.homeTestKit => 'Home Test Kit',
+  String _typeLabel(AppLocalizations l10n, BookingType? t) => switch (t) {
+        BookingType.labVisit => l10n.labVisit,
+        BookingType.homeCollection => l10n.homeCollection,
+        BookingType.homeTestKit => l10n.homeTestKit,
         null => '—',
       };
 
-  String _paymentLabel(PaymentMethod? m) => switch (m) {
-        PaymentMethod.online => 'Online (demo)',
-        PaymentMethod.cashLabVisit => 'Cash at lab',
-        PaymentMethod.cashHomeCollection => 'Cash on collection',
-        PaymentMethod.cashOnDelivery => 'Cash on delivery',
+  String _paymentLabel(AppLocalizations l10n, PaymentMethod? m) => switch (m) {
+        PaymentMethod.online => l10n.paymentOnlineDemo,
+        PaymentMethod.cashLabVisit => l10n.paymentCashAtLab,
+        PaymentMethod.cashHomeCollection => l10n.paymentCashOnCollection,
+        PaymentMethod.cashOnDelivery => l10n.paymentCashOnDelivery,
         null => '—',
       };
 }
@@ -395,6 +402,7 @@ class _DoneStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -407,18 +415,18 @@ class _DoneStep extends StatelessWidget {
                 style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
-              'Your booking for ${flow.params.testName} at ${flow.params.labName} has been created.',
+              l10n.bookingCreatedFor(flow.params.testName, flow.params.labName),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: () => context.go('/patient/bookings'),
-              child: const Text('View My Bookings'),
+              child: Text(l10n.viewMyBookings),
             ),
             const SizedBox(height: 12),
             TextButton(
               onPressed: () => context.go('/patient'),
-              child: const Text('Back to Labs'),
+              child: Text(l10n.backToLabs),
             ),
           ],
         ),
@@ -437,6 +445,7 @@ class _ErrorStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -445,7 +454,7 @@ class _ErrorStep extends StatelessWidget {
           children: [
             const Icon(Icons.error_outline, size: 80, color: Colors.red),
             const SizedBox(height: 16),
-            Text('Booking Failed',
+            Text(l10n.bookingFailed,
                 style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(flow.errorMessage ?? 'An error occurred.',
@@ -453,7 +462,7 @@ class _ErrorStep extends StatelessWidget {
             const SizedBox(height: 24),
             FilledButton(
               onPressed: notifier.back,
-              child: const Text('Try Again'),
+              child: Text(l10n.tryAgain),
             ),
           ],
         ),

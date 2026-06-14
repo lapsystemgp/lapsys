@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../l10n/app_localizations.dart';
 import '../application/lab_workspace_provider.dart';
 import '../data/lab_repository.dart';
 import '../data/lab_workspace_models.dart';
@@ -44,10 +45,11 @@ class _LabBookingDetailScreenState
           .setBookingStatus(widget.bookingId, status);
       ref.invalidate(labWorkspaceProvider);
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                'Booking ${status == BookingStatus.confirmed ? 'confirmed' : 'rejected'}'),
+                'Booking ${status == BookingStatus.confirmed ? l10n.statusConfirmed : l10n.statusRejected}'),
           ),
         );
       }
@@ -80,8 +82,9 @@ class _LabBookingDetailScreenState
           );
       ref.invalidate(labWorkspaceProvider);
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Kit status updated to ${_kitLabel(next)}')),
+          SnackBar(content: Text('Kit status updated to ${_kitLabel(next, l10n)}')),
         );
       }
     } catch (e) {
@@ -102,8 +105,9 @@ class _LabBookingDetailScreenState
           .setResultStatus(widget.bookingId, 'Delivered');
       ref.invalidate(labWorkspaceProvider);
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Result marked as delivered')),
+          SnackBar(content: Text(l10n.resultMarkedDelivered)),
         );
       }
     } catch (e) {
@@ -121,6 +125,7 @@ class _LabBookingDetailScreenState
     await showDialog<void>(
       context: context,
       builder: (ctx) {
+        final l10n = AppLocalizations.of(context)!;
         final controller = TextEditingController();
         return AlertDialog(
           title: const Text('Tracking Number'),
@@ -133,7 +138,7 @@ class _LabBookingDetailScreenState
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             FilledButton(
               onPressed: () {
@@ -163,25 +168,26 @@ class _LabBookingDetailScreenState
     return order[idx + 1];
   }
 
-  String _kitLabel(KitStatus s) {
+  String _kitLabel(KitStatus s, AppLocalizations l10n) {
     switch (s) {
       case KitStatus.awaitingShipment:
-        return 'Awaiting Shipment';
+        return l10n.awaitingShipment;
       case KitStatus.shipped:
-        return 'Shipped';
+        return l10n.kitShipped;
       case KitStatus.delivered:
-        return 'Delivered';
+        return l10n.kitDelivered;
       case KitStatus.sampleReceived:
-        return 'Sample Received';
+        return l10n.sampleReceived;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final booking = _booking;
     if (booking == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Booking')),
+        appBar: AppBar(title: Text(l10n.bookingDetail)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -192,38 +198,38 @@ class _LabBookingDetailScreenState
         : booking.scheduledAt;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Booking Detail')),
+      appBar: AppBar(title: Text(l10n.bookingDetail)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Patient card
           _SectionCard(
-            title: 'Patient',
+            title: l10n.rolePatient,
             children: [
-              _InfoRow(label: 'Name', value: booking.patient.fullName ?? '—'),
-              _InfoRow(label: 'Phone', value: booking.patient.phone ?? '—'),
+              _InfoRow(label: l10n.fullName, value: booking.patient.fullName ?? '—'),
+              _InfoRow(label: l10n.phone, value: booking.patient.phone ?? '—'),
             ],
           ),
           const SizedBox(height: 12),
 
           // Booking details
           _SectionCard(
-            title: 'Booking',
+            title: l10n.bookingDetail,
             children: [
-              _InfoRow(label: 'Test', value: booking.test.name),
-              _InfoRow(label: 'Scheduled', value: dateStr),
-              _InfoRow(label: 'Type', value: _typeLabel(booking.bookingType)),
-              _InfoRow(label: 'Status', value: booking.status.name.toUpperCase()),
+              _InfoRow(label: l10n.typeLabel, value: booking.test.name),
+              _InfoRow(label: l10n.date, value: dateStr),
+              _InfoRow(label: l10n.typeLabel, value: _typeLabel(booking.bookingType, l10n)),
+              _InfoRow(label: l10n.statusPending, value: booking.status.name.toUpperCase()),
               _InfoRow(
-                  label: 'Amount', value: 'EGP ${booking.totalPriceEgp}'),
+                  label: l10n.total, value: 'EGP ${booking.totalPriceEgp}'),
               _InfoRow(
-                  label: 'Payment',
-                  value: _paymentLabel(booking.paymentMethod)),
+                  label: l10n.payment,
+                  value: _paymentLabel(booking.paymentMethod, l10n)),
               _InfoRow(
-                  label: 'Payment Status',
+                  label: l10n.payStatus,
                   value: booking.paymentStatus.name.toUpperCase()),
               if (booking.homeAddress != null)
-                _InfoRow(label: 'Address', value: booking.homeAddress!),
+                _InfoRow(label: l10n.address, value: booking.homeAddress!),
             ],
           ),
           const SizedBox(height: 12),
@@ -231,15 +237,15 @@ class _LabBookingDetailScreenState
           // Kit status (HomeTestKit only)
           if (booking.bookingType == BookingType.homeTestKit) ...[
             _SectionCard(
-              title: 'Kit Status',
+              title: l10n.kitTracking,
               children: [
                 _InfoRow(
-                    label: 'Status',
+                    label: l10n.statusPending,
                     value: _kitLabel(
-                        booking.kitStatus ?? KitStatus.awaitingShipment)),
+                        booking.kitStatus ?? KitStatus.awaitingShipment, l10n)),
                 if (booking.kitTrackingNumber != null)
                   _InfoRow(
-                      label: 'Tracking', value: booking.kitTrackingNumber!),
+                      label: l10n.trackingNumber(booking.kitTrackingNumber!), value: booking.kitTrackingNumber!),
               ],
             ),
             const SizedBox(height: 12),
@@ -248,7 +254,7 @@ class _LabBookingDetailScreenState
           // Timeline
           if (booking.timeline.isNotEmpty) ...[
             _SectionCard(
-              title: 'Timeline',
+              title: l10n.statusHistory,
               children: booking.timeline
                   .map((e) => _TimelineRow(entry: e))
                   .toList(),
@@ -275,27 +281,27 @@ class _LabBookingDetailScreenState
     );
   }
 
-  String _typeLabel(BookingType t) {
+  String _typeLabel(BookingType t, AppLocalizations l10n) {
     switch (t) {
       case BookingType.labVisit:
-        return 'Lab Visit';
+        return l10n.labVisit;
       case BookingType.homeCollection:
-        return 'Home Collection';
+        return l10n.homeCollection;
       case BookingType.homeTestKit:
-        return 'Home Test Kit';
+        return l10n.homeTestKit;
     }
   }
 
-  String _paymentLabel(PaymentMethod m) {
+  String _paymentLabel(PaymentMethod m, AppLocalizations l10n) {
     switch (m) {
       case PaymentMethod.online:
-        return 'Online';
+        return l10n.paymentOnlineDemo;
       case PaymentMethod.cashLabVisit:
-        return 'Cash (Lab Visit)';
+        return l10n.paymentCashAtLab;
       case PaymentMethod.cashHomeCollection:
-        return 'Cash (Home Collection)';
+        return l10n.paymentCashOnCollection;
       case PaymentMethod.cashOnDelivery:
-        return 'Cash on Delivery';
+        return l10n.paymentCashOnDelivery;
     }
   }
 }
@@ -319,24 +325,25 @@ class _ActionsCard extends StatelessWidget {
   final VoidCallback onAdvanceKit;
   final VoidCallback onMarkDelivered;
   final KitStatus? nextKitStatus;
-  final String Function(KitStatus) kitLabel;
+  final String Function(KitStatus, AppLocalizations) kitLabel;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final actions = <Widget>[];
 
     if (booking.status == BookingStatus.pending) {
       actions.add(FilledButton.icon(
         onPressed: loading ? null : onConfirm,
         icon: const Icon(Icons.check),
-        label: const Text('Confirm'),
+        label: Text(l10n.statusConfirmed),
       ));
       actions.add(const SizedBox(height: 8));
       actions.add(OutlinedButton.icon(
         onPressed: loading ? null : onReject,
         style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
         icon: const Icon(Icons.close),
-        label: const Text('Reject'),
+        label: Text(l10n.statusRejected),
       ));
     }
 
@@ -347,7 +354,7 @@ class _ActionsCard extends StatelessWidget {
       actions.add(FilledButton.icon(
         onPressed: loading ? null : onAdvanceKit,
         icon: const Icon(Icons.local_shipping),
-        label: Text('Mark as ${kitLabel(nextKitStatus!)}'),
+        label: Text('Mark as ${kitLabel(nextKitStatus!, l10n)}'),
       ));
     }
 

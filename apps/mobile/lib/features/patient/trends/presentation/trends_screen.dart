@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../data/health_profile_models.dart';
 import '../application/health_profile_provider.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
@@ -23,10 +24,11 @@ class _TrendsScreenState extends ConsumerState<TrendsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final profileAsync = ref.watch(healthProfileProvider(_params));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Health Trends')),
+      appBar: AppBar(title: Text(l10n.healthTrends)),
       body: Column(
         children: [
           _FilterRow(
@@ -71,15 +73,16 @@ class _FilterRow extends StatelessWidget {
   final ValueChanged<String> onRangeChanged;
   final ValueChanged<String> onGroupByChanged;
 
-  static const _ranges = [
-    ('3 mo', '3m'),
-    ('6 mo', '6m'),
-    ('12 mo', '12m'),
-    ('All', 'all'),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final ranges = [
+      (l10n.period3mo, '3m'),
+      (l10n.period6mo, '6m'),
+      (l10n.period12mo, '12m'),
+      (l10n.periodAll, 'all'),
+    ];
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Column(
@@ -89,7 +92,7 @@ class _FilterRow extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                for (final (label, val) in _ranges)
+                for (final (label, val) in ranges)
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ChoiceChip(
@@ -106,16 +109,16 @@ class _FilterRow extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           SegmentedButton<String>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: 'analyte',
-                label: Text('By Analyte'),
-                icon: Icon(Icons.biotech, size: 16),
+                label: Text(l10n.byAnalyte),
+                icon: const Icon(Icons.biotech, size: 16),
               ),
               ButtonSegment(
                 value: 'lab_test',
-                label: Text('By Test'),
-                icon: Icon(Icons.science, size: 16),
+                label: Text(l10n.byTest),
+                icon: const Icon(Icons.science, size: 16),
               ),
             ],
             selected: {groupBy},
@@ -145,6 +148,7 @@ class _TrendsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView(
@@ -160,7 +164,7 @@ class _TrendsBody extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  'No trends in the selected period. Try a wider time range.',
+                  l10n.noTrendsInPeriod,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -201,6 +205,7 @@ class _TrendsBody extends StatelessWidget {
 class _NoDataCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -213,12 +218,12 @@ class _NoDataCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'No structured data yet',
+              l10n.noStructuredDataYet,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 4),
             Text(
-              'When labs enter your test values as structured data, trends and charts will appear here.',
+              l10n.structuredDataExplanation,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -254,6 +259,7 @@ class _SeriesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final sorted = [...series.points]
       ..sort((a, b) => a.testDate.compareTo(b.testDate));
@@ -370,7 +376,7 @@ class _SeriesCard extends StatelessWidget {
               const Divider(height: 8),
               const SizedBox(height: 4),
               Text(
-                'Recent readings',
+                l10n.recentReadings,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   letterSpacing: 0.8,
@@ -422,6 +428,7 @@ class _TrendMiniChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final lo = _minY;
     final hi = _maxY;
@@ -481,7 +488,7 @@ class _TrendMiniChart extends StatelessWidget {
                       fontSize: 8,
                       color: Colors.green,
                       fontWeight: FontWeight.w600),
-                  labelResolver: (_) => 'Low',
+                  labelResolver: (_) => l10n.low,
                 ),
               ),
             if (refHigh != null)
@@ -499,7 +506,7 @@ class _TrendMiniChart extends StatelessWidget {
                       fontSize: 8,
                       color: Colors.orange,
                       fontWeight: FontWeight.w600),
-                  labelResolver: (_) => 'High',
+                  labelResolver: (_) => l10n.high,
                 ),
               ),
           ],
@@ -767,6 +774,7 @@ class _PdfOnlySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Card(
       child: Padding(
@@ -781,7 +789,7 @@ class _PdfOnlySection extends StatelessWidget {
                     color: theme.colorScheme.onSurfaceVariant),
                 const SizedBox(width: 8),
                 Text(
-                  'PDF-only results',
+                  l10n.pdfOnlyResults,
                   style: theme.textTheme.titleSmall
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
@@ -789,7 +797,7 @@ class _PdfOnlySection extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'These results have a PDF but no structured data for trending.',
+              l10n.pdfOnlyResultsDesc,
               style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant),
             ),
@@ -841,14 +849,15 @@ class _TrendBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final (icon, color, label) = switch (direction) {
-      'increasing' => (Icons.trending_up, Colors.orange, 'Rising'),
-      'decreasing' => (Icons.trending_down, Colors.blue, 'Falling'),
-      'stable' => (Icons.trending_flat, Colors.green, 'Stable'),
+      'increasing' => (Icons.trending_up, Colors.orange, l10n.trendRising),
+      'decreasing' => (Icons.trending_down, Colors.blue, l10n.trendFalling),
+      'stable' => (Icons.trending_flat, Colors.green, l10n.trendStable),
       _ => (
           Icons.help_outline,
           Theme.of(context).colorScheme.onSurfaceVariant,
-          'Not enough data',
+          l10n.trendNotEnoughData,
         ),
     };
     return Row(

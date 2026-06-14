@@ -37,6 +37,7 @@ class _AnalyticsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -50,25 +51,25 @@ class _AnalyticsBody extends StatelessWidget {
           childAspectRatio: 1.3,
           children: [
             _MetricCard(
-              label: 'Total Bookings',
+              label: l10n.totalBookings,
               value: '${analytics.totalBookings}',
               icon: Icons.event_note_outlined,
               color: Colors.blue,
             ),
             _MetricCard(
-              label: 'Completed',
+              label: l10n.statusCompleted,
               value: '${analytics.completedBookings}',
               icon: Icons.check_circle_outline,
               color: Colors.green,
             ),
             _MetricCard(
-              label: 'Pending Results',
+              label: l10n.pendingResults,
               value: '${analytics.pendingResults}',
               icon: Icons.pending_actions_outlined,
               color: Colors.orange,
             ),
             _MetricCard(
-              label: 'Revenue',
+              label: l10n.revenue,
               value: 'EGP ${_formatRevenue(analytics.revenueEstimateEgp)}',
               icon: Icons.payments_outlined,
               color: Colors.purple,
@@ -84,7 +85,7 @@ class _AnalyticsBody extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Slot Capacity Usage',
+                Text(l10n.slotCapacityUsage,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         )),
@@ -115,7 +116,7 @@ class _AnalyticsBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Percentage of upcoming slots with confirmed bookings',
+                  l10n.capacityUsageSubtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -134,7 +135,7 @@ class _AnalyticsBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Completion Rate',
+                  Text(l10n.completionRate,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           )),
@@ -181,7 +182,7 @@ class _AnalyticsBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Most Booked Tests',
+                  Text(l10n.mostBookedTests,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           )),

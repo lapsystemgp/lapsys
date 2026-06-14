@@ -48,15 +48,18 @@ class _LabBookingDetailScreenState
         final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-                'Booking ${status == BookingStatus.confirmed ? l10n.statusConfirmed : l10n.statusRejected}'),
+            content: Text(l10n.bookingMarkedAs(
+                status == BookingStatus.confirmed
+                    ? l10n.statusConfirmed
+                    : l10n.statusRejected)),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error: $e')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.failedWithError(e.toString()))));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -84,13 +87,14 @@ class _LabBookingDetailScreenState
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Kit status updated to ${_kitLabel(next, l10n)}')),
+          SnackBar(content: Text(l10n.kitStatusUpdatedTo(_kitLabel(next, l10n)))),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error: $e')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.failedWithError(e.toString()))));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -112,8 +116,9 @@ class _LabBookingDetailScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error: $e')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.failedWithError(e.toString()))));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -128,11 +133,11 @@ class _LabBookingDetailScreenState
         final l10n = AppLocalizations.of(context)!;
         final controller = TextEditingController();
         return AlertDialog(
-          title: const Text('Tracking Number'),
+          title: Text(l10n.trackingNumberLabel),
           content: TextField(
             controller: controller,
-            decoration: const InputDecoration(
-              hintText: 'Enter tracking number (optional)',
+            decoration: InputDecoration(
+              hintText: l10n.enterTrackingNumberOptional,
             ),
           ),
           actions: [
@@ -147,7 +152,7 @@ class _LabBookingDetailScreenState
                     : null;
                 Navigator.pop(ctx);
               },
-              child: const Text('Confirm'),
+              child: Text(l10n.confirm),
             ),
           ],
         );
@@ -354,7 +359,7 @@ class _ActionsCard extends StatelessWidget {
       actions.add(FilledButton.icon(
         onPressed: loading ? null : onAdvanceKit,
         icon: const Icon(Icons.local_shipping),
-        label: Text('Mark as ${kitLabel(nextKitStatus!, l10n)}'),
+        label: Text(l10n.markAs(kitLabel(nextKitStatus!, l10n))),
       ));
     }
 
@@ -364,7 +369,7 @@ class _ActionsCard extends StatelessWidget {
       actions.add(OutlinedButton.icon(
         onPressed: loading ? null : onMarkDelivered,
         icon: const Icon(Icons.assignment_turned_in),
-        label: const Text('Mark Result Delivered'),
+        label: Text(l10n.markResultDelivered),
       ));
     }
 
@@ -376,7 +381,7 @@ class _ActionsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Actions',
+            Text(l10n.actions,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     )),

@@ -36,6 +36,7 @@ class _ReviewsBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final detailAsync = ref.watch(labDetailProvider(labId));
 
     return detailAsync.when(
@@ -49,10 +50,10 @@ class _ReviewsBody extends ConsumerWidget {
         final lab = detail.lab;
 
         if (reviews.isEmpty) {
-          return const EmptyState(
+          return EmptyState(
             icon: Icons.star_outline,
-            message: 'No reviews yet',
-            subtitle: 'Patient reviews will appear here after they\'re published',
+            message: l10n.noReviewsYet,
+            subtitle: l10n.reviewsWillAppear,
           );
         }
 

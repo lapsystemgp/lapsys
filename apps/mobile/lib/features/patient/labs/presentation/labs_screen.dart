@@ -326,7 +326,7 @@ class _LabCard extends StatelessWidget {
                         if (lab.startingFromEgp != null)
                           _Chip(
                               icon: Icons.payments_outlined,
-                              label: 'From ${lab.startingFromEgp} EGP'),
+                              label: l10n.startingFromEgp(lab.startingFromEgp!)),
                         if (lab.homeCollection)
                           _Chip(
                               icon: Icons.home_outlined,

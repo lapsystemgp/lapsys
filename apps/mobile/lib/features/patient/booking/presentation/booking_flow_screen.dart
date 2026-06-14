@@ -411,7 +411,7 @@ class _DoneStep extends StatelessWidget {
           children: [
             const Icon(Icons.check_circle, size: 80, color: Colors.green),
             const SizedBox(height: 16),
-            Text('Booking Confirmed!',
+            Text(l10n.bookingConfirmedBang,
                 style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
@@ -481,6 +481,7 @@ class _BookingSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       color: theme.colorScheme.primaryContainer,
       child: Padding(
@@ -506,7 +507,7 @@ class _BookingSummaryCard extends StatelessWidget {
                   const Icon(Icons.info_outline, size: 16),
                   const SizedBox(width: 4),
                   Expanded(
-                    child: Text('Prep: ${params.preparation}',
+                    child: Text(l10n.prepLabel(params.preparation!),
                         style: theme.textTheme.bodySmall),
                   ),
                 ],

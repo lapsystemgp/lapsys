@@ -310,5 +310,60 @@
   "noPendingBookings": "لا توجد حجوزات معلقة",
   "noConfirmedBookings": "لا توجد حجوزات مؤكدة",
   "noBookingsYet": "لا توجد حجوزات بعد",
-  "resultMarkedDelivered": "تم تحديد النتيجة كمسلّمة"
+  "resultMarkedDelivered": "تم تحديد النتيجة كمسلّمة",
+
+  "actions": "إجراءات",
+  "confirm": "تأكيد",
+  "trackingNumberLabel": "رقم التتبع",
+  "enterTrackingNumberOptional": "أدخل رقم التتبع (اختياري)",
+  "markResultDelivered": "تحديد النتيجة كمُسلَّمة",
+  "bookingMarkedAs": "الحجز {status}",
+  "@bookingMarkedAs": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "kitStatusUpdatedTo": "تم تحديث حالة الطقم إلى {status}",
+  "@kitStatusUpdatedTo": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "markAs": "وضع علامة كـ {status}",
+  "@markAs": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "slotCapacityUsage": "استخدام سعة المواعيد",
+  "completionRate": "معدل الإكمال",
+  "mostBookedTests": "أكثر الفحوصات حجزًا",
+  "prepLabel": "التحضير: {preparation}",
+  "@prepLabel": {
+    "placeholders": {
+      "preparation": { "type": "String" }
+    }
+  },
+  "shareFailed": "فشلت المشاركة: {error}",
+  "@shareFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "pendingBookingsAwaiting": "{count, plural, =1{حجز واحد بانتظار التأكيد} other{{count} حجوزات بانتظار التأكيد}}",
+  "@pendingBookingsAwaiting": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "capacityUsageSubtitle": "نسبة المواعيد القادمة التي تحتوي على حجوزات مؤكدة",
+  "noReviewsYet": "لا توجد تقييمات بعد",
+  "reviewsWillAppear": "ستظهر تقييمات المرضى هنا بعد نشرها",
+  "startingFromEgp": "ابتداءً من {price} ج.م",
+  "@startingFromEgp": {
+    "placeholders": {
+      "price": { "type": "Object" }
+    }
+  }
 }

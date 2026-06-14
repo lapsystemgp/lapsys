@@ -1381,6 +1381,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Result marked as delivered'**
   String get resultMarkedDelivered;
+
+  /// No description provided for @actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get actions;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @trackingNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking Number'**
+  String get trackingNumberLabel;
+
+  /// No description provided for @enterTrackingNumberOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter tracking number (optional)'**
+  String get enterTrackingNumberOptional;
+
+  /// No description provided for @markResultDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Result Delivered'**
+  String get markResultDelivered;
+
+  /// No description provided for @bookingMarkedAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking {status}'**
+  String bookingMarkedAs(String status);
+
+  /// No description provided for @kitStatusUpdatedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Kit status updated to {status}'**
+  String kitStatusUpdatedTo(String status);
+
+  /// No description provided for @markAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as {status}'**
+  String markAs(String status);
+
+  /// No description provided for @slotCapacityUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Slot Capacity Usage'**
+  String get slotCapacityUsage;
+
+  /// No description provided for @completionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion Rate'**
+  String get completionRate;
+
+  /// No description provided for @mostBookedTests.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Booked Tests'**
+  String get mostBookedTests;
+
+  /// No description provided for @prepLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Prep: {preparation}'**
+  String prepLabel(String preparation);
+
+  /// No description provided for @shareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Share failed: {error}'**
+  String shareFailed(String error);
+
+  /// No description provided for @pendingBookingsAwaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 booking awaiting confirmation} other{{count} bookings awaiting confirmation}}'**
+  String pendingBookingsAwaiting(int count);
+
+  /// No description provided for @capacityUsageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage of upcoming slots with confirmed bookings'**
+  String get capacityUsageSubtitle;
+
+  /// No description provided for @reviewsWillAppear.
+  ///
+  /// In en, this message translates to:
+  /// **'Patient reviews will appear here after they\'re published'**
+  String get reviewsWillAppear;
+
+  /// No description provided for @startingFromEgp.
+  ///
+  /// In en, this message translates to:
+  /// **'From {price} EGP'**
+  String startingFromEgp(Object price);
 }
 
 class _AppLocalizationsDelegate

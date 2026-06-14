@@ -238,7 +238,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
                 leading: Icon(Icons.notifications_active,
                     color: scheme.onErrorContainer),
                 title: Text(
-                  '$pending booking${pending > 1 ? 's' : ''} awaiting confirmation',
+                  l10n.pendingBookingsAwaiting(pending),
                   style: TextStyle(color: scheme.onErrorContainer),
                 ),
                 trailing: Icon(Icons.chevron_right,

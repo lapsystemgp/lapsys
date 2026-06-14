@@ -320,5 +320,60 @@
   "noPendingBookings": "No pending bookings",
   "noConfirmedBookings": "No confirmed bookings",
   "noBookingsYet": "No bookings yet",
-  "resultMarkedDelivered": "Result marked as delivered"
+  "resultMarkedDelivered": "Result marked as delivered",
+
+  "actions": "Actions",
+  "confirm": "Confirm",
+  "trackingNumberLabel": "Tracking Number",
+  "enterTrackingNumberOptional": "Enter tracking number (optional)",
+  "markResultDelivered": "Mark Result Delivered",
+  "bookingMarkedAs": "Booking {status}",
+  "@bookingMarkedAs": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "kitStatusUpdatedTo": "Kit status updated to {status}",
+  "@kitStatusUpdatedTo": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "markAs": "Mark as {status}",
+  "@markAs": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "slotCapacityUsage": "Slot Capacity Usage",
+  "completionRate": "Completion Rate",
+  "mostBookedTests": "Most Booked Tests",
+  "prepLabel": "Prep: {preparation}",
+  "@prepLabel": {
+    "placeholders": {
+      "preparation": { "type": "String" }
+    }
+  },
+  "shareFailed": "Share failed: {error}",
+  "@shareFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "pendingBookingsAwaiting": "{count, plural, =1{1 booking awaiting confirmation} other{{count} bookings awaiting confirmation}}",
+  "@pendingBookingsAwaiting": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "capacityUsageSubtitle": "Percentage of upcoming slots with confirmed bookings",
+  "noReviewsYet": "No reviews yet",
+  "reviewsWillAppear": "Patient reviews will appear here after they're published",
+  "startingFromEgp": "From {price} EGP",
+  "@startingFromEgp": {
+    "placeholders": {
+      "price": { "type": "Object" }
+    }
+  }
 }

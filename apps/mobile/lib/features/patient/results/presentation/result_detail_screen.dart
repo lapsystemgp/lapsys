@@ -62,8 +62,9 @@ class _ResultDetailScreenState extends ConsumerState<ResultDetailScreen> {
       await Share.shareXFiles([XFile(file.path)], subject: fileName);
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Share failed: $e')));
+            .showSnackBar(SnackBar(content: Text(l10n.shareFailed(e.toString()))));
       }
     }
   }

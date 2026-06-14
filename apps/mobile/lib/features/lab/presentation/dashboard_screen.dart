@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/lab_workspace_provider.dart';
 import '../data/lab_repository.dart';
 import '../data/lab_workspace_models.dart';
+import '../../auth/application/session_notifier.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../../shared/widgets/error_state.dart';
 import '../../../l10n/app_localizations.dart';
@@ -10,13 +11,45 @@ import '../../../l10n/app_localizations.dart';
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.logout),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.logout),
+          ),
+        ],
+      ),
+    );
+    if (shouldLogout ?? false) {
+      await ref.read(sessionNotifierProvider.notifier).logout();
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final workspaceAsync = ref.watch(labWorkspaceProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.labTabDashboard)),
+      appBar: AppBar(
+        title: Text(l10n.labTabDashboard),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: l10n.logout,
+            onPressed: () => _confirmLogout(context, ref),
+          ),
+        ],
+      ),
       body: workspaceAsync.when(
         loading: () => const LoadingIndicator(),
         error: (e, _) => ErrorState(

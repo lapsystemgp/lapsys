@@ -4,18 +4,21 @@ import '../../workspace/application/workspace_provider.dart';
 import '../../workspace/data/workspace_models.dart';
 import '../../workspace/data/patient_repository.dart';
 import '../../../auth/application/session_notifier.dart';
+import '../../../auth/application/biometric_service.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/error_state.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final profileAsync = ref.watch(workspaceProfileProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Profile')),
+      appBar: AppBar(title: Text(l10n.myProfile)),
       body: profileAsync.when(
         loading: () => const LoadingIndicator(),
         error: (e, _) => ErrorState(
@@ -45,6 +48,8 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
   late LabHistorySharing _sharing;
   bool _saving = false;
   bool _signingOut = false;
+  bool _biometricAvailable = false;
+  bool _biometricEnabled = false;
 
   @override
   void initState() {
@@ -53,6 +58,24 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
     _phoneCtrl = TextEditingController(text: widget.profile.phone);
     _addressCtrl = TextEditingController(text: widget.profile.address);
     _sharing = widget.profile.labHistorySharing;
+    _loadBiometric();
+  }
+
+  Future<void> _loadBiometric() async {
+    final service = ref.read(biometricServiceProvider);
+    if (service == null) return;
+    final available = await service.isAvailable();
+    if (mounted) {
+      setState(() {
+        _biometricAvailable = available;
+        _biometricEnabled = service.isEnabled;
+      });
+    }
+  }
+
+  Future<void> _setBiometric(bool value) async {
+    await ref.read(biometricServiceProvider)?.setEnabled(value);
+    if (mounted) setState(() => _biometricEnabled = value);
   }
 
   @override
@@ -76,14 +99,16 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
           );
       ref.invalidate(workspaceProvider);
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated')),
+          SnackBar(content: Text(l10n.profileUpdated)),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Save failed: $e')));
+            .showSnackBar(SnackBar(content: Text(l10n.saveFailed(e.toString()))));
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -101,6 +126,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Form(
@@ -110,11 +136,11 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
         children: [
           // Email (read-only)
           _Section(
-            title: 'Account',
+            title: l10n.account,
             child: ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.email_outlined),
-              title: const Text('Email'),
+              title: Text(l10n.email),
               subtitle: Text(widget.profile.email),
             ),
           ),
@@ -123,34 +149,34 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
 
           // Editable fields
           _Section(
-            title: 'Personal info',
+            title: l10n.personalInfo,
             child: Column(
               children: [
                 TextFormField(
                   controller: _nameCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Full name',
-                    prefixIcon: Icon(Icons.person_outlined),
+                  decoration: InputDecoration(
+                    labelText: l10n.fullName,
+                    prefixIcon: const Icon(Icons.person_outlined),
                   ),
                   validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Name is required'
+                      ? l10n.nameRequired
                       : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _phoneCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Phone',
-                    prefixIcon: Icon(Icons.phone_outlined),
+                  decoration: InputDecoration(
+                    labelText: l10n.phone,
+                    prefixIcon: const Icon(Icons.phone_outlined),
                   ),
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _addressCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Address',
-                    prefixIcon: Icon(Icons.home_outlined),
+                  decoration: InputDecoration(
+                    labelText: l10n.address,
+                    prefixIcon: const Icon(Icons.home_outlined),
                   ),
                   maxLines: 2,
                 ),
@@ -162,15 +188,15 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
 
           // Privacy toggle
           _Section(
-            title: 'Privacy',
+            title: l10n.privacy,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Share history across labs'),
-                  subtitle: const Text(
-                    'Enable cross-lab health trends and comparisons',
+                  title: Text(l10n.shareHistoryAcrossLabs),
+                  subtitle: Text(
+                    l10n.enableCrossLabTrends,
                   ),
                   value: _sharing == LabHistorySharing.fullHistoryAuthorized,
                   onChanged: (v) => setState(() => _sharing = v
@@ -181,8 +207,8 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
                   padding: const EdgeInsets.only(left: 4, bottom: 4),
                   child: Text(
                     _sharing == LabHistorySharing.fullHistoryAuthorized
-                        ? 'All labs you have tested with can see your full history to power trend charts.'
-                        : 'Only the lab that performed a test can see that result.',
+                        ? l10n.allLabsSeeHistory
+                        : l10n.onlyTestingLabSeesResult,
                     style: theme.textTheme.bodySmall
                         ?.copyWith(color: theme.colorScheme.outline),
                   ),
@@ -191,13 +217,27 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
             ),
           ),
 
+          if (_biometricAvailable) ...[
+            const SizedBox(height: 16),
+            _Section(
+              title: l10n.security,
+              child: SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.biometricUnlock),
+                subtitle: Text(l10n.biometricUnlockSubtitle),
+                value: _biometricEnabled,
+                onChanged: _setBiometric,
+              ),
+            ),
+          ],
+
           const SizedBox(height: 24),
 
           _saving
               ? const Center(child: CircularProgressIndicator())
               : FilledButton(
                   onPressed: _save,
-                  child: const Text('Save Changes'),
+                  child: Text(l10n.saveChanges),
                 ),
 
           const SizedBox(height: 32),
@@ -209,8 +249,8 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
               : TextButton.icon(
                   onPressed: _signOut,
                   icon: const Icon(Icons.logout, color: Colors.red),
-                  label: const Text('Sign Out',
-                      style: TextStyle(color: Colors.red)),
+                  label: Text(l10n.signOut,
+                      style: const TextStyle(color: Colors.red)),
                 ),
         ],
       ),

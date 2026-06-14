@@ -8,6 +8,7 @@ import '../../patient/booking/data/booking_models.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../../shared/widgets/error_state.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../l10n/app_localizations.dart';
 
 class LabBookingsScreen extends ConsumerStatefulWidget {
   const LabBookingsScreen({super.key});
@@ -34,17 +35,18 @@ class _LabBookingsScreenState extends ConsumerState<LabBookingsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final workspaceAsync = ref.watch(labWorkspaceProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bookings'),
+        title: Text(l10n.labTabBookings),
         bottom: TabBar(
           controller: _tabs,
-          tabs: const [
-            Tab(text: 'Pending'),
-            Tab(text: 'Confirmed'),
-            Tab(text: 'All'),
+          tabs: [
+            Tab(text: l10n.statusPending),
+            Tab(text: l10n.statusConfirmed),
+            Tab(text: l10n.periodAll),
           ],
         ),
       ),
@@ -67,10 +69,10 @@ class _LabBookingsScreenState extends ConsumerState<LabBookingsScreen>
             child: TabBarView(
               controller: _tabs,
               children: [
-                _BookingList(bookings: pending, emptyMessage: 'No pending bookings'),
-                _BookingList(bookings: confirmed, emptyMessage: 'No confirmed bookings'),
+                _BookingList(bookings: pending, emptyMessage: l10n.noPendingBookings),
+                _BookingList(bookings: confirmed, emptyMessage: l10n.noConfirmedBookings),
                 _BookingList(
-                    bookings: workspace.bookings, emptyMessage: 'No bookings yet'),
+                    bookings: workspace.bookings, emptyMessage: l10n.noBookingsYet),
               ],
             ),
           );
@@ -182,12 +184,13 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final (label, color) = switch (status) {
-      BookingStatus.pending => ('Pending', Colors.orange),
-      BookingStatus.confirmed => ('Confirmed', Colors.blue),
-      BookingStatus.completed => ('Completed', Colors.green),
-      BookingStatus.cancelled => ('Cancelled', Colors.red),
-      BookingStatus.rejected => ('Rejected', Colors.red),
+      BookingStatus.pending => (l10n.statusPending, Colors.orange),
+      BookingStatus.confirmed => (l10n.statusConfirmed, Colors.blue),
+      BookingStatus.completed => (l10n.statusCompleted, Colors.green),
+      BookingStatus.cancelled => (l10n.statusCancelled, Colors.red),
+      BookingStatus.rejected => (l10n.statusRejected, Colors.red),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -207,10 +210,11 @@ class _TypeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final label = switch (type) {
-      BookingType.labVisit => 'Lab Visit',
-      BookingType.homeCollection => 'Home Collect',
-      BookingType.homeTestKit => 'Test Kit',
+      BookingType.labVisit => l10n.labVisit,
+      BookingType.homeCollection => l10n.homeCollection,
+      BookingType.homeTestKit => l10n.homeTestKit,
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

@@ -133,4 +133,582 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get validationPasswordLength =>
       'Password must be at least 8 characters';
+
+  @override
+  String get apply => 'Apply';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get continueAction => 'Continue';
+
+  @override
+  String get bookNow => 'Book Now';
+
+  @override
+  String get book => 'Book';
+
+  @override
+  String get viewLab => 'View Lab';
+
+  @override
+  String get sortBy => 'Sort by';
+
+  @override
+  String get enable => 'Enable';
+
+  @override
+  String get tryAgain => 'Try Again';
+
+  @override
+  String get notNow => 'Not now';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get time => 'Time';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get payment => 'Payment';
+
+  @override
+  String get typeLabel => 'Type';
+
+  @override
+  String get price => 'Price';
+
+  @override
+  String get rating => 'Rating';
+
+  @override
+  String get slot => 'Slot';
+
+  @override
+  String get document => 'Document';
+
+  @override
+  String get homeCollection => 'Home collection';
+
+  @override
+  String get homeTestKit => 'Home Test Kit';
+
+  @override
+  String get labVisit => 'Lab Visit';
+
+  @override
+  String get homeCollectionOnly => 'Home collection only';
+
+  @override
+  String get findTestOrLab => 'Find a Test or Lab';
+
+  @override
+  String get labFilters => 'Lab filters';
+
+  @override
+  String get searchHint => 'Search tests (e.g. CBC) or labs…';
+
+  @override
+  String get testsTab => 'Tests';
+
+  @override
+  String get labsTab => 'Labs';
+
+  @override
+  String get bestRating => 'Best rating';
+
+  @override
+  String get lowestPrice => 'Lowest price';
+
+  @override
+  String get nearest => 'Nearest';
+
+  @override
+  String get noTestsFound => 'No tests found';
+
+  @override
+  String get tryDifferentTestName => 'Try a different test name';
+
+  @override
+  String get noLabsFound => 'No labs found';
+
+  @override
+  String get tryAdjustingFilters => 'Try adjusting your search or filters';
+
+  @override
+  String fromPriceEgp(String price) {
+    return 'From $price EGP';
+  }
+
+  @override
+  String labCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count labs',
+      one: '1 lab',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String distanceKm(String distance) {
+    return '$distance km';
+  }
+
+  @override
+  String labsOfferingTest(String testName) {
+    return 'Labs offering $testName';
+  }
+
+  @override
+  String get noLabsOfferTest => 'No labs offer this test yet';
+
+  @override
+  String resultsIn(String turnaround) {
+    return 'Results in $turnaround';
+  }
+
+  @override
+  String parametersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count parameters',
+      one: '1 parameter',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String atLabsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'At $count labs',
+      one: 'At 1 lab',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get enableLocationForSort =>
+      'Enable location to sort labs by how near they are.';
+
+  @override
+  String get noTestsAvailable => 'No tests available';
+
+  @override
+  String get noReviewsYet => 'No reviews yet';
+
+  @override
+  String get chooseBookingType => 'Choose booking type';
+
+  @override
+  String get chooseTimeSlot => 'Choose a time slot';
+
+  @override
+  String get enterHomeAddress => 'Enter home address';
+
+  @override
+  String get paymentMethod => 'Payment method';
+
+  @override
+  String get confirmBookingStep => 'Confirm booking';
+
+  @override
+  String get processingEllipsis => 'Processing…';
+
+  @override
+  String get bookingConfirmedBang => 'Booking confirmed!';
+
+  @override
+  String get bookingFailed => 'Booking failed';
+
+  @override
+  String get howToTakeTest => 'How would you like to take this test?';
+
+  @override
+  String get visitLabInPerson => 'Visit the lab in person';
+
+  @override
+  String get phlebotomistVisitsHome => 'A phlebotomist visits your home';
+
+  @override
+  String get kitShippedSelfCollect => 'Kit shipped to you; self-collect sample';
+
+  @override
+  String get noSlotsAvailable7Days => 'No slots available in the next 7 days';
+
+  @override
+  String get continueWithoutSlot => 'Continue without a slot';
+
+  @override
+  String get enterAddressForService => 'Enter the address for the service:';
+
+  @override
+  String get homeAddressLabel => 'Home address';
+
+  @override
+  String get streetApartmentCityHint => 'Street, apartment, city…';
+
+  @override
+  String get addressRequired => 'Address is required';
+
+  @override
+  String get paymentOnlineDemo => 'Online (demo)';
+
+  @override
+  String get paymentCashAtLab => 'Cash at lab';
+
+  @override
+  String get paymentCashOnCollection => 'Cash on collection';
+
+  @override
+  String get paymentCashOnDelivery => 'Cash on delivery';
+
+  @override
+  String bookingCreatedFor(String testName, String labName) {
+    return 'Your booking for $testName at $labName has been created.';
+  }
+
+  @override
+  String get viewMyBookings => 'View My Bookings';
+
+  @override
+  String get backToLabs => 'Back to Labs';
+
+  @override
+  String get confirmBookingButton => 'Confirm Booking';
+
+  @override
+  String get myBookings => 'My Bookings';
+
+  @override
+  String get upcoming => 'Upcoming';
+
+  @override
+  String get past => 'Past';
+
+  @override
+  String get noUpcomingBookings => 'No upcoming bookings';
+
+  @override
+  String get noPastBookings => 'No past bookings';
+
+  @override
+  String get statusPending => 'Pending';
+
+  @override
+  String get statusConfirmed => 'Confirmed';
+
+  @override
+  String get statusCompleted => 'Completed';
+
+  @override
+  String get statusCancelled => 'Cancelled';
+
+  @override
+  String get statusRejected => 'Rejected';
+
+  @override
+  String get bookingDetail => 'Booking Detail';
+
+  @override
+  String cancelFailed(String error) {
+    return 'Cancel failed: $error';
+  }
+
+  @override
+  String get paymentSuccessful => 'Payment successful!';
+
+  @override
+  String paymentFailedMsg(String error) {
+    return 'Payment failed: $error';
+  }
+
+  @override
+  String get cancelBooking => 'Cancel Booking';
+
+  @override
+  String get retryPayment => 'Retry Payment';
+
+  @override
+  String get payStatus => 'Pay status';
+
+  @override
+  String get payStatusPending => 'Pending';
+
+  @override
+  String get payStatusPaid => 'Paid';
+
+  @override
+  String get payStatusFailed => 'Failed';
+
+  @override
+  String get payStatusRefunded => 'Refunded';
+
+  @override
+  String get kitTracking => 'Kit Tracking';
+
+  @override
+  String trackingNumber(String number) {
+    return 'Tracking #$number';
+  }
+
+  @override
+  String get awaitingShipment => 'Awaiting shipment';
+
+  @override
+  String get kitShipped => 'Kit shipped';
+
+  @override
+  String get kitDelivered => 'Kit delivered';
+
+  @override
+  String get sampleReceived => 'Sample received';
+
+  @override
+  String get statusHistory => 'Status History';
+
+  @override
+  String get myProfile => 'My Profile';
+
+  @override
+  String get account => 'Account';
+
+  @override
+  String get personalInfo => 'Personal info';
+
+  @override
+  String get nameRequired => 'Name is required';
+
+  @override
+  String get privacy => 'Privacy';
+
+  @override
+  String get shareHistoryAcrossLabs => 'Share history across labs';
+
+  @override
+  String get enableCrossLabTrends =>
+      'Enable cross-lab health trends and comparisons';
+
+  @override
+  String get allLabsSeeHistory =>
+      'All labs you have tested with can see your full history to power trend charts.';
+
+  @override
+  String get onlyTestingLabSeesResult =>
+      'Only the lab that performed a test can see that result.';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get profileUpdated => 'Profile updated';
+
+  @override
+  String saveFailed(String error) {
+    return 'Save failed: $error';
+  }
+
+  @override
+  String get signOut => 'Sign Out';
+
+  @override
+  String get myResults => 'My Results';
+
+  @override
+  String get noResultsYet => 'No results yet';
+
+  @override
+  String get completedTestsWillAppear => 'Completed tests will appear here';
+
+  @override
+  String get resultStatusPending => 'Pending';
+
+  @override
+  String get resultStatusUploaded => 'Uploaded';
+
+  @override
+  String get resultStatusDelivered => 'Delivered';
+
+  @override
+  String get resultStatusStructured => 'Structured';
+
+  @override
+  String get result => 'Result';
+
+  @override
+  String get resultDetail => 'Result Detail';
+
+  @override
+  String get sharePdf => 'Share PDF';
+
+  @override
+  String get writeReview => 'Write a Review';
+
+  @override
+  String rateExperience(String labName) {
+    return 'Rate your experience at $labName';
+  }
+
+  @override
+  String get commentOptional => 'Comment (optional)';
+
+  @override
+  String get reviewSubmitted => 'Review submitted!';
+
+  @override
+  String failedToSubmit(String error) {
+    return 'Failed to submit: $error';
+  }
+
+  @override
+  String get summary => 'Summary';
+
+  @override
+  String get yourReview => 'Your Review';
+
+  @override
+  String couldNotOpenDocument(String error) {
+    return 'Could not open document: $error';
+  }
+
+  @override
+  String get healthTrends => 'Health Trends';
+
+  @override
+  String get period3mo => '3 mo';
+
+  @override
+  String get period6mo => '6 mo';
+
+  @override
+  String get period12mo => '12 mo';
+
+  @override
+  String get periodAll => 'All';
+
+  @override
+  String get byAnalyte => 'By Analyte';
+
+  @override
+  String get byTest => 'By Test';
+
+  @override
+  String get noTrendsInPeriod =>
+      'No trends in the selected period. Try a wider time range.';
+
+  @override
+  String get noStructuredDataYet => 'No structured data yet';
+
+  @override
+  String get structuredDataExplanation =>
+      'When labs enter your test values as structured data, trends and charts will appear here.';
+
+  @override
+  String get recentReadings => 'Recent readings';
+
+  @override
+  String get trendRising => 'Rising';
+
+  @override
+  String get trendFalling => 'Falling';
+
+  @override
+  String get trendStable => 'Stable';
+
+  @override
+  String get trendNotEnoughData => 'Not enough data';
+
+  @override
+  String get pdfOnlyResults => 'PDF-only results';
+
+  @override
+  String get pdfOnlyResultsDesc =>
+      'These results have a PDF but no structured data for trending.';
+
+  @override
+  String get low => 'Low';
+
+  @override
+  String get high => 'High';
+
+  @override
+  String get totalBookings => 'Total Bookings';
+
+  @override
+  String get pendingResults => 'Pending Results';
+
+  @override
+  String get revenue => 'Revenue';
+
+  @override
+  String get slotCapacityUsed => 'Slot Capacity Used';
+
+  @override
+  String get labStaffCollectSamples =>
+      'Lab staff collect samples at patient\'s home';
+
+  @override
+  String get shipKitToPatientAddress => 'Ship kit to patient\'s address';
+
+  @override
+  String get saveCapabilities => 'Save Capabilities';
+
+  @override
+  String get capabilitiesUpdated => 'Capabilities updated';
+
+  @override
+  String get capabilities => 'Capabilities';
+
+  @override
+  String failedWithError(String error) {
+    return 'Failed: $error';
+  }
+
+  @override
+  String get stayUpToDate => 'Stay up to date';
+
+  @override
+  String get notificationPermissionBody =>
+      'Get instant alerts when your booking is confirmed, results are ready, or your kit ships — and reminders the evening before tests that need preparation.';
+
+  @override
+  String get enableNotifications => 'Enable notifications';
+
+  @override
+  String get authenticateToUnlock => 'Authenticate to unlock TesTly';
+
+  @override
+  String get authenticateButton => 'Authenticate';
+
+  @override
+  String get security => 'Security';
+
+  @override
+  String get biometricUnlock => 'Biometric unlock';
+
+  @override
+  String get biometricUnlockSubtitle => 'Require biometrics to open the app';
+
+  @override
+  String get noPendingBookings => 'No pending bookings';
+
+  @override
+  String get noConfirmedBookings => 'No confirmed bookings';
+
+  @override
+  String get noBookingsYet => 'No bookings yet';
+
+  @override
+  String get resultMarkedDelivered => 'Result marked as delivered';
 }

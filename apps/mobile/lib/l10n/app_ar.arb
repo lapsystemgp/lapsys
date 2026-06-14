@@ -40,5 +40,275 @@
   "egp": "ج.م",
   "validationRequired": "هذا الحقل مطلوب",
   "validationEmail": "أدخل بريدًا إلكترونيًا صحيحًا",
-  "validationPasswordLength": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل"
+  "validationPasswordLength": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
+
+  "apply": "تطبيق",
+  "cancel": "إلغاء",
+  "submit": "إرسال",
+  "continueAction": "متابعة",
+  "bookNow": "احجز الآن",
+  "book": "احجز",
+  "viewLab": "عرض المعمل",
+  "sortBy": "ترتيب حسب",
+  "enable": "تفعيل",
+  "tryAgain": "حاول مجددًا",
+  "notNow": "ليس الآن",
+  "date": "التاريخ",
+  "time": "الوقت",
+  "total": "المجموع",
+  "payment": "الدفع",
+  "typeLabel": "النوع",
+  "price": "السعر",
+  "rating": "التقييم",
+  "slot": "الموعد",
+  "document": "المستند",
+
+  "homeCollection": "تحصيل منزلي",
+  "homeTestKit": "عدة فحص منزلية",
+  "labVisit": "زيارة المعمل",
+  "homeCollectionOnly": "تحصيل منزلي فقط",
+
+  "findTestOrLab": "ابحث عن تحليل أو معمل",
+  "labFilters": "فلاتر المعامل",
+  "searchHint": "ابحث عن تحليل (مثل CBC) أو معمل...",
+  "testsTab": "التحاليل",
+  "labsTab": "المعامل",
+  "bestRating": "أعلى تقييم",
+  "lowestPrice": "أقل سعر",
+  "nearest": "الأقرب",
+  "noTestsFound": "لا توجد تحاليل",
+  "tryDifferentTestName": "جرب اسمًا آخر للتحليل",
+  "noLabsFound": "لا توجد معامل",
+  "tryAdjustingFilters": "حاول تعديل البحث أو الفلاتر",
+  "fromPriceEgp": "من {price} ج.م",
+  "@fromPriceEgp": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "labCount": "{count, plural, =1{معمل واحد} other{{count} معامل}}",
+  "@labCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "distanceKm": "{distance} كم",
+  "@distanceKm": {
+    "placeholders": {
+      "distance": { "type": "String" }
+    }
+  },
+
+  "labsOfferingTest": "معامل تقدم {testName}",
+  "@labsOfferingTest": {
+    "placeholders": {
+      "testName": { "type": "String" }
+    }
+  },
+  "noLabsOfferTest": "لا توجد معامل تقدم هذا التحليل بعد",
+  "resultsIn": "النتائج خلال {turnaround}",
+  "@resultsIn": {
+    "placeholders": {
+      "turnaround": { "type": "String" }
+    }
+  },
+  "parametersCount": "{count, plural, =1{معامل واحد} other{{count} معاملات}}",
+  "@parametersCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "atLabsCount": "{count, plural, =1{في معمل واحد} other{في {count} معامل}}",
+  "@atLabsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "enableLocationForSort": "فعّل الموقع لترتيب المعامل حسب القرب.",
+  "noTestsAvailable": "لا توجد تحاليل متاحة",
+  "noReviewsYet": "لا توجد تقييمات بعد",
+
+  "chooseBookingType": "اختر نوع الحجز",
+  "chooseTimeSlot": "اختر موعدًا",
+  "enterHomeAddress": "أدخل عنوان المنزل",
+  "paymentMethod": "طريقة الدفع",
+  "confirmBookingStep": "تأكيد الحجز",
+  "processingEllipsis": "جارٍ المعالجة…",
+  "bookingConfirmedBang": "تم تأكيد الحجز!",
+  "bookingFailed": "فشل الحجز",
+  "howToTakeTest": "كيف تريد إجراء هذا التحليل؟",
+  "visitLabInPerson": "زيارة المعمل شخصيًا",
+  "phlebotomistVisitsHome": "يزورك أخصائي سحب عينات في المنزل",
+  "kitShippedSelfCollect": "عدة ترسل إليك لسحب العينة بنفسك",
+  "noSlotsAvailable7Days": "لا توجد مواعيد متاحة خلال 7 أيام",
+  "continueWithoutSlot": "المتابعة بدون موعد",
+  "enterAddressForService": "أدخل العنوان للخدمة:",
+  "homeAddressLabel": "عنوان المنزل",
+  "streetApartmentCityHint": "الشارع، الشقة، المدينة...",
+  "addressRequired": "العنوان مطلوب",
+  "paymentOnlineDemo": "أونلاين (تجريبي)",
+  "paymentCashAtLab": "نقدًا في المعمل",
+  "paymentCashOnCollection": "نقدًا عند التحصيل",
+  "paymentCashOnDelivery": "نقدًا عند التسليم",
+  "bookingCreatedFor": "تم إنشاء حجزك لـ {testName} في {labName}.",
+  "@bookingCreatedFor": {
+    "placeholders": {
+      "testName": { "type": "String" },
+      "labName": { "type": "String" }
+    }
+  },
+  "viewMyBookings": "عرض حجوزاتي",
+  "backToLabs": "العودة إلى المعامل",
+  "confirmBookingButton": "تأكيد الحجز",
+
+  "myBookings": "حجوزاتي",
+  "upcoming": "القادمة",
+  "past": "السابقة",
+  "noUpcomingBookings": "لا توجد حجوزات قادمة",
+  "noPastBookings": "لا توجد حجوزات سابقة",
+  "statusPending": "قيد الانتظار",
+  "statusConfirmed": "مؤكد",
+  "statusCompleted": "مكتمل",
+  "statusCancelled": "ملغى",
+  "statusRejected": "مرفوض",
+
+  "bookingDetail": "تفاصيل الحجز",
+  "cancelFailed": "فشل الإلغاء: {error}",
+  "@cancelFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "paymentSuccessful": "تم الدفع بنجاح!",
+  "paymentFailedMsg": "فشل الدفع: {error}",
+  "@paymentFailedMsg": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "cancelBooking": "إلغاء الحجز",
+  "retryPayment": "إعادة محاولة الدفع",
+  "payStatus": "حالة الدفع",
+  "payStatusPending": "قيد الانتظار",
+  "payStatusPaid": "مدفوع",
+  "payStatusFailed": "فاشل",
+  "payStatusRefunded": "مسترد",
+  "kitTracking": "تتبع العدة",
+  "trackingNumber": "رقم التتبع: {number}",
+  "@trackingNumber": {
+    "placeholders": {
+      "number": { "type": "String" }
+    }
+  },
+  "awaitingShipment": "في انتظار الشحن",
+  "kitShipped": "تم شحن العدة",
+  "kitDelivered": "تم تسليم العدة",
+  "sampleReceived": "تم استلام العينة",
+  "statusHistory": "سجل الحالات",
+
+  "myProfile": "ملفي الشخصي",
+  "account": "الحساب",
+  "personalInfo": "المعلومات الشخصية",
+  "nameRequired": "الاسم مطلوب",
+  "privacy": "الخصوصية",
+  "shareHistoryAcrossLabs": "مشاركة السجل عبر المعامل",
+  "enableCrossLabTrends": "تفعيل الاتجاهات الصحية عبر المعامل",
+  "allLabsSeeHistory": "جميع المعامل التي أجريت بها اختبارات يمكنها رؤية سجلك الكامل لدعم مخططات الاتجاهات.",
+  "onlyTestingLabSeesResult": "فقط المعمل الذي أجرى الاختبار يمكنه رؤية النتيجة.",
+  "saveChanges": "حفظ التغييرات",
+  "profileUpdated": "تم تحديث الملف الشخصي",
+  "saveFailed": "فشل الحفظ: {error}",
+  "@saveFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "signOut": "تسجيل الخروج",
+
+  "myResults": "نتائجي",
+  "noResultsYet": "لا توجد نتائج بعد",
+  "completedTestsWillAppear": "ستظهر الاختبارات المكتملة هنا",
+  "resultStatusPending": "قيد الانتظار",
+  "resultStatusUploaded": "مرفوع",
+  "resultStatusDelivered": "مسلّم",
+  "resultStatusStructured": "منظم",
+
+  "result": "النتيجة",
+  "resultDetail": "تفاصيل النتيجة",
+  "sharePdf": "مشاركة PDF",
+  "writeReview": "كتابة تقييم",
+  "rateExperience": "قيّم تجربتك في {labName}",
+  "@rateExperience": {
+    "placeholders": {
+      "labName": { "type": "String" }
+    }
+  },
+  "commentOptional": "تعليق (اختياري)",
+  "reviewSubmitted": "تم إرسال التقييم!",
+  "failedToSubmit": "فشل الإرسال: {error}",
+  "@failedToSubmit": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "summary": "ملخص",
+  "yourReview": "تقييمك",
+  "couldNotOpenDocument": "تعذر فتح المستند: {error}",
+  "@couldNotOpenDocument": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "healthTrends": "الاتجاهات الصحية",
+  "period3mo": "3 أشهر",
+  "period6mo": "6 أشهر",
+  "period12mo": "12 شهرًا",
+  "periodAll": "الكل",
+  "byAnalyte": "حسب المحلل",
+  "byTest": "حسب الاختبار",
+  "noTrendsInPeriod": "لا توجد اتجاهات في الفترة المحددة. حاول توسيع النطاق الزمني.",
+  "noStructuredDataYet": "لا توجد بيانات منظمة بعد",
+  "structuredDataExplanation": "عندما تدخل المعامل قيم اختباراتك كبيانات منظمة، ستظهر الاتجاهات والرسوم البيانية هنا.",
+  "recentReadings": "القراءات الأخيرة",
+  "trendRising": "مرتفع",
+  "trendFalling": "منخفض",
+  "trendStable": "مستقر",
+  "trendNotEnoughData": "بيانات غير كافية",
+  "pdfOnlyResults": "نتائج PDF فقط",
+  "pdfOnlyResultsDesc": "هذه النتائج تحتوي على PDF ولكن لا توجد بيانات منظمة للاتجاهات.",
+  "low": "منخفض",
+  "high": "مرتفع",
+
+  "totalBookings": "إجمالي الحجوزات",
+  "pendingResults": "نتائج قيد الانتظار",
+  "revenue": "الإيرادات",
+  "slotCapacityUsed": "الطاقة الاستيعابية المستخدمة للمواعيد",
+  "labStaffCollectSamples": "يجمع طاقم المعمل العينات في منزل المريض",
+  "shipKitToPatientAddress": "إرسال العدة إلى عنوان المريض",
+  "saveCapabilities": "حفظ الإمكانيات",
+  "capabilitiesUpdated": "تم تحديث الإمكانيات",
+  "capabilities": "الإمكانيات",
+  "failedWithError": "فشل: {error}",
+  "@failedWithError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "stayUpToDate": "ابقَ على اطلاع",
+  "notificationPermissionBody": "احصل على تنبيهات فورية عند تأكيد حجزك أو جاهزية النتائج أو شحن عدتك — وتذكيرات مسائية قبل الاختبارات التي تحتاج إعدادًا.",
+  "enableNotifications": "تفعيل الإشعارات",
+
+  "authenticateToUnlock": "المصادقة لفتح تيستلي",
+  "authenticateButton": "المصادقة",
+
+  "security": "الأمان",
+  "biometricUnlock": "الفتح بالبيومترية",
+  "biometricUnlockSubtitle": "يتطلب المصادقة البيومترية عند فتح التطبيق",
+
+  "noPendingBookings": "لا توجد حجوزات معلقة",
+  "noConfirmedBookings": "لا توجد حجوزات مؤكدة",
+  "noBookingsYet": "لا توجد حجوزات بعد",
+  "resultMarkedDelivered": "تم تحديد النتيجة كمسلّمة"
 }

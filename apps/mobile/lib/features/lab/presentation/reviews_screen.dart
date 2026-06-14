@@ -6,16 +6,18 @@ import '../../patient/labs/data/public_repository.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../../shared/widgets/error_state.dart';
 import '../../../shared/widgets/empty_state.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ReviewsScreen extends ConsumerWidget {
   const ReviewsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final labInfoAsync = ref.watch(labInfoProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Reviews')),
+      appBar: AppBar(title: Text(l10n.labTabReviews)),
       body: labInfoAsync.when(
         loading: () => const LoadingIndicator(),
         error: (e, _) => ErrorState(

@@ -5,16 +5,18 @@ import '../data/lab_repository.dart';
 import '../data/lab_workspace_models.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../../shared/widgets/error_state.dart';
+import '../../../l10n/app_localizations.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final workspaceAsync = ref.watch(labWorkspaceProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard')),
+      appBar: AppBar(title: Text(l10n.labTabDashboard)),
       body: workspaceAsync.when(
         loading: () => const LoadingIndicator(),
         error: (e, _) => ErrorState(
@@ -48,6 +50,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
   }
 
   Future<void> _saveCapabilities() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _saving = true);
     try {
       await ref.read(labRepositoryProvider).updateProfile(
@@ -57,13 +60,13 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
       ref.invalidate(labWorkspaceProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Capabilities updated')),
+          SnackBar(content: Text(l10n.capabilitiesUpdated)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e')),
+          SnackBar(content: Text(l10n.failedWithError(e.toString()))),
         );
       }
     } finally {
@@ -73,6 +76,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final lab = widget.workspace.lab;
     final analytics = widget.workspace.analytics;
     final pending = widget.workspace.bookings.where((b) => b.status.name == 'pending').length;
@@ -132,25 +136,25 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
             childAspectRatio: 1.4,
             children: [
               _StatCard(
-                label: 'Total Bookings',
+                label: l10n.totalBookings,
                 value: '${analytics.totalBookings}',
                 icon: Icons.event_note,
                 color: Colors.blue,
               ),
               _StatCard(
-                label: 'Completed',
+                label: l10n.statusCompleted,
                 value: '${analytics.completedBookings}',
                 icon: Icons.check_circle,
                 color: Colors.green,
               ),
               _StatCard(
-                label: 'Pending Results',
+                label: l10n.pendingResults,
                 value: '${analytics.pendingResults}',
                 icon: Icons.pending_actions,
                 color: Colors.orange,
               ),
               _StatCard(
-                label: 'Revenue',
+                label: l10n.revenue,
                 value: 'EGP ${analytics.revenueEstimateEgp}',
                 icon: Icons.payments,
                 color: Colors.purple,
@@ -169,7 +173,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Slot Capacity Used',
+                      Text(l10n.slotCapacityUsed,
                           style: Theme.of(context).textTheme.titleSmall),
                       Text('${analytics.capacityUsagePercent.toStringAsFixed(1)}%',
                           style: Theme.of(context)
@@ -217,20 +221,20 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Capabilities',
+                  Text(l10n.capabilities,
                       style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 8),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Home Collection'),
-                    subtitle: const Text('Lab staff collect samples at patient\'s home'),
+                    title: Text(l10n.homeCollection),
+                    subtitle: Text(l10n.labStaffCollectSamples),
                     value: _homeCollection,
                     onChanged: (v) => setState(() => _homeCollection = v),
                   ),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Home Test Kit'),
-                    subtitle: const Text('Ship kit to patient\'s address'),
+                    title: Text(l10n.homeTestKit),
+                    subtitle: Text(l10n.shipKitToPatientAddress),
                     value: _homeTestKit,
                     onChanged: (v) => setState(() => _homeTestKit = v),
                   ),
@@ -245,7 +249,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
                               width: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Save Capabilities'),
+                          : Text(l10n.saveCapabilities),
                     ),
                   ),
                 ],

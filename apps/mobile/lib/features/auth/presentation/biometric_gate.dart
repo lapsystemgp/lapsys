@@ -33,8 +33,8 @@ class _BiometricGateState extends ConsumerState<BiometricGate> {
       });
       return;
     }
-    final l10n = AppLocalizations.of(context);
-    final reason = l10n?.biometricReason ?? 'Authenticate to unlock TesTly';
+    final l10n = AppLocalizations.of(context)!;
+    final reason = l10n.authenticateToUnlock;
     final ok = await service.authenticate(reason);
     if (mounted) setState(() { _unlocked = ok; _checking = false; });
   }
@@ -56,8 +56,7 @@ class _BiometricGateState extends ConsumerState<BiometricGate> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _attempt,
-                child: Text(AppLocalizations.of(context)?.biometricPrompt ??
-                    'Authenticate'),
+                child: Text(AppLocalizations.of(context)!.authenticateButton),
               ),
             ],
           ),

@@ -4,16 +4,18 @@ import '../application/lab_workspace_provider.dart';
 import '../data/lab_workspace_models.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../../shared/widgets/error_state.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AnalyticsScreen extends ConsumerWidget {
   const AnalyticsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final analyticsAsync = ref.watch(labAnalyticsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Analytics')),
+      appBar: AppBar(title: Text(l10n.labTabAnalytics)),
       body: analyticsAsync.when(
         loading: () => const LoadingIndicator(),
         error: (e, _) => ErrorState(

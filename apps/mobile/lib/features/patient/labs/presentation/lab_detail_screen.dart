@@ -211,7 +211,7 @@ class _TestTile extends StatelessWidget {
                 overflow: TextOverflow.ellipsis),
           ],
           if (test.turnaroundTime != null)
-            Text('Results in ${test.turnaroundTime}',
+            Text(l10n.resultsIn(test.turnaroundTime!),
                 style: theme.textTheme.bodySmall
                     ?.copyWith(color: theme.colorScheme.outline)),
         ],

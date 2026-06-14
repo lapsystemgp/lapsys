@@ -709,4 +709,76 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resultMarkedDelivered => 'تم تحديد النتيجة كمسلّمة';
+
+  @override
+  String get actions => 'إجراءات';
+
+  @override
+  String get confirm => 'تأكيد';
+
+  @override
+  String get trackingNumberLabel => 'رقم التتبع';
+
+  @override
+  String get enterTrackingNumberOptional => 'أدخل رقم التتبع (اختياري)';
+
+  @override
+  String get markResultDelivered => 'تحديد النتيجة كمُسلَّمة';
+
+  @override
+  String bookingMarkedAs(String status) {
+    return 'الحجز $status';
+  }
+
+  @override
+  String kitStatusUpdatedTo(String status) {
+    return 'تم تحديث حالة الطقم إلى $status';
+  }
+
+  @override
+  String markAs(String status) {
+    return 'وضع علامة كـ $status';
+  }
+
+  @override
+  String get slotCapacityUsage => 'استخدام سعة المواعيد';
+
+  @override
+  String get completionRate => 'معدل الإكمال';
+
+  @override
+  String get mostBookedTests => 'أكثر الفحوصات حجزًا';
+
+  @override
+  String prepLabel(String preparation) {
+    return 'التحضير: $preparation';
+  }
+
+  @override
+  String shareFailed(String error) {
+    return 'فشلت المشاركة: $error';
+  }
+
+  @override
+  String pendingBookingsAwaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count حجوزات بانتظار التأكيد',
+      one: 'حجز واحد بانتظار التأكيد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get capacityUsageSubtitle =>
+      'نسبة المواعيد القادمة التي تحتوي على حجوزات مؤكدة';
+
+  @override
+  String get reviewsWillAppear => 'ستظهر تقييمات المرضى هنا بعد نشرها';
+
+  @override
+  String startingFromEgp(Object price) {
+    return 'ابتداءً من $price ج.م';
+  }
 }

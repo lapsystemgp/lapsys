@@ -711,4 +711,77 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resultMarkedDelivered => 'Result marked as delivered';
+
+  @override
+  String get actions => 'Actions';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get trackingNumberLabel => 'Tracking Number';
+
+  @override
+  String get enterTrackingNumberOptional => 'Enter tracking number (optional)';
+
+  @override
+  String get markResultDelivered => 'Mark Result Delivered';
+
+  @override
+  String bookingMarkedAs(String status) {
+    return 'Booking $status';
+  }
+
+  @override
+  String kitStatusUpdatedTo(String status) {
+    return 'Kit status updated to $status';
+  }
+
+  @override
+  String markAs(String status) {
+    return 'Mark as $status';
+  }
+
+  @override
+  String get slotCapacityUsage => 'Slot Capacity Usage';
+
+  @override
+  String get completionRate => 'Completion Rate';
+
+  @override
+  String get mostBookedTests => 'Most Booked Tests';
+
+  @override
+  String prepLabel(String preparation) {
+    return 'Prep: $preparation';
+  }
+
+  @override
+  String shareFailed(String error) {
+    return 'Share failed: $error';
+  }
+
+  @override
+  String pendingBookingsAwaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bookings awaiting confirmation',
+      one: '1 booking awaiting confirmation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get capacityUsageSubtitle =>
+      'Percentage of upcoming slots with confirmed bookings';
+
+  @override
+  String get reviewsWillAppear =>
+      'Patient reviews will appear here after they\'re published';
+
+  @override
+  String startingFromEgp(Object price) {
+    return 'From $price EGP';
+  }
 }

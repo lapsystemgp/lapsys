@@ -8,6 +8,7 @@ import '../../booking/data/booking_models.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class MyBookingsScreen extends ConsumerStatefulWidget {
   const MyBookingsScreen({super.key});
@@ -21,17 +22,18 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Bookings'),
+        title: Text(l10n.myBookings),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: SegmentedButton<int>(
-              segments: const [
-                ButtonSegment(value: 0, label: Text('Upcoming')),
-                ButtonSegment(value: 1, label: Text('Past')),
+              segments: [
+                ButtonSegment(value: 0, label: Text(l10n.upcoming)),
+                ButtonSegment(value: 1, label: Text(l10n.past)),
               ],
               selected: {_selectedIndex},
               onSelectionChanged: (s) => setState(() => _selectedIndex = s.first),
@@ -42,12 +44,12 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
       body: _selectedIndex == 0
           ? _BookingsList(
               source: ref.watch(upcomingBookingsProvider),
-              emptyMessage: 'No upcoming bookings',
+              emptyMessage: l10n.noUpcomingBookings,
               onRefresh: () => ref.invalidate(workspaceProvider),
             )
           : _BookingsList(
               source: ref.watch(pastBookingsProvider),
-              emptyMessage: 'No past bookings',
+              emptyMessage: l10n.noPastBookings,
               onRefresh: () => ref.invalidate(workspaceProvider),
             ),
     );
@@ -153,12 +155,13 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final (label, color) = switch (status) {
-      BookingStatus.pending => ('Pending', Colors.orange),
-      BookingStatus.confirmed => ('Confirmed', Colors.blue),
-      BookingStatus.completed => ('Completed', Colors.green),
-      BookingStatus.cancelled => ('Cancelled', Colors.grey),
-      BookingStatus.rejected => ('Rejected', Colors.red),
+      BookingStatus.pending => (l10n.statusPending, Colors.orange),
+      BookingStatus.confirmed => (l10n.statusConfirmed, Colors.blue),
+      BookingStatus.completed => (l10n.statusCompleted, Colors.green),
+      BookingStatus.cancelled => (l10n.statusCancelled, Colors.grey),
+      BookingStatus.rejected => (l10n.statusRejected, Colors.red),
     };
 
     return Container(

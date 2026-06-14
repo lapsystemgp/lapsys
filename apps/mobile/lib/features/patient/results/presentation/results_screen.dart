@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../workspace/application/workspace_provider.dart';
 import '../../workspace/data/workspace_models.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
@@ -13,10 +14,11 @@ class ResultsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final resultsAsync = ref.watch(resultsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Results')),
+      appBar: AppBar(title: Text(l10n.myResults)),
       body: resultsAsync.when(
         loading: () => const LoadingIndicator(),
         error: (e, _) => ErrorState(
@@ -25,10 +27,10 @@ class ResultsScreen extends ConsumerWidget {
         ),
         data: (results) {
           if (results.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.science_outlined,
-              message: 'No results yet',
-              subtitle: 'Completed tests will appear here',
+              message: l10n.noResultsYet,
+              subtitle: l10n.completedTestsWillAppear,
             );
           }
           return RefreshIndicator(
@@ -52,6 +54,7 @@ class _ResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final date = DateFormat('d MMM yyyy')
         .format(DateTime.parse(result.scheduledAt).toLocal());
@@ -89,9 +92,9 @@ class _ResultCard extends StatelessWidget {
                   Text(date, style: theme.textTheme.bodySmall),
                   const Spacer(),
                   if (result.hasStructuredData)
-                    const Chip(
-                      label: Text('Structured'),
-                      avatar: Icon(Icons.analytics, size: 14),
+                    Chip(
+                      label: Text(l10n.resultStatusStructured),
+                      avatar: const Icon(Icons.analytics, size: 14),
                       visualDensity: VisualDensity.compact,
                     ),
                   if (result.file != null)
@@ -113,10 +116,11 @@ class _ResultStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final (label, color) = switch (status) {
-      ResultStatus.pending => ('Pending', Colors.orange),
-      ResultStatus.uploaded => ('Uploaded', Colors.blue),
-      ResultStatus.delivered => ('Delivered', Colors.green),
+      ResultStatus.pending => (l10n.resultStatusPending, Colors.orange),
+      ResultStatus.uploaded => (l10n.resultStatusUploaded, Colors.blue),
+      ResultStatus.delivered => (l10n.resultStatusDelivered, Colors.green),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

@@ -1,13 +1,19 @@
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/network/dio_client.dart';
 import '../../workspace/application/workspace_provider.dart';
 import '../../workspace/data/workspace_models.dart';
 import '../../workspace/data/patient_repository.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class ResultDetailScreen extends ConsumerStatefulWidget {
   final String bookingId;
@@ -43,13 +49,16 @@ class _ResultDetailScreenState extends ConsumerState<ResultDetailScreen> {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => _PdfViewer(url: url),
+      builder: (_) => _PdfViewer(url: url, dio: ref.read(dioClientProvider)),
     );
   }
 
   Future<void> _share(String url, String fileName) async {
     try {
-      final file = await DefaultCacheManager().getSingleFile(url);
+      final bytes = await _downloadFile(ref.read(dioClientProvider), url);
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/$fileName');
+      await file.writeAsBytes(bytes, flush: true);
       await Share.shareXFiles([XFile(file.path)], subject: fileName);
     } catch (e) {
       if (mounted) {
@@ -60,19 +69,20 @@ class _ResultDetailScreenState extends ConsumerState<ResultDetailScreen> {
   }
 
   Future<void> _submitReview(WorkspaceResult result) async {
+    final l10n = AppLocalizations.of(context)!;
     int rating = 5;
     final commentCtrl = TextEditingController();
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Write a Review'),
+        title: Text(l10n.writeReview),
         content: StatefulBuilder(builder: (ctx, setState) {
           return Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Rate your experience at ${result.labName}'),
+              Text(l10n.rateExperience(result.labName)),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -89,8 +99,8 @@ class _ResultDetailScreenState extends ConsumerState<ResultDetailScreen> {
               ),
               TextField(
                 controller: commentCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Comment (optional)',
+                decoration: InputDecoration(
+                  labelText: l10n.commentOptional,
                 ),
                 maxLines: 3,
               ),
@@ -100,11 +110,11 @@ class _ResultDetailScreenState extends ConsumerState<ResultDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Submit'),
+            child: Text(l10n.submit),
           ),
         ],
       ),
@@ -123,13 +133,13 @@ class _ResultDetailScreenState extends ConsumerState<ResultDetailScreen> {
       ref.invalidate(workspaceProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Review submitted!')),
+          SnackBar(content: Text(l10n.reviewSubmitted)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed to submit: $e')));
+            .showSnackBar(SnackBar(content: Text(l10n.failedToSubmit(e.toString()))));
       }
     } finally {
       if (mounted) setState(() => _submittingReview = false);
@@ -138,12 +148,13 @@ class _ResultDetailScreenState extends ConsumerState<ResultDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     ref.watch(workspaceProvider);
     final result = _getResult();
 
     if (result == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Result')),
+        appBar: AppBar(title: Text(l10n.result)),
         body: const LoadingIndicator(),
       );
     }
@@ -153,12 +164,12 @@ class _ResultDetailScreenState extends ConsumerState<ResultDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Result Detail'),
+        title: Text(l10n.resultDetail),
         actions: [
           if (result.file != null)
             IconButton(
               icon: const Icon(Icons.share),
-              tooltip: 'Share PDF',
+              tooltip: l10n.sharePdf,
               onPressed: () =>
                   _share(result.file!.fileUrl, result.file!.fileName),
             ),
@@ -190,7 +201,7 @@ class _ResultDetailScreenState extends ConsumerState<ResultDetailScreen> {
                 : FilledButton.icon(
                     onPressed: () => _submitReview(result),
                     icon: const Icon(Icons.rate_review),
-                    label: const Text('Write a Review'),
+                    label: Text(l10n.writeReview),
                   ),
           ],
         ],
@@ -265,13 +276,14 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Summary', style: Theme.of(context).textTheme.titleSmall),
+            Text(l10n.summary, style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
             Text(summary.summary),
             if (summary.highlights.items.isNotEmpty) ...[
@@ -336,13 +348,14 @@ class _ExistingReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Your Review', style: Theme.of(context).textTheme.titleSmall),
+            Text(l10n.yourReview, style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
             Row(
               children: List.generate(
@@ -367,39 +380,59 @@ class _ExistingReviewCard extends StatelessWidget {
 
 // ─── PDF bottom sheet ─────────────────────────────────────────────────────────
 
+/// Downloads a protected result file through the authenticated [dio] client.
+///
+/// [url] is the relative path returned by the API (e.g. `/results/files/{id}`);
+/// Dio resolves it against the configured base URL and attaches the Bearer
+/// token via the auth interceptor.
+Future<Uint8List> _downloadFile(Dio dio, String url) async {
+  final response = await dio.get<List<int>>(
+    url,
+    options: Options(responseType: ResponseType.bytes),
+  );
+  final data = response.data;
+  if (data == null || data.isEmpty) {
+    throw Exception('Empty file response');
+  }
+  return Uint8List.fromList(data);
+}
+
 class _PdfViewer extends StatefulWidget {
   final String url;
+  final Dio dio;
 
-  const _PdfViewer({required this.url});
+  const _PdfViewer({required this.url, required this.dio});
 
   @override
   State<_PdfViewer> createState() => _PdfViewerState();
 }
 
 class _PdfViewerState extends State<_PdfViewer> {
-  late final PdfController _controller;
+  late final Future<PdfController> _controllerFuture;
+  PdfController? _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = PdfController(
-      document: _openCached(widget.url),
-    );
+    _controllerFuture = _open();
   }
 
-  Future<PdfDocument> _openCached(String url) async {
-    final file = await DefaultCacheManager().getSingleFile(url);
-    return PdfDocument.openFile(file.path);
+  Future<PdfController> _open() async {
+    final bytes = await _downloadFile(widget.dio, widget.url);
+    final controller = PdfController(document: PdfDocument.openData(bytes));
+    _controller = controller;
+    return controller;
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final height = MediaQuery.of(context).size.height * 0.85;
 
     return SizedBox(
@@ -410,8 +443,8 @@ class _PdfViewerState extends State<_PdfViewer> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                const Text('Document',
-                    style: TextStyle(fontWeight: FontWeight.w600)),
+                Text(l10n.document,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -421,7 +454,25 @@ class _PdfViewerState extends State<_PdfViewer> {
             ),
           ),
           const Divider(height: 1),
-          Expanded(child: PdfView(controller: _controller)),
+          Expanded(
+            child: FutureBuilder<PdfController>(
+              future: _controllerFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError || !snapshot.hasData) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Text(l10n.couldNotOpenDocument(snapshot.error.toString())),
+                    ),
+                  );
+                }
+                return PdfView(controller: snapshot.data!);
+              },
+            ),
+          ),
         ],
       ),
     );

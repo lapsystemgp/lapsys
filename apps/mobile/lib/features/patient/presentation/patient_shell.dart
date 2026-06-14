@@ -125,6 +125,7 @@ class _NotificationPermissionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return SafeArea(
       child: Padding(
@@ -144,15 +145,13 @@ class _NotificationPermissionSheet extends StatelessWidget {
             const Icon(Icons.notifications_outlined, size: 48),
             const SizedBox(height: 16),
             Text(
-              'Stay up to date',
+              l10n.stayUpToDate,
               style: theme.textTheme.titleLarge
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
-              'Get instant alerts when your booking is confirmed, '
-              'results are ready, or your kit ships — and reminders '
-              'the evening before tests that need preparation.',
+              l10n.notificationPermissionBody,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium
                   ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
@@ -163,12 +162,12 @@ class _NotificationPermissionSheet extends StatelessWidget {
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
               ),
-              child: const Text('Enable notifications'),
+              child: Text(l10n.enableNotifications),
             ),
             const SizedBox(height: 8),
             TextButton(
               onPressed: onSkip,
-              child: const Text('Not now'),
+              child: Text(l10n.notNow),
             ),
           ],
         ),

@@ -3,11 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../data/lab_models.dart';
 import '../data/public_repository.dart';
+import '../../../../core/location/location_service.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../l10n/app_localizations.dart';
 
-// Active filter state
+// Shared search text, used by BOTH the Tests and Labs tabs.
+final _searchQueryProvider = StateProvider<String>((_) => '');
+
+// Labs-tab-only filters (sort / home collection). The query is merged in
+// from [_searchQueryProvider] when the request is built.
 final _labsFilterProvider = StateProvider<LabsFilter>(
   (_) => const LabsFilter(),
 );
@@ -29,73 +35,65 @@ class _LabsScreenState extends ConsumerState<LabsScreen> {
   }
 
   void _applySearch(String q) {
-    ref.read(_labsFilterProvider.notifier).state =
-        LabsFilter(q: q.isEmpty ? null : q);
+    ref.read(_searchQueryProvider.notifier).state = q;
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final filter = ref.watch(_labsFilterProvider);
-    final labsAsync = ref.watch(labsListProvider(filter));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Find a Lab'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(56),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-            child: SearchBar(
-              controller: _searchCtrl,
-              hintText: 'Search labs or services…',
-              leading: const Icon(Icons.search),
-              trailing: [
-                if (_searchCtrl.text.isNotEmpty)
-                  IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      _searchCtrl.clear();
-                      _applySearch('');
-                    },
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.findTestOrLab),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.tune),
+              tooltip: l10n.labFilters,
+              onPressed: () => _showFilters(context, filter),
+            ),
+          ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(104),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                  child: SearchBar(
+                    controller: _searchCtrl,
+                    hintText: l10n.searchHint,
+                    leading: const Icon(Icons.search),
+                    trailing: [
+                      if (_searchCtrl.text.isNotEmpty)
+                        IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchCtrl.clear();
+                            _applySearch('');
+                          },
+                        ),
+                    ],
+                    onChanged: _applySearch,
                   ),
+                ),
+                TabBar(
+                  tabs: [
+                    Tab(text: l10n.testsTab),
+                    Tab(text: l10n.labsTab),
+                  ],
+                ),
               ],
-              onChanged: _applySearch,
             ),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.tune),
-            tooltip: 'Filters',
-            onPressed: () => _showFilters(context, filter),
-          ),
-        ],
-      ),
-      body: labsAsync.when(
-        loading: () => const LoadingIndicator(),
-        error: (e, _) => ErrorState(
-          error: e,
-          onRetry: () => ref.invalidate(labsListProvider(filter)),
+        body: const TabBarView(
+          children: [
+            _TestsTabView(),
+            _LabsTabView(),
+          ],
         ),
-        data: (data) {
-          if (data.items.isEmpty) {
-            return const EmptyState(
-              icon: Icons.science_outlined,
-              message: 'No labs found',
-              subtitle: 'Try adjusting your search or filters',
-            );
-          }
-          return RefreshIndicator(
-            onRefresh: () async =>
-                ref.invalidate(labsListProvider(filter)),
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: data.items.length,
-              itemBuilder: (context, i) =>
-                  _LabCard(lab: data.items[i]),
-            ),
-          );
-        },
       ),
     );
   }
@@ -108,6 +106,162 @@ class _LabsScreenState extends ConsumerState<LabsScreen> {
   }
 }
 
+// ─── Tests tab — searches medical tests, opens nearest-labs detail ───────────
+
+class _TestsTabView extends ConsumerWidget {
+  const _TestsTabView();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final query = ref.watch(_searchQueryProvider);
+    final testsAsync = ref.watch(testsListProvider(query));
+
+    return testsAsync.when(
+      loading: () => const LoadingIndicator(),
+      error: (e, _) => ErrorState(
+        error: e,
+        onRetry: () => ref.invalidate(testsListProvider(query)),
+      ),
+      data: (data) {
+        if (data.items.isEmpty) {
+          return EmptyState(
+            icon: Icons.search_off,
+            message: l10n.noTestsFound,
+            subtitle: l10n.tryDifferentTestName,
+          );
+        }
+        return RefreshIndicator(
+          onRefresh: () async => ref.invalidate(testsListProvider(query)),
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            itemCount: data.items.length,
+            itemBuilder: (context, i) => _TestCard(test: data.items[i]),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _TestCard extends StatelessWidget {
+  final PublicTestCard test;
+
+  const _TestCard({required this.test});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => context.push(
+          '/patient/tests/${Uri.encodeComponent(test.name)}'
+          '?category=${Uri.encodeComponent(test.category)}',
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Center(
+                  child: Text('🧪', style: TextStyle(fontSize: 22)),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(test.name,
+                        style: theme.textTheme.titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 2),
+                    Text(test.category,
+                        style: theme.textTheme.labelSmall
+                            ?.copyWith(color: theme.colorScheme.primary)),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        if (test.minPriceEgp != null)
+                          _Chip(
+                              icon: Icons.payments_outlined,
+                              label: l10n.fromPriceEgp(test.minPriceEgp.toString())),
+                        _Chip(
+                            icon: Icons.science_outlined,
+                            label: l10n.labCount(test.labCount)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Labs tab — searches lab facilities (the original behaviour) ─────────────
+
+class _LabsTabView extends ConsumerWidget {
+  const _LabsTabView();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final query = ref.watch(_searchQueryProvider);
+    final baseFilter = ref.watch(_labsFilterProvider);
+    // Inject the user's location (when known) so the backend can return a
+    // distanceKm per lab and honour the "Nearest" sort.
+    final location = ref.watch(currentLocationProvider).valueOrNull;
+    final filter = baseFilter.copyWith(
+      q: query.isEmpty ? null : query,
+      userLat: location?.lat,
+      userLng: location?.lng,
+    );
+    final labsAsync = ref.watch(labsListProvider(filter));
+
+    return labsAsync.when(
+      loading: () => const LoadingIndicator(),
+      error: (e, _) => ErrorState(
+        error: e,
+        onRetry: () => ref.invalidate(labsListProvider(filter)),
+      ),
+      data: (data) {
+        if (data.items.isEmpty) {
+          return EmptyState(
+            icon: Icons.science_outlined,
+            message: l10n.noLabsFound,
+            subtitle: l10n.tryAdjustingFilters,
+          );
+        }
+        return RefreshIndicator(
+          onRefresh: () async => ref.invalidate(labsListProvider(filter)),
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            itemCount: data.items.length,
+            itemBuilder: (context, i) => _LabCard(lab: data.items[i]),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _LabCard extends StatelessWidget {
   final PublicLabCard lab;
 
@@ -115,6 +269,7 @@ class _LabCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Card(
@@ -175,12 +330,11 @@ class _LabCard extends StatelessWidget {
                         if (lab.homeCollection)
                           _Chip(
                               icon: Icons.home_outlined,
-                              label: 'Home collection'),
+                              label: l10n.homeCollection),
                         if (lab.distanceKm != null)
                           _Chip(
                               icon: Icons.location_on_outlined,
-                              label:
-                                  '${lab.distanceKm!.toStringAsFixed(1)} km'),
+                              label: l10n.distanceKm(lab.distanceKm!.toStringAsFixed(1))),
                       ],
                     ),
                   ],
@@ -239,26 +393,27 @@ class _FiltersSheetState extends ConsumerState<_FiltersSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Sort by', style: Theme.of(context).textTheme.titleMedium),
+          Text(l10n.sortBy, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             children: [
-              _sortChip('Best rating', 'rating'),
-              _sortChip('Lowest price', 'price'),
-              _sortChip('Nearest', 'distance'),
+              _sortChip(l10n.bestRating, 'rating'),
+              _sortChip(l10n.lowestPrice, 'price'),
+              _sortChip(l10n.nearest, 'distance'),
             ],
           ),
           const SizedBox(height: 16),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Home collection only'),
+            title: Text(l10n.homeCollectionOnly),
             value: _homeOnly,
             onChanged: (v) => setState(() => _homeOnly = v),
           ),
@@ -271,7 +426,7 @@ class _FiltersSheetState extends ConsumerState<_FiltersSheet> {
                     LabsFilter(sort: _sort, homeCollectionOnly: _homeOnly);
                 Navigator.pop(context);
               },
-              child: const Text('Apply'),
+              child: Text(l10n.apply),
             ),
           ),
         ],

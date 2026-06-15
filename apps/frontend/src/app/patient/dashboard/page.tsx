@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Star } from "lucide-react";
+import { ArrowLeft, HeartPulse, Star } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Breadcrumb } from "../../../components/Breadcrumb";
@@ -239,6 +239,10 @@ export default function PatientDashboardPage() {
             </div>
           </div>
           <div className="flex gap-2">
+            <button onClick={() => router.push("/patient/assistant")} className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-all duration-150 font-medium shadow-sm">
+              <HeartPulse className="w-4 h-4" />
+              AI Assistant
+            </button>
             <button onClick={() => router.push("/labs")} className="px-3 py-1.5 text-sm border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-blue-300 transition-all duration-150 font-medium text-gray-700">
               Browse Labs
             </button>

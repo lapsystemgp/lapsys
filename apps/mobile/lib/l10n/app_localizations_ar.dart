@@ -781,4 +781,34 @@ class AppLocalizationsAr extends AppLocalizations {
   String startingFromEgp(Object price) {
     return 'ابتداءً من $price ج.م';
   }
+
+  @override
+  String get assistantTitle => 'المساعد الصحي';
+
+  @override
+  String get assistantNewChat => 'محادثة جديدة';
+
+  @override
+  String get assistantInputHint => 'اسأل عن تحليل، أو التحضير له، أو صحتك…';
+
+  @override
+  String get assistantEmptyTitle => 'مرحبًا! أنا مساعدك الصحي';
+
+  @override
+  String get assistantEmptyBody =>
+      'اسألني عن التحاليل المخبرية، وكيفية التحضير لها، أو ماذا تعني النتيجة بشكل عام. لا يمكنني أن أحل محل نصيحة الطبيب.';
+
+  @override
+  String get assistantDisclaimer =>
+      'مساعد ذكاء اصطناعي — ليس بديلًا عن الاستشارة الطبية المتخصصة.';
+
+  @override
+  String get assistantSuggestion1 => 'كيف أستعد لتحليل دم يتطلب الصيام؟';
+
+  @override
+  String get assistantSuggestion2 => 'ماذا يقيس تحليل صورة الدم الكاملة (CBC)؟';
+
+  @override
+  String get assistantSuggestion3 =>
+      'فيمَ يُستخدم تحليل السكر التراكمي (HbA1c)؟';
 }

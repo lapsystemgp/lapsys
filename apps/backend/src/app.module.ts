@@ -26,6 +26,8 @@ import { ClinicalNormalizationService } from './api/clinical-normalization.servi
 import { StructuredResultsService } from './api/structured-results.service';
 import { LabPatientContextService } from './api/lab-patient-context.service';
 import { ResultsDownloadController } from './api/results-download.controller';
+import { ChatController } from './chat/chat.controller';
+import { ChatService } from './chat/chat.service';
 
 @Module({
   imports: [
@@ -41,6 +43,7 @@ import { ResultsDownloadController } from './api/results-download.controller';
         LAB_STORAGE_DRIVER: Joi.string().valid('local', 's3').default('local'),
         CORS_ORIGIN: Joi.string().default('http://localhost:3000'),
         FCM_SERVICE_ACCOUNT_JSON: Joi.string().optional(),
+        GEMINI_API_KEY: Joi.string().optional(),
       }),
     }),
     AuthModule,
@@ -56,6 +59,7 @@ import { ResultsDownloadController } from './api/results-download.controller';
     FaqController,
     AdminController,
     ResultsDownloadController,
+    ChatController,
   ],
   providers: [
     AppService,
@@ -71,6 +75,7 @@ import { ResultsDownloadController } from './api/results-download.controller';
     ClinicalNormalizationService,
     StructuredResultsService,
     LabPatientContextService,
+    ChatService,
   ],
 })
 export class AppModule {}

@@ -1483,6 +1483,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'From {price} EGP'**
   String startingFromEgp(Object price);
+
+  /// No description provided for @assistantTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Assistant'**
+  String get assistantTitle;
+
+  /// No description provided for @assistantNewChat.
+  ///
+  /// In en, this message translates to:
+  /// **'New chat'**
+  String get assistantNewChat;
+
+  /// No description provided for @assistantInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about a test, prep, or your health…'**
+  String get assistantInputHint;
+
+  /// No description provided for @assistantEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi! I\'m your health assistant'**
+  String get assistantEmptyTitle;
+
+  /// No description provided for @assistantEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask me about lab tests, how to prepare, or what a result generally means. I can\'t replace a doctor\'s advice.'**
+  String get assistantEmptyBody;
+
+  /// No description provided for @assistantDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'AI assistant — not a substitute for professional medical advice.'**
+  String get assistantDisclaimer;
+
+  /// No description provided for @assistantSuggestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I prepare for a fasting blood test?'**
+  String get assistantSuggestion1;
+
+  /// No description provided for @assistantSuggestion2.
+  ///
+  /// In en, this message translates to:
+  /// **'What does a CBC test measure?'**
+  String get assistantSuggestion2;
+
+  /// No description provided for @assistantSuggestion3.
+  ///
+  /// In en, this message translates to:
+  /// **'What is HbA1c used for?'**
+  String get assistantSuggestion3;
 }
 
 class _AppLocalizationsDelegate

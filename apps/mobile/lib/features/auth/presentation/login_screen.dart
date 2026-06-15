@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../application/session_notifier.dart';
+import '../../../shared/widgets/animations.dart';
 import '../../../l10n/app_localizations.dart';
 
 enum _RoleChoice { patient, lab }
@@ -67,25 +68,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 48),
-                Text(
-                  l10n.appTitle,
-                  style: theme.textTheme.headlineLarge?.copyWith(
-                    color: AppColors.brand,
-                    fontWeight: FontWeight.w800,
+                FadeSlideIn(
+                  index: 0,
+                  child: Text(
+                    l10n.appTitle,
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      color: AppColors.brand,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  l10n.login,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: AppColors.foreground,
-                    fontWeight: FontWeight.w600,
+                FadeSlideIn(
+                  index: 1,
+                  child: Text(
+                    l10n.login,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: AppColors.foreground,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
 
                 // Role toggle
-                SegmentedButton<_RoleChoice>(
+                FadeSlideIn(
+                  index: 2,
+                  child: SegmentedButton<_RoleChoice>(
                   segments: [
                     ButtonSegment(
                       value: _RoleChoice.patient,
@@ -106,10 +115,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     selectedForegroundColor: Colors.white,
                   ),
                 ),
+                ),
                 const SizedBox(height: 24),
 
                 // Email
-                TextFormField(
+                FadeSlideIn(
+                  index: 3,
+                  child: TextFormField(
                   controller: _emailCtrl,
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
@@ -123,10 +135,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     return null;
                   },
                 ),
+                ),
                 const SizedBox(height: 16),
 
                 // Password
-                TextFormField(
+                FadeSlideIn(
+                  index: 4,
+                  child: TextFormField(
                   controller: _passCtrl,
                   obscureText: _obscurePass,
                   decoration: InputDecoration(
@@ -148,6 +163,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     return null;
                   },
                 ),
+                ),
                 const SizedBox(height: 8),
 
                 if (_errorMsg != null) ...[
@@ -161,18 +177,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 24),
 
-                ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(l10n.login),
+                FadeSlideIn(
+                  index: 5,
+                  child: ElevatedButton(
+                    onPressed: _isSubmitting ? null : _submit,
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(l10n.login),
+                  ),
                 ),
 
                 const SizedBox(height: 16),

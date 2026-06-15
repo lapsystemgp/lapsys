@@ -6,6 +6,7 @@ import '../data/lab_workspace_models.dart';
 import '../../auth/application/session_notifier.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../../shared/widgets/error_state.dart';
+import '../../../shared/widgets/animations.dart';
 import '../../../l10n/app_localizations.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -121,7 +122,9 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
         padding: const EdgeInsets.all(16),
         children: [
           // Lab header card
-          Card(
+          FadeSlideIn(
+            index: 0,
+            child: Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -157,10 +160,13 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
               ),
             ),
           ),
+          ),
           const SizedBox(height: 16),
 
           // Stats grid
-          GridView.count(
+          FadeSlideIn(
+            index: 1,
+            child: GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -170,34 +176,38 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
             children: [
               _StatCard(
                 label: l10n.totalBookings,
-                value: '${analytics.totalBookings}',
+                value: analytics.totalBookings,
                 icon: Icons.event_note,
                 color: Colors.blue,
               ),
               _StatCard(
                 label: l10n.statusCompleted,
-                value: '${analytics.completedBookings}',
+                value: analytics.completedBookings,
                 icon: Icons.check_circle,
                 color: Colors.green,
               ),
               _StatCard(
                 label: l10n.pendingResults,
-                value: '${analytics.pendingResults}',
+                value: analytics.pendingResults,
                 icon: Icons.pending_actions,
                 color: Colors.orange,
               ),
               _StatCard(
                 label: l10n.revenue,
-                value: 'EGP ${analytics.revenueEstimateEgp}',
+                value: analytics.revenueEstimateEgp.round(),
+                prefix: 'EGP ',
                 icon: Icons.payments,
                 color: Colors.purple,
               ),
             ],
           ),
+          ),
           const SizedBox(height: 12),
 
           // Capacity usage
-          Card(
+          FadeSlideIn(
+            index: 2,
+            child: Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -216,23 +226,22 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: analytics.capacityUsagePercent / 100,
-                      minHeight: 8,
-                      backgroundColor: scheme.surfaceContainerHighest,
-                    ),
+                  AnimatedProgressBar(
+                    value: analytics.capacityUsagePercent / 100,
+                    backgroundColor: scheme.surfaceContainerHighest,
                   ),
                 ],
               ),
             ),
           ),
+          ),
           const SizedBox(height: 12),
 
           // Pending bookings alert
           if (pending > 0)
-            Card(
+            FadeSlideIn(
+              index: 3,
+              child: Card(
               color: scheme.errorContainer,
               child: ListTile(
                 leading: Icon(Icons.notifications_active,
@@ -245,10 +254,13 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
                     color: scheme.onErrorContainer),
               ),
             ),
+            ),
           const SizedBox(height: 16),
 
           // Lab capabilities
-          Card(
+          FadeSlideIn(
+            index: 4,
+            child: Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -289,6 +301,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
               ),
             ),
           ),
+          ),
         ],
       ),
     );
@@ -301,10 +314,12 @@ class _StatCard extends StatelessWidget {
     required this.value,
     required this.icon,
     required this.color,
+    this.prefix = '',
   });
 
   final String label;
-  final String value;
+  final int value;
+  final String prefix;
   final IconData icon;
   final Color color;
 
@@ -321,7 +336,9 @@ class _StatCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(value,
+                CountUpText(
+                    value: value,
+                    formatter: (v) => '$prefix$v',
                     style: Theme.of(context)
                         .textTheme
                         .titleMedium

@@ -89,9 +89,9 @@ class _PatientShellState extends ConsumerState<PatientShell> {
         onTap: (i) => context.go(_tabs[i]),
         items: [
           BottomNavigationBarItem(
-            icon: const Icon(Icons.science_outlined),
-            activeIcon: const Icon(Icons.science),
-            label: l10n.patientTabLabs,
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home),
+            label: l10n.patientTabHome,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.calendar_today_outlined),

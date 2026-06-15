@@ -230,6 +230,12 @@ abstract class AppLocalizations {
   /// **'No results found'**
   String get noResults;
 
+  /// No description provided for @patientTabHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get patientTabHome;
+
   /// No description provided for @patientTabLabs.
   ///
   /// In en, this message translates to:
@@ -577,6 +583,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{distance} km'**
   String distanceKm(String distance);
+
+  /// No description provided for @homeGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, {name} 👋'**
+  String homeGreeting(String name);
+
+  /// No description provided for @homeGreetingGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome 👋'**
+  String get homeGreetingGuest;
+
+  /// No description provided for @homeTrustBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Egypt\'s Trusted Medical Lab Platform'**
+  String get homeTrustBadge;
+
+  /// No description provided for @homeHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Find the best medical labs near you'**
+  String get homeHeadline;
+
+  /// No description provided for @homeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare prices, ratings, and book appointments instantly.'**
+  String get homeSubtitle;
+
+  /// No description provided for @homeSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Test name or symptoms…'**
+  String get homeSearchHint;
+
+  /// No description provided for @browseBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse by'**
+  String get browseBy;
+
+  /// No description provided for @popular.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get popular;
+
+  /// No description provided for @topRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Rated'**
+  String get topRated;
+
+  /// No description provided for @bestPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Best Price'**
+  String get bestPrice;
+
+  /// No description provided for @featuredLabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured Labs'**
+  String get featuredLabs;
+
+  /// No description provided for @featuredLabsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-rated labs available for booking right now'**
+  String get featuredLabsSubtitle;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get viewAll;
+
+  /// No description provided for @whyChooseTestly.
+  ///
+  /// In en, this message translates to:
+  /// **'Why Choose TesTly?'**
+  String get whyChooseTestly;
+
+  /// No description provided for @howItWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How It Works'**
+  String get howItWorks;
+
+  /// No description provided for @featureComparePricesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare Prices'**
+  String get featureComparePricesTitle;
+
+  /// No description provided for @featureComparePricesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'See prices from multiple labs instantly'**
+  String get featureComparePricesDesc;
+
+  /// No description provided for @featureReviewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified Reviews'**
+  String get featureReviewsTitle;
+
+  /// No description provided for @featureReviewsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Real reviews from real patients'**
+  String get featureReviewsDesc;
+
+  /// No description provided for @featureHomeCollectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Collection'**
+  String get featureHomeCollectionTitle;
+
+  /// No description provided for @featureHomeCollectionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Book sample collection at home'**
+  String get featureHomeCollectionDesc;
+
+  /// No description provided for @featureDigitalResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital Results'**
+  String get featureDigitalResultsTitle;
+
+  /// No description provided for @featureDigitalResultsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get your results as a PDF in-app'**
+  String get featureDigitalResultsDesc;
+
+  /// No description provided for @stepSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get stepSearchTitle;
+
+  /// No description provided for @stepSearchDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a test name or symptoms'**
+  String get stepSearchDesc;
+
+  /// No description provided for @stepCompareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get stepCompareTitle;
+
+  /// No description provided for @stepCompareDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'View labs, prices & ratings'**
+  String get stepCompareDesc;
+
+  /// No description provided for @stepBookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book'**
+  String get stepBookTitle;
+
+  /// No description provided for @stepBookDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule your appointment'**
+  String get stepBookDesc;
+
+  /// No description provided for @stepResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Results'**
+  String get stepResultsTitle;
+
+  /// No description provided for @stepResultsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive digital PDF results'**
+  String get stepResultsDesc;
 
   /// No description provided for @labsOfferingTest.
   ///
@@ -1357,6 +1549,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Require biometrics to open the app'**
   String get biometricUnlockSubtitle;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @languageSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get languageSystem;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageEnglish;
+
+  /// No description provided for @languageArabic.
+  ///
+  /// In en, this message translates to:
+  /// **'العربية'**
+  String get languageArabic;
+
+  /// No description provided for @theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
 
   /// No description provided for @noPendingBookings.
   ///

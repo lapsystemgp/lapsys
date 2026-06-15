@@ -12,13 +12,43 @@ export type AssistantMessage = {
   id: string;
   role: ChatRole;
   content: string;
+  tools?: ToolResult[];
   createdAt?: string;
 };
+
+/** A lab the assistant surfaced via the `find_labs` tool. */
+export type AssistantLabCard = {
+  labId: string;
+  labTestId: string | null;
+  name: string;
+  address: string;
+  city: string | null;
+  priceEgp: number | null;
+  rating: number | null;
+  reviews: number;
+  homeCollection: boolean;
+  accreditation: string | null;
+  turnaroundTime: string | null;
+};
+
+/** An aggregated test the assistant surfaced via the `search_tests` tool. */
+export type AssistantTestCard = {
+  name: string;
+  category: string;
+  minPriceEgp: number | null;
+  labCount: number;
+};
+
+/** Structured agentic output attached to an assistant message. */
+export type ToolResult =
+  | { tool: "find_labs"; query: string; labs: AssistantLabCard[] }
+  | { tool: "search_tests"; query: string; tests: AssistantTestCard[] };
 
 /** Events streamed by `POST /chat/messages`, one per SSE `data:` line. */
 export type ChatStreamEvent =
   | { type: "meta"; conversationId: string }
   | { type: "delta"; text: string }
+  | { type: "tool"; result: ToolResult }
   | { type: "done"; messageId: string }
   | { type: "error"; message: string };
 

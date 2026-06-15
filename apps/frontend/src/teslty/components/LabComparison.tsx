@@ -405,7 +405,7 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             {/* Sidebar */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden sticky top-[72px]">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden lg:sticky lg:top-[72px]">
                 <div className="h-1.5 bg-gradient-to-r from-blue-600 to-blue-400" />
                 <div className="p-5">
                   <h2 className="text-base font-bold text-gray-900 mb-2">Browse Labs</h2>
@@ -449,8 +449,8 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
 
               {/* Filters and Sort */}
               <div className="bg-white rounded-xl shadow-sm p-3 mb-4">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <button
                       onClick={() => setShowFilters(!showFilters)}
                       className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition font-medium ${

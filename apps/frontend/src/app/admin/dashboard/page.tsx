@@ -197,7 +197,7 @@ export default function AdminDashboardPage() {
         <Breadcrumb items={[{ label: "Admin Dashboard" }]} className="mb-4" />
 
         {/* ── Stats Row ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
           <StatCard label="Total Labs" value={workspace?.stats.totalLabs ?? 0} />
           <StatCard label="Active Labs" value={workspace?.stats.activeLabs ?? 0} />
           <StatCard label="Total Bookings" value={aggregateStats?.totalBookings ?? 0} />

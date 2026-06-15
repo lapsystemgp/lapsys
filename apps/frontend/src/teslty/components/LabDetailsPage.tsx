@@ -48,7 +48,7 @@ export function LabDetailsPage({ lab, tests, reviewItems = [], isLoading, onBack
               <div className="skeleton h-5 w-20 rounded" />
             </div>
             <div className="skeleton h-4 w-48 mb-6 rounded" />
-            <div className="grid grid-cols-4 gap-6 pb-6 border-b border-gray-100 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pb-6 border-b border-gray-100 mb-6">
               {[0,1,2,3].map(i => (
                 <div key={i}>
                   <div className="skeleton h-3.5 w-24 mb-2 rounded" />
@@ -71,7 +71,7 @@ export function LabDetailsPage({ lab, tests, reviewItems = [], isLoading, onBack
                 <div key={i} className="border border-gray-100 rounded-2xl p-6">
                   <div className="skeleton h-6 w-48 mb-2 rounded" />
                   <div className="skeleton h-4 w-full mb-4 rounded" />
-                  <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                     {[0,1,2].map(j => (
                       <div key={j}>
                         <div className="skeleton h-3.5 w-20 mb-1 rounded" />
@@ -265,7 +265,7 @@ export function LabDetailsPage({ lab, tests, reviewItems = [], isLoading, onBack
                       </div>
                     </div>
                     <p className="text-gray-600 mb-3">{test.description ?? '—'}</p>
-                    <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                       <div>
                         <div className="text-gray-500 font-medium mb-1">Preparation</div>
                         <div className="text-gray-900 font-semibold">{test.preparation ?? '—'}</div>

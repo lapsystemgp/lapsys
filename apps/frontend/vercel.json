@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "next build --webpack",
+  "installCommand": "npm install",
+  "env": {
+    "NEXT_PUBLIC_API_BASE_URL": "https://testly-backend-production-c28a.up.railway.app",
+    "NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS": "false"
+  }
+}

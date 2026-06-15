@@ -9,6 +9,7 @@ import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/lab_pending_screen.dart';
 import '../../features/auth/presentation/admin_unsupported_screen.dart';
 import '../../features/patient/presentation/patient_shell.dart';
+import '../../features/patient/home/presentation/home_screen.dart';
 import '../../features/patient/labs/presentation/labs_screen.dart';
 import '../../features/patient/labs/presentation/lab_detail_screen.dart';
 import '../../features/patient/labs/presentation/test_detail_screen.dart';
@@ -128,11 +129,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (_, __, child) => PatientShell(child: child),
         routes: [
-          // Labs tab — root of the shell
+          // Home tab — landing screen (root of the shell)
           GoRoute(
             path: Routes.patientShell,
-            builder: (_, __) => const LabsScreen(),
+            builder: (_, __) => const HomeScreen(),
             routes: [
+              // Search screen — Tests/Labs tabs, opened from the home screen.
+              GoRoute(
+                path: 'search',
+                builder: (_, state) {
+                  final q = state.uri.queryParameters['q'];
+                  final sort = state.uri.queryParameters['sort'];
+                  // Test-name searches open the Tests tab; a "browse by" sort
+                  // opens the Labs tab.
+                  final tabIndex =
+                      (q != null && q.isNotEmpty) ? 0 : (sort != null ? 1 : 0);
+                  return LabsScreen(
+                    initialQuery: q,
+                    initialSort: sort,
+                    initialTabIndex: tabIndex,
+                  );
+                },
+              ),
               GoRoute(
                 path: 'labs/:labId',
                 builder: (_, state) => LabDetailScreen(

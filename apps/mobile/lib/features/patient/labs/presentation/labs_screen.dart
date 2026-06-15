@@ -4,9 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../data/lab_models.dart';
 import '../data/public_repository.dart';
 import '../../../../core/location/location_service.dart';
-import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/list_skeleton.dart';
+import '../../../../shared/widgets/animations.dart';
 import '../../../../l10n/app_localizations.dart';
 
 // Shared search text, used by BOTH the Tests and Labs tabs.
@@ -19,7 +20,22 @@ final _labsFilterProvider = StateProvider<LabsFilter>(
 );
 
 class LabsScreen extends ConsumerStatefulWidget {
-  const LabsScreen({super.key});
+  const LabsScreen({
+    super.key,
+    this.initialQuery,
+    this.initialSort,
+    this.initialTabIndex = 0,
+  });
+
+  /// Pre-fills the search box (e.g. when opened from a "Popular" chip).
+  final String? initialQuery;
+
+  /// Pre-applies a labs sort ('rating' | 'price' | 'distance') when opened
+  /// from a "Browse by" chip.
+  final String? initialSort;
+
+  /// 0 = Tests tab, 1 = Labs tab.
+  final int initialTabIndex;
 
   @override
   ConsumerState<LabsScreen> createState() => _LabsScreenState();
@@ -27,6 +43,27 @@ class LabsScreen extends ConsumerStatefulWidget {
 
 class _LabsScreenState extends ConsumerState<LabsScreen> {
   final _searchCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final q = widget.initialQuery;
+    if (q != null && q.isNotEmpty) _searchCtrl.text = q;
+    // Seed the shared search/filter providers from the launch arguments once
+    // the first frame is up (can't mutate providers during initState build).
+    if ((q != null && q.isNotEmpty) || widget.initialSort != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (q != null && q.isNotEmpty) {
+          ref.read(_searchQueryProvider.notifier).state = q;
+        }
+        if (widget.initialSort != null) {
+          ref.read(_labsFilterProvider.notifier).state =
+              ref.read(_labsFilterProvider).copyWith(sort: widget.initialSort);
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -45,6 +82,7 @@ class _LabsScreenState extends ConsumerState<LabsScreen> {
 
     return DefaultTabController(
       length: 2,
+      initialIndex: widget.initialTabIndex,
       child: Scaffold(
         appBar: AppBar(
           title: Text(l10n.findTestOrLab),
@@ -118,7 +156,7 @@ class _TestsTabView extends ConsumerWidget {
     final testsAsync = ref.watch(testsListProvider(query));
 
     return testsAsync.when(
-      loading: () => const LoadingIndicator(),
+      loading: () => const CardListSkeleton(),
       error: (e, _) => ErrorState(
         error: e,
         onRetry: () => ref.invalidate(testsListProvider(query)),
@@ -136,7 +174,10 @@ class _TestsTabView extends ConsumerWidget {
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: data.items.length,
-            itemBuilder: (context, i) => _TestCard(test: data.items[i]),
+            itemBuilder: (context, i) => FadeSlideIn(
+              index: i,
+              child: _TestCard(test: data.items[i]),
+            ),
           ),
         );
       },
@@ -156,7 +197,7 @@ class _TestCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: InkWell(
+      child: PressableCard(
         borderRadius: BorderRadius.circular(12),
         onTap: () => context.push(
           '/patient/tests/${Uri.encodeComponent(test.name)}'
@@ -236,7 +277,7 @@ class _LabsTabView extends ConsumerWidget {
     final labsAsync = ref.watch(labsListProvider(filter));
 
     return labsAsync.when(
-      loading: () => const LoadingIndicator(),
+      loading: () => const CardListSkeleton(),
       error: (e, _) => ErrorState(
         error: e,
         onRetry: () => ref.invalidate(labsListProvider(filter)),
@@ -254,7 +295,10 @@ class _LabsTabView extends ConsumerWidget {
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: data.items.length,
-            itemBuilder: (context, i) => _LabCard(lab: data.items[i]),
+            itemBuilder: (context, i) => FadeSlideIn(
+              index: i,
+              child: _LabCard(lab: data.items[i]),
+            ),
           ),
         );
       },
@@ -274,7 +318,7 @@ class _LabCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: InkWell(
+      child: PressableCard(
         borderRadius: BorderRadius.circular(12),
         onTap: () => context.push('/patient/labs/${lab.id}', extra: lab),
         child: Padding(

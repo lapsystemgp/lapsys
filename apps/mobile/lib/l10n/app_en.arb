@@ -29,6 +29,7 @@
   "error": "Something went wrong",
   "noResults": "No results found",
 
+  "patientTabHome": "Home",
   "patientTabLabs": "Labs",
   "patientTabBookings": "Bookings",
   "patientTabResults": "Results",
@@ -108,6 +109,43 @@
       "distance": { "type": "String" }
     }
   },
+
+  "homeGreeting": "Hi, {name} 👋",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "homeGreetingGuest": "Welcome 👋",
+  "homeTrustBadge": "Egypt's Trusted Medical Lab Platform",
+  "homeHeadline": "Find the best medical labs near you",
+  "homeSubtitle": "Compare prices, ratings, and book appointments instantly.",
+  "homeSearchHint": "Test name or symptoms…",
+  "browseBy": "Browse by",
+  "popular": "Popular",
+  "topRated": "Top Rated",
+  "bestPrice": "Best Price",
+  "featuredLabs": "Featured Labs",
+  "featuredLabsSubtitle": "Top-rated labs available for booking right now",
+  "viewAll": "View all",
+  "whyChooseTestly": "Why Choose TesTly?",
+  "howItWorks": "How It Works",
+  "featureComparePricesTitle": "Compare Prices",
+  "featureComparePricesDesc": "See prices from multiple labs instantly",
+  "featureReviewsTitle": "Verified Reviews",
+  "featureReviewsDesc": "Real reviews from real patients",
+  "featureHomeCollectionTitle": "Home Collection",
+  "featureHomeCollectionDesc": "Book sample collection at home",
+  "featureDigitalResultsTitle": "Digital Results",
+  "featureDigitalResultsDesc": "Get your results as a PDF in-app",
+  "stepSearchTitle": "Search",
+  "stepSearchDesc": "Enter a test name or symptoms",
+  "stepCompareTitle": "Compare",
+  "stepCompareDesc": "View labs, prices & ratings",
+  "stepBookTitle": "Book",
+  "stepBookDesc": "Schedule your appointment",
+  "stepResultsTitle": "Get Results",
+  "stepResultsDesc": "Receive digital PDF results",
 
   "labsOfferingTest": "Labs offering {testName}",
   "@labsOfferingTest": {
@@ -316,6 +354,16 @@
   "security": "Security",
   "biometricUnlock": "Biometric unlock",
   "biometricUnlockSubtitle": "Require biometrics to open the app",
+
+  "language": "Language",
+  "languageSystem": "System default",
+  "languageEnglish": "English",
+  "languageArabic": "العربية",
+
+  "theme": "Theme",
+  "themeSystem": "System default",
+  "themeLight": "Light",
+  "themeDark": "Dark",
 
   "noPendingBookings": "No pending bookings",
   "noConfirmedBookings": "No confirmed bookings",

@@ -5,6 +5,8 @@ import '../../workspace/data/workspace_models.dart';
 import '../../workspace/data/patient_repository.dart';
 import '../../../auth/application/session_notifier.dart';
 import '../../../auth/application/biometric_service.dart';
+import '../../../../core/locale/locale_controller.dart';
+import '../../../../core/theme/theme_controller.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -231,6 +233,18 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
             ),
           ],
 
+          const SizedBox(height: 16),
+          _Section(
+            title: l10n.language,
+            child: _LanguageSelector(),
+          ),
+
+          const SizedBox(height: 16),
+          _Section(
+            title: l10n.theme,
+            child: _ThemeSelector(),
+          ),
+
           const SizedBox(height: 24),
 
           _saving
@@ -252,6 +266,82 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
                   label: Text(l10n.signOut,
                       style: const TextStyle(color: Colors.red)),
                 ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LanguageSelector extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final selected = ref.watch(localeControllerProvider)?.languageCode;
+
+    void choose(String? code) {
+      ref.read(localeControllerProvider.notifier).setLocale(
+            code == null ? null : Locale(code),
+          );
+    }
+
+    return RadioGroup<String?>(
+      groupValue: selected,
+      onChanged: choose,
+      child: Column(
+        children: [
+          RadioListTile<String?>(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.languageSystem),
+            value: null,
+          ),
+          RadioListTile<String?>(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.languageEnglish),
+            value: 'en',
+          ),
+          RadioListTile<String?>(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.languageArabic),
+            value: 'ar',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ThemeSelector extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final mode = ref.watch(themeControllerProvider);
+
+    void choose(ThemeMode? value) {
+      if (value != null) {
+        ref.read(themeControllerProvider.notifier).setMode(value);
+      }
+    }
+
+    return RadioGroup<ThemeMode>(
+      groupValue: mode,
+      onChanged: choose,
+      child: Column(
+        children: [
+          RadioListTile<ThemeMode>(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.themeSystem),
+            value: ThemeMode.system,
+          ),
+          RadioListTile<ThemeMode>(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.themeLight),
+            value: ThemeMode.light,
+          ),
+          RadioListTile<ThemeMode>(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.themeDark),
+            value: ThemeMode.dark,
+          ),
         ],
       ),
     );

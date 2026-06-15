@@ -77,6 +77,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noResults => 'No results found';
 
   @override
+  String get patientTabHome => 'Home';
+
+  @override
   String get patientTabLabs => 'Labs';
 
   @override
@@ -262,6 +265,104 @@ class AppLocalizationsEn extends AppLocalizations {
   String distanceKm(String distance) {
     return '$distance km';
   }
+
+  @override
+  String homeGreeting(String name) {
+    return 'Hi, $name 👋';
+  }
+
+  @override
+  String get homeGreetingGuest => 'Welcome 👋';
+
+  @override
+  String get homeTrustBadge => 'Egypt\'s Trusted Medical Lab Platform';
+
+  @override
+  String get homeHeadline => 'Find the best medical labs near you';
+
+  @override
+  String get homeSubtitle =>
+      'Compare prices, ratings, and book appointments instantly.';
+
+  @override
+  String get homeSearchHint => 'Test name or symptoms…';
+
+  @override
+  String get browseBy => 'Browse by';
+
+  @override
+  String get popular => 'Popular';
+
+  @override
+  String get topRated => 'Top Rated';
+
+  @override
+  String get bestPrice => 'Best Price';
+
+  @override
+  String get featuredLabs => 'Featured Labs';
+
+  @override
+  String get featuredLabsSubtitle =>
+      'Top-rated labs available for booking right now';
+
+  @override
+  String get viewAll => 'View all';
+
+  @override
+  String get whyChooseTestly => 'Why Choose TesTly?';
+
+  @override
+  String get howItWorks => 'How It Works';
+
+  @override
+  String get featureComparePricesTitle => 'Compare Prices';
+
+  @override
+  String get featureComparePricesDesc =>
+      'See prices from multiple labs instantly';
+
+  @override
+  String get featureReviewsTitle => 'Verified Reviews';
+
+  @override
+  String get featureReviewsDesc => 'Real reviews from real patients';
+
+  @override
+  String get featureHomeCollectionTitle => 'Home Collection';
+
+  @override
+  String get featureHomeCollectionDesc => 'Book sample collection at home';
+
+  @override
+  String get featureDigitalResultsTitle => 'Digital Results';
+
+  @override
+  String get featureDigitalResultsDesc => 'Get your results as a PDF in-app';
+
+  @override
+  String get stepSearchTitle => 'Search';
+
+  @override
+  String get stepSearchDesc => 'Enter a test name or symptoms';
+
+  @override
+  String get stepCompareTitle => 'Compare';
+
+  @override
+  String get stepCompareDesc => 'View labs, prices & ratings';
+
+  @override
+  String get stepBookTitle => 'Book';
+
+  @override
+  String get stepBookDesc => 'Schedule your appointment';
+
+  @override
+  String get stepResultsTitle => 'Get Results';
+
+  @override
+  String get stepResultsDesc => 'Receive digital PDF results';
 
   @override
   String labsOfferingTest(String testName) {
@@ -699,6 +800,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get biometricUnlockSubtitle => 'Require biometrics to open the app';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get languageSystem => 'System default';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageArabic => 'العربية';
+
+  @override
+  String get theme => 'Theme';
+
+  @override
+  String get themeSystem => 'System default';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
 
   @override
   String get noPendingBookings => 'No pending bookings';

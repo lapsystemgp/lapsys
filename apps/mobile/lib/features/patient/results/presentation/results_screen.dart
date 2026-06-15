@@ -5,9 +5,10 @@ import 'package:intl/intl.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../workspace/application/workspace_provider.dart';
 import '../../workspace/data/workspace_models.dart';
-import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/list_skeleton.dart';
+import '../../../../shared/widgets/animations.dart';
 
 class ResultsScreen extends ConsumerWidget {
   const ResultsScreen({super.key});
@@ -20,7 +21,7 @@ class ResultsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.myResults)),
       body: resultsAsync.when(
-        loading: () => const LoadingIndicator(),
+        loading: () => const CardListSkeleton(),
         error: (e, _) => ErrorState(
           error: e,
           onRetry: () => ref.invalidate(workspaceProvider),
@@ -38,7 +39,10 @@ class ResultsScreen extends ConsumerWidget {
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: results.length,
-              itemBuilder: (context, i) => _ResultCard(result: results[i]),
+              itemBuilder: (context, i) => FadeSlideIn(
+                index: i,
+                child: _ResultCard(result: results[i]),
+              ),
             ),
           );
         },
@@ -61,7 +65,7 @@ class _ResultCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: InkWell(
+      child: PressableCard(
         borderRadius: BorderRadius.circular(12),
         onTap: () =>
             context.push('/patient/results/${result.bookingId}', extra: result),

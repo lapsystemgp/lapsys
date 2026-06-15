@@ -79,6 +79,11 @@ class _PatientShellState extends ConsumerState<PatientShell> {
 
     return Scaffold(
       body: widget.child,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push(Routes.assistant),
+        tooltip: l10n.assistantTitle,
+        child: const Icon(Icons.health_and_safety_outlined),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (i) => context.go(_tabs[i]),

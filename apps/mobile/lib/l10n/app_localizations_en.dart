@@ -784,4 +784,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String startingFromEgp(Object price) {
     return 'From $price EGP';
   }
+
+  @override
+  String get assistantTitle => 'Health Assistant';
+
+  @override
+  String get assistantNewChat => 'New chat';
+
+  @override
+  String get assistantInputHint => 'Ask about a test, prep, or your health…';
+
+  @override
+  String get assistantEmptyTitle => 'Hi! I\'m your health assistant';
+
+  @override
+  String get assistantEmptyBody =>
+      'Ask me about lab tests, how to prepare, or what a result generally means. I can\'t replace a doctor\'s advice.';
+
+  @override
+  String get assistantDisclaimer =>
+      'AI assistant — not a substitute for professional medical advice.';
+
+  @override
+  String get assistantSuggestion1 =>
+      'How do I prepare for a fasting blood test?';
+
+  @override
+  String get assistantSuggestion2 => 'What does a CBC test measure?';
+
+  @override
+  String get assistantSuggestion3 => 'What is HbA1c used for?';
 }

@@ -76,6 +76,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noResults => 'لا توجد نتائج';
 
   @override
+  String get patientTabHome => 'الرئيسية';
+
+  @override
   String get patientTabLabs => 'المعامل';
 
   @override
@@ -261,6 +264,101 @@ class AppLocalizationsAr extends AppLocalizations {
   String distanceKm(String distance) {
     return '$distance كم';
   }
+
+  @override
+  String homeGreeting(String name) {
+    return 'مرحبًا، $name 👋';
+  }
+
+  @override
+  String get homeGreetingGuest => 'أهلًا بك 👋';
+
+  @override
+  String get homeTrustBadge => 'منصة مصر الموثوقة للمعامل الطبية';
+
+  @override
+  String get homeHeadline => 'اعثر على أفضل المعامل الطبية القريبة منك';
+
+  @override
+  String get homeSubtitle => 'قارن الأسعار والتقييمات واحجز موعدك فورًا.';
+
+  @override
+  String get homeSearchHint => 'اسم التحليل أو الأعراض…';
+
+  @override
+  String get browseBy => 'تصفح حسب';
+
+  @override
+  String get popular => 'الأكثر بحثًا';
+
+  @override
+  String get topRated => 'الأعلى تقييمًا';
+
+  @override
+  String get bestPrice => 'أفضل سعر';
+
+  @override
+  String get featuredLabs => 'معامل مميزة';
+
+  @override
+  String get featuredLabsSubtitle => 'أعلى المعامل تقييمًا والمتاحة للحجز الآن';
+
+  @override
+  String get viewAll => 'عرض الكل';
+
+  @override
+  String get whyChooseTestly => 'لماذا TesTly؟';
+
+  @override
+  String get howItWorks => 'كيف يعمل';
+
+  @override
+  String get featureComparePricesTitle => 'قارن الأسعار';
+
+  @override
+  String get featureComparePricesDesc => 'اطّلع على أسعار عدة معامل فورًا';
+
+  @override
+  String get featureReviewsTitle => 'تقييمات موثوقة';
+
+  @override
+  String get featureReviewsDesc => 'تقييمات حقيقية من مرضى حقيقيين';
+
+  @override
+  String get featureHomeCollectionTitle => 'سحب العينة منزليًا';
+
+  @override
+  String get featureHomeCollectionDesc => 'احجز سحب العينة في منزلك';
+
+  @override
+  String get featureDigitalResultsTitle => 'نتائج رقمية';
+
+  @override
+  String get featureDigitalResultsDesc => 'استلم نتائجك بصيغة PDF داخل التطبيق';
+
+  @override
+  String get stepSearchTitle => 'ابحث';
+
+  @override
+  String get stepSearchDesc => 'أدخل اسم التحليل أو الأعراض';
+
+  @override
+  String get stepCompareTitle => 'قارن';
+
+  @override
+  String get stepCompareDesc => 'اطّلع على المعامل والأسعار والتقييمات';
+
+  @override
+  String get stepBookTitle => 'احجز';
+
+  @override
+  String get stepBookDesc => 'حدد موعدك';
+
+  @override
+  String get stepResultsTitle => 'استلم النتائج';
+
+  @override
+  String get stepResultsDesc => 'استلم نتائجك الرقمية بصيغة PDF';
 
   @override
   String labsOfferingTest(String testName) {
@@ -697,6 +795,30 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get biometricUnlockSubtitle =>
       'يتطلب المصادقة البيومترية عند فتح التطبيق';
+
+  @override
+  String get language => 'اللغة';
+
+  @override
+  String get languageSystem => 'لغة النظام';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageArabic => 'العربية';
+
+  @override
+  String get theme => 'المظهر';
+
+  @override
+  String get themeSystem => 'مظهر النظام';
+
+  @override
+  String get themeLight => 'فاتح';
+
+  @override
+  String get themeDark => 'داكن';
 
   @override
   String get noPendingBookings => 'لا توجد حجوزات معلقة';

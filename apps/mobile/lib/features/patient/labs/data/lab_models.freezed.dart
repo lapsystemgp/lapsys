@@ -1516,6 +1516,1122 @@ abstract class _PublicLabDetailResponse implements PublicLabDetailResponse {
       get copyWith => throw _privateConstructorUsedError;
 }
 
+PublicTestCard _$PublicTestCardFromJson(Map<String, dynamic> json) {
+  return _PublicTestCard.fromJson(json);
+}
+
+/// @nodoc
+mixin _$PublicTestCard {
+  String get name => throw _privateConstructorUsedError;
+  String get category => throw _privateConstructorUsedError;
+  int? get minPriceEgp => throw _privateConstructorUsedError;
+  int get labCount => throw _privateConstructorUsedError;
+
+  /// Serializes this PublicTestCard to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of PublicTestCard
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $PublicTestCardCopyWith<PublicTestCard> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $PublicTestCardCopyWith<$Res> {
+  factory $PublicTestCardCopyWith(
+          PublicTestCard value, $Res Function(PublicTestCard) then) =
+      _$PublicTestCardCopyWithImpl<$Res, PublicTestCard>;
+  @useResult
+  $Res call({String name, String category, int? minPriceEgp, int labCount});
+}
+
+/// @nodoc
+class _$PublicTestCardCopyWithImpl<$Res, $Val extends PublicTestCard>
+    implements $PublicTestCardCopyWith<$Res> {
+  _$PublicTestCardCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of PublicTestCard
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? name = null,
+    Object? category = null,
+    Object? minPriceEgp = freezed,
+    Object? labCount = null,
+  }) {
+    return _then(_value.copyWith(
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String,
+      minPriceEgp: freezed == minPriceEgp
+          ? _value.minPriceEgp
+          : minPriceEgp // ignore: cast_nullable_to_non_nullable
+              as int?,
+      labCount: null == labCount
+          ? _value.labCount
+          : labCount // ignore: cast_nullable_to_non_nullable
+              as int,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$PublicTestCardImplCopyWith<$Res>
+    implements $PublicTestCardCopyWith<$Res> {
+  factory _$$PublicTestCardImplCopyWith(_$PublicTestCardImpl value,
+          $Res Function(_$PublicTestCardImpl) then) =
+      __$$PublicTestCardImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String name, String category, int? minPriceEgp, int labCount});
+}
+
+/// @nodoc
+class __$$PublicTestCardImplCopyWithImpl<$Res>
+    extends _$PublicTestCardCopyWithImpl<$Res, _$PublicTestCardImpl>
+    implements _$$PublicTestCardImplCopyWith<$Res> {
+  __$$PublicTestCardImplCopyWithImpl(
+      _$PublicTestCardImpl _value, $Res Function(_$PublicTestCardImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of PublicTestCard
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? name = null,
+    Object? category = null,
+    Object? minPriceEgp = freezed,
+    Object? labCount = null,
+  }) {
+    return _then(_$PublicTestCardImpl(
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String,
+      minPriceEgp: freezed == minPriceEgp
+          ? _value.minPriceEgp
+          : minPriceEgp // ignore: cast_nullable_to_non_nullable
+              as int?,
+      labCount: null == labCount
+          ? _value.labCount
+          : labCount // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$PublicTestCardImpl implements _PublicTestCard {
+  const _$PublicTestCardImpl(
+      {required this.name,
+      required this.category,
+      this.minPriceEgp,
+      required this.labCount});
+
+  factory _$PublicTestCardImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PublicTestCardImplFromJson(json);
+
+  @override
+  final String name;
+  @override
+  final String category;
+  @override
+  final int? minPriceEgp;
+  @override
+  final int labCount;
+
+  @override
+  String toString() {
+    return 'PublicTestCard(name: $name, category: $category, minPriceEgp: $minPriceEgp, labCount: $labCount)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$PublicTestCardImpl &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.category, category) ||
+                other.category == category) &&
+            (identical(other.minPriceEgp, minPriceEgp) ||
+                other.minPriceEgp == minPriceEgp) &&
+            (identical(other.labCount, labCount) ||
+                other.labCount == labCount));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, name, category, minPriceEgp, labCount);
+
+  /// Create a copy of PublicTestCard
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$PublicTestCardImplCopyWith<_$PublicTestCardImpl> get copyWith =>
+      __$$PublicTestCardImplCopyWithImpl<_$PublicTestCardImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$PublicTestCardImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _PublicTestCard implements PublicTestCard {
+  const factory _PublicTestCard(
+      {required final String name,
+      required final String category,
+      final int? minPriceEgp,
+      required final int labCount}) = _$PublicTestCardImpl;
+
+  factory _PublicTestCard.fromJson(Map<String, dynamic> json) =
+      _$PublicTestCardImpl.fromJson;
+
+  @override
+  String get name;
+  @override
+  String get category;
+  @override
+  int? get minPriceEgp;
+  @override
+  int get labCount;
+
+  /// Create a copy of PublicTestCard
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$PublicTestCardImplCopyWith<_$PublicTestCardImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+PublicTestListResponse _$PublicTestListResponseFromJson(
+    Map<String, dynamic> json) {
+  return _PublicTestListResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$PublicTestListResponse {
+  List<PublicTestCard> get items => throw _privateConstructorUsedError;
+  Pagination get pagination => throw _privateConstructorUsedError;
+
+  /// Serializes this PublicTestListResponse to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of PublicTestListResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $PublicTestListResponseCopyWith<PublicTestListResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $PublicTestListResponseCopyWith<$Res> {
+  factory $PublicTestListResponseCopyWith(PublicTestListResponse value,
+          $Res Function(PublicTestListResponse) then) =
+      _$PublicTestListResponseCopyWithImpl<$Res, PublicTestListResponse>;
+  @useResult
+  $Res call({List<PublicTestCard> items, Pagination pagination});
+
+  $PaginationCopyWith<$Res> get pagination;
+}
+
+/// @nodoc
+class _$PublicTestListResponseCopyWithImpl<$Res,
+        $Val extends PublicTestListResponse>
+    implements $PublicTestListResponseCopyWith<$Res> {
+  _$PublicTestListResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of PublicTestListResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? items = null,
+    Object? pagination = null,
+  }) {
+    return _then(_value.copyWith(
+      items: null == items
+          ? _value.items
+          : items // ignore: cast_nullable_to_non_nullable
+              as List<PublicTestCard>,
+      pagination: null == pagination
+          ? _value.pagination
+          : pagination // ignore: cast_nullable_to_non_nullable
+              as Pagination,
+    ) as $Val);
+  }
+
+  /// Create a copy of PublicTestListResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $PaginationCopyWith<$Res> get pagination {
+    return $PaginationCopyWith<$Res>(_value.pagination, (value) {
+      return _then(_value.copyWith(pagination: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$PublicTestListResponseImplCopyWith<$Res>
+    implements $PublicTestListResponseCopyWith<$Res> {
+  factory _$$PublicTestListResponseImplCopyWith(
+          _$PublicTestListResponseImpl value,
+          $Res Function(_$PublicTestListResponseImpl) then) =
+      __$$PublicTestListResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({List<PublicTestCard> items, Pagination pagination});
+
+  @override
+  $PaginationCopyWith<$Res> get pagination;
+}
+
+/// @nodoc
+class __$$PublicTestListResponseImplCopyWithImpl<$Res>
+    extends _$PublicTestListResponseCopyWithImpl<$Res,
+        _$PublicTestListResponseImpl>
+    implements _$$PublicTestListResponseImplCopyWith<$Res> {
+  __$$PublicTestListResponseImplCopyWithImpl(
+      _$PublicTestListResponseImpl _value,
+      $Res Function(_$PublicTestListResponseImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of PublicTestListResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? items = null,
+    Object? pagination = null,
+  }) {
+    return _then(_$PublicTestListResponseImpl(
+      items: null == items
+          ? _value._items
+          : items // ignore: cast_nullable_to_non_nullable
+              as List<PublicTestCard>,
+      pagination: null == pagination
+          ? _value.pagination
+          : pagination // ignore: cast_nullable_to_non_nullable
+              as Pagination,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$PublicTestListResponseImpl implements _PublicTestListResponse {
+  const _$PublicTestListResponseImpl(
+      {required final List<PublicTestCard> items, required this.pagination})
+      : _items = items;
+
+  factory _$PublicTestListResponseImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PublicTestListResponseImplFromJson(json);
+
+  final List<PublicTestCard> _items;
+  @override
+  List<PublicTestCard> get items {
+    if (_items is EqualUnmodifiableListView) return _items;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_items);
+  }
+
+  @override
+  final Pagination pagination;
+
+  @override
+  String toString() {
+    return 'PublicTestListResponse(items: $items, pagination: $pagination)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$PublicTestListResponseImpl &&
+            const DeepCollectionEquality().equals(other._items, _items) &&
+            (identical(other.pagination, pagination) ||
+                other.pagination == pagination));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, const DeepCollectionEquality().hash(_items), pagination);
+
+  /// Create a copy of PublicTestListResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$PublicTestListResponseImplCopyWith<_$PublicTestListResponseImpl>
+      get copyWith => __$$PublicTestListResponseImplCopyWithImpl<
+          _$PublicTestListResponseImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$PublicTestListResponseImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _PublicTestListResponse implements PublicTestListResponse {
+  const factory _PublicTestListResponse(
+      {required final List<PublicTestCard> items,
+      required final Pagination pagination}) = _$PublicTestListResponseImpl;
+
+  factory _PublicTestListResponse.fromJson(Map<String, dynamic> json) =
+      _$PublicTestListResponseImpl.fromJson;
+
+  @override
+  List<PublicTestCard> get items;
+  @override
+  Pagination get pagination;
+
+  /// Create a copy of PublicTestListResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$PublicTestListResponseImplCopyWith<_$PublicTestListResponseImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+TestOfferLab _$TestOfferLabFromJson(Map<String, dynamic> json) {
+  return _TestOfferLab.fromJson(json);
+}
+
+/// @nodoc
+mixin _$TestOfferLab {
+  String get labTestId => throw _privateConstructorUsedError;
+  String get labId => throw _privateConstructorUsedError;
+  String get labName => throw _privateConstructorUsedError;
+  String get address => throw _privateConstructorUsedError;
+  int get priceEgp => throw _privateConstructorUsedError;
+  double? get rating => throw _privateConstructorUsedError;
+  int get reviews => throw _privateConstructorUsedError;
+  bool get homeCollection => throw _privateConstructorUsedError;
+  bool get homeTestKit => throw _privateConstructorUsedError;
+  String? get accreditation => throw _privateConstructorUsedError;
+  String? get turnaroundTime => throw _privateConstructorUsedError;
+  double? get latitude => throw _privateConstructorUsedError;
+  double? get longitude => throw _privateConstructorUsedError;
+
+  /// Serializes this TestOfferLab to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of TestOfferLab
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $TestOfferLabCopyWith<TestOfferLab> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $TestOfferLabCopyWith<$Res> {
+  factory $TestOfferLabCopyWith(
+          TestOfferLab value, $Res Function(TestOfferLab) then) =
+      _$TestOfferLabCopyWithImpl<$Res, TestOfferLab>;
+  @useResult
+  $Res call(
+      {String labTestId,
+      String labId,
+      String labName,
+      String address,
+      int priceEgp,
+      double? rating,
+      int reviews,
+      bool homeCollection,
+      bool homeTestKit,
+      String? accreditation,
+      String? turnaroundTime,
+      double? latitude,
+      double? longitude});
+}
+
+/// @nodoc
+class _$TestOfferLabCopyWithImpl<$Res, $Val extends TestOfferLab>
+    implements $TestOfferLabCopyWith<$Res> {
+  _$TestOfferLabCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of TestOfferLab
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? labTestId = null,
+    Object? labId = null,
+    Object? labName = null,
+    Object? address = null,
+    Object? priceEgp = null,
+    Object? rating = freezed,
+    Object? reviews = null,
+    Object? homeCollection = null,
+    Object? homeTestKit = null,
+    Object? accreditation = freezed,
+    Object? turnaroundTime = freezed,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
+  }) {
+    return _then(_value.copyWith(
+      labTestId: null == labTestId
+          ? _value.labTestId
+          : labTestId // ignore: cast_nullable_to_non_nullable
+              as String,
+      labId: null == labId
+          ? _value.labId
+          : labId // ignore: cast_nullable_to_non_nullable
+              as String,
+      labName: null == labName
+          ? _value.labName
+          : labName // ignore: cast_nullable_to_non_nullable
+              as String,
+      address: null == address
+          ? _value.address
+          : address // ignore: cast_nullable_to_non_nullable
+              as String,
+      priceEgp: null == priceEgp
+          ? _value.priceEgp
+          : priceEgp // ignore: cast_nullable_to_non_nullable
+              as int,
+      rating: freezed == rating
+          ? _value.rating
+          : rating // ignore: cast_nullable_to_non_nullable
+              as double?,
+      reviews: null == reviews
+          ? _value.reviews
+          : reviews // ignore: cast_nullable_to_non_nullable
+              as int,
+      homeCollection: null == homeCollection
+          ? _value.homeCollection
+          : homeCollection // ignore: cast_nullable_to_non_nullable
+              as bool,
+      homeTestKit: null == homeTestKit
+          ? _value.homeTestKit
+          : homeTestKit // ignore: cast_nullable_to_non_nullable
+              as bool,
+      accreditation: freezed == accreditation
+          ? _value.accreditation
+          : accreditation // ignore: cast_nullable_to_non_nullable
+              as String?,
+      turnaroundTime: freezed == turnaroundTime
+          ? _value.turnaroundTime
+          : turnaroundTime // ignore: cast_nullable_to_non_nullable
+              as String?,
+      latitude: freezed == latitude
+          ? _value.latitude
+          : latitude // ignore: cast_nullable_to_non_nullable
+              as double?,
+      longitude: freezed == longitude
+          ? _value.longitude
+          : longitude // ignore: cast_nullable_to_non_nullable
+              as double?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$TestOfferLabImplCopyWith<$Res>
+    implements $TestOfferLabCopyWith<$Res> {
+  factory _$$TestOfferLabImplCopyWith(
+          _$TestOfferLabImpl value, $Res Function(_$TestOfferLabImpl) then) =
+      __$$TestOfferLabImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String labTestId,
+      String labId,
+      String labName,
+      String address,
+      int priceEgp,
+      double? rating,
+      int reviews,
+      bool homeCollection,
+      bool homeTestKit,
+      String? accreditation,
+      String? turnaroundTime,
+      double? latitude,
+      double? longitude});
+}
+
+/// @nodoc
+class __$$TestOfferLabImplCopyWithImpl<$Res>
+    extends _$TestOfferLabCopyWithImpl<$Res, _$TestOfferLabImpl>
+    implements _$$TestOfferLabImplCopyWith<$Res> {
+  __$$TestOfferLabImplCopyWithImpl(
+      _$TestOfferLabImpl _value, $Res Function(_$TestOfferLabImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of TestOfferLab
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? labTestId = null,
+    Object? labId = null,
+    Object? labName = null,
+    Object? address = null,
+    Object? priceEgp = null,
+    Object? rating = freezed,
+    Object? reviews = null,
+    Object? homeCollection = null,
+    Object? homeTestKit = null,
+    Object? accreditation = freezed,
+    Object? turnaroundTime = freezed,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
+  }) {
+    return _then(_$TestOfferLabImpl(
+      labTestId: null == labTestId
+          ? _value.labTestId
+          : labTestId // ignore: cast_nullable_to_non_nullable
+              as String,
+      labId: null == labId
+          ? _value.labId
+          : labId // ignore: cast_nullable_to_non_nullable
+              as String,
+      labName: null == labName
+          ? _value.labName
+          : labName // ignore: cast_nullable_to_non_nullable
+              as String,
+      address: null == address
+          ? _value.address
+          : address // ignore: cast_nullable_to_non_nullable
+              as String,
+      priceEgp: null == priceEgp
+          ? _value.priceEgp
+          : priceEgp // ignore: cast_nullable_to_non_nullable
+              as int,
+      rating: freezed == rating
+          ? _value.rating
+          : rating // ignore: cast_nullable_to_non_nullable
+              as double?,
+      reviews: null == reviews
+          ? _value.reviews
+          : reviews // ignore: cast_nullable_to_non_nullable
+              as int,
+      homeCollection: null == homeCollection
+          ? _value.homeCollection
+          : homeCollection // ignore: cast_nullable_to_non_nullable
+              as bool,
+      homeTestKit: null == homeTestKit
+          ? _value.homeTestKit
+          : homeTestKit // ignore: cast_nullable_to_non_nullable
+              as bool,
+      accreditation: freezed == accreditation
+          ? _value.accreditation
+          : accreditation // ignore: cast_nullable_to_non_nullable
+              as String?,
+      turnaroundTime: freezed == turnaroundTime
+          ? _value.turnaroundTime
+          : turnaroundTime // ignore: cast_nullable_to_non_nullable
+              as String?,
+      latitude: freezed == latitude
+          ? _value.latitude
+          : latitude // ignore: cast_nullable_to_non_nullable
+              as double?,
+      longitude: freezed == longitude
+          ? _value.longitude
+          : longitude // ignore: cast_nullable_to_non_nullable
+              as double?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$TestOfferLabImpl implements _TestOfferLab {
+  const _$TestOfferLabImpl(
+      {required this.labTestId,
+      required this.labId,
+      required this.labName,
+      required this.address,
+      required this.priceEgp,
+      this.rating,
+      required this.reviews,
+      required this.homeCollection,
+      required this.homeTestKit,
+      this.accreditation,
+      this.turnaroundTime,
+      this.latitude,
+      this.longitude});
+
+  factory _$TestOfferLabImpl.fromJson(Map<String, dynamic> json) =>
+      _$$TestOfferLabImplFromJson(json);
+
+  @override
+  final String labTestId;
+  @override
+  final String labId;
+  @override
+  final String labName;
+  @override
+  final String address;
+  @override
+  final int priceEgp;
+  @override
+  final double? rating;
+  @override
+  final int reviews;
+  @override
+  final bool homeCollection;
+  @override
+  final bool homeTestKit;
+  @override
+  final String? accreditation;
+  @override
+  final String? turnaroundTime;
+  @override
+  final double? latitude;
+  @override
+  final double? longitude;
+
+  @override
+  String toString() {
+    return 'TestOfferLab(labTestId: $labTestId, labId: $labId, labName: $labName, address: $address, priceEgp: $priceEgp, rating: $rating, reviews: $reviews, homeCollection: $homeCollection, homeTestKit: $homeTestKit, accreditation: $accreditation, turnaroundTime: $turnaroundTime, latitude: $latitude, longitude: $longitude)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$TestOfferLabImpl &&
+            (identical(other.labTestId, labTestId) ||
+                other.labTestId == labTestId) &&
+            (identical(other.labId, labId) || other.labId == labId) &&
+            (identical(other.labName, labName) || other.labName == labName) &&
+            (identical(other.address, address) || other.address == address) &&
+            (identical(other.priceEgp, priceEgp) ||
+                other.priceEgp == priceEgp) &&
+            (identical(other.rating, rating) || other.rating == rating) &&
+            (identical(other.reviews, reviews) || other.reviews == reviews) &&
+            (identical(other.homeCollection, homeCollection) ||
+                other.homeCollection == homeCollection) &&
+            (identical(other.homeTestKit, homeTestKit) ||
+                other.homeTestKit == homeTestKit) &&
+            (identical(other.accreditation, accreditation) ||
+                other.accreditation == accreditation) &&
+            (identical(other.turnaroundTime, turnaroundTime) ||
+                other.turnaroundTime == turnaroundTime) &&
+            (identical(other.latitude, latitude) ||
+                other.latitude == latitude) &&
+            (identical(other.longitude, longitude) ||
+                other.longitude == longitude));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      labTestId,
+      labId,
+      labName,
+      address,
+      priceEgp,
+      rating,
+      reviews,
+      homeCollection,
+      homeTestKit,
+      accreditation,
+      turnaroundTime,
+      latitude,
+      longitude);
+
+  /// Create a copy of TestOfferLab
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$TestOfferLabImplCopyWith<_$TestOfferLabImpl> get copyWith =>
+      __$$TestOfferLabImplCopyWithImpl<_$TestOfferLabImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$TestOfferLabImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _TestOfferLab implements TestOfferLab {
+  const factory _TestOfferLab(
+      {required final String labTestId,
+      required final String labId,
+      required final String labName,
+      required final String address,
+      required final int priceEgp,
+      final double? rating,
+      required final int reviews,
+      required final bool homeCollection,
+      required final bool homeTestKit,
+      final String? accreditation,
+      final String? turnaroundTime,
+      final double? latitude,
+      final double? longitude}) = _$TestOfferLabImpl;
+
+  factory _TestOfferLab.fromJson(Map<String, dynamic> json) =
+      _$TestOfferLabImpl.fromJson;
+
+  @override
+  String get labTestId;
+  @override
+  String get labId;
+  @override
+  String get labName;
+  @override
+  String get address;
+  @override
+  int get priceEgp;
+  @override
+  double? get rating;
+  @override
+  int get reviews;
+  @override
+  bool get homeCollection;
+  @override
+  bool get homeTestKit;
+  @override
+  String? get accreditation;
+  @override
+  String? get turnaroundTime;
+  @override
+  double? get latitude;
+  @override
+  double? get longitude;
+
+  /// Create a copy of TestOfferLab
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$TestOfferLabImplCopyWith<_$TestOfferLabImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+TestOffersResponse _$TestOffersResponseFromJson(Map<String, dynamic> json) {
+  return _TestOffersResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$TestOffersResponse {
+  String get name => throw _privateConstructorUsedError;
+  String get category => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
+  String? get preparation => throw _privateConstructorUsedError;
+  String? get turnaroundTime => throw _privateConstructorUsedError;
+  int? get parametersCount => throw _privateConstructorUsedError;
+  List<TestOfferLab> get labs => throw _privateConstructorUsedError;
+
+  /// Serializes this TestOffersResponse to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of TestOffersResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $TestOffersResponseCopyWith<TestOffersResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $TestOffersResponseCopyWith<$Res> {
+  factory $TestOffersResponseCopyWith(
+          TestOffersResponse value, $Res Function(TestOffersResponse) then) =
+      _$TestOffersResponseCopyWithImpl<$Res, TestOffersResponse>;
+  @useResult
+  $Res call(
+      {String name,
+      String category,
+      String? description,
+      String? preparation,
+      String? turnaroundTime,
+      int? parametersCount,
+      List<TestOfferLab> labs});
+}
+
+/// @nodoc
+class _$TestOffersResponseCopyWithImpl<$Res, $Val extends TestOffersResponse>
+    implements $TestOffersResponseCopyWith<$Res> {
+  _$TestOffersResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of TestOffersResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? name = null,
+    Object? category = null,
+    Object? description = freezed,
+    Object? preparation = freezed,
+    Object? turnaroundTime = freezed,
+    Object? parametersCount = freezed,
+    Object? labs = null,
+  }) {
+    return _then(_value.copyWith(
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+      preparation: freezed == preparation
+          ? _value.preparation
+          : preparation // ignore: cast_nullable_to_non_nullable
+              as String?,
+      turnaroundTime: freezed == turnaroundTime
+          ? _value.turnaroundTime
+          : turnaroundTime // ignore: cast_nullable_to_non_nullable
+              as String?,
+      parametersCount: freezed == parametersCount
+          ? _value.parametersCount
+          : parametersCount // ignore: cast_nullable_to_non_nullable
+              as int?,
+      labs: null == labs
+          ? _value.labs
+          : labs // ignore: cast_nullable_to_non_nullable
+              as List<TestOfferLab>,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$TestOffersResponseImplCopyWith<$Res>
+    implements $TestOffersResponseCopyWith<$Res> {
+  factory _$$TestOffersResponseImplCopyWith(_$TestOffersResponseImpl value,
+          $Res Function(_$TestOffersResponseImpl) then) =
+      __$$TestOffersResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String name,
+      String category,
+      String? description,
+      String? preparation,
+      String? turnaroundTime,
+      int? parametersCount,
+      List<TestOfferLab> labs});
+}
+
+/// @nodoc
+class __$$TestOffersResponseImplCopyWithImpl<$Res>
+    extends _$TestOffersResponseCopyWithImpl<$Res, _$TestOffersResponseImpl>
+    implements _$$TestOffersResponseImplCopyWith<$Res> {
+  __$$TestOffersResponseImplCopyWithImpl(_$TestOffersResponseImpl _value,
+      $Res Function(_$TestOffersResponseImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of TestOffersResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? name = null,
+    Object? category = null,
+    Object? description = freezed,
+    Object? preparation = freezed,
+    Object? turnaroundTime = freezed,
+    Object? parametersCount = freezed,
+    Object? labs = null,
+  }) {
+    return _then(_$TestOffersResponseImpl(
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+      preparation: freezed == preparation
+          ? _value.preparation
+          : preparation // ignore: cast_nullable_to_non_nullable
+              as String?,
+      turnaroundTime: freezed == turnaroundTime
+          ? _value.turnaroundTime
+          : turnaroundTime // ignore: cast_nullable_to_non_nullable
+              as String?,
+      parametersCount: freezed == parametersCount
+          ? _value.parametersCount
+          : parametersCount // ignore: cast_nullable_to_non_nullable
+              as int?,
+      labs: null == labs
+          ? _value._labs
+          : labs // ignore: cast_nullable_to_non_nullable
+              as List<TestOfferLab>,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$TestOffersResponseImpl implements _TestOffersResponse {
+  const _$TestOffersResponseImpl(
+      {required this.name,
+      required this.category,
+      this.description,
+      this.preparation,
+      this.turnaroundTime,
+      this.parametersCount,
+      required final List<TestOfferLab> labs})
+      : _labs = labs;
+
+  factory _$TestOffersResponseImpl.fromJson(Map<String, dynamic> json) =>
+      _$$TestOffersResponseImplFromJson(json);
+
+  @override
+  final String name;
+  @override
+  final String category;
+  @override
+  final String? description;
+  @override
+  final String? preparation;
+  @override
+  final String? turnaroundTime;
+  @override
+  final int? parametersCount;
+  final List<TestOfferLab> _labs;
+  @override
+  List<TestOfferLab> get labs {
+    if (_labs is EqualUnmodifiableListView) return _labs;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_labs);
+  }
+
+  @override
+  String toString() {
+    return 'TestOffersResponse(name: $name, category: $category, description: $description, preparation: $preparation, turnaroundTime: $turnaroundTime, parametersCount: $parametersCount, labs: $labs)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$TestOffersResponseImpl &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.category, category) ||
+                other.category == category) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
+            (identical(other.preparation, preparation) ||
+                other.preparation == preparation) &&
+            (identical(other.turnaroundTime, turnaroundTime) ||
+                other.turnaroundTime == turnaroundTime) &&
+            (identical(other.parametersCount, parametersCount) ||
+                other.parametersCount == parametersCount) &&
+            const DeepCollectionEquality().equals(other._labs, _labs));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      name,
+      category,
+      description,
+      preparation,
+      turnaroundTime,
+      parametersCount,
+      const DeepCollectionEquality().hash(_labs));
+
+  /// Create a copy of TestOffersResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$TestOffersResponseImplCopyWith<_$TestOffersResponseImpl> get copyWith =>
+      __$$TestOffersResponseImplCopyWithImpl<_$TestOffersResponseImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$TestOffersResponseImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _TestOffersResponse implements TestOffersResponse {
+  const factory _TestOffersResponse(
+      {required final String name,
+      required final String category,
+      final String? description,
+      final String? preparation,
+      final String? turnaroundTime,
+      final int? parametersCount,
+      required final List<TestOfferLab> labs}) = _$TestOffersResponseImpl;
+
+  factory _TestOffersResponse.fromJson(Map<String, dynamic> json) =
+      _$TestOffersResponseImpl.fromJson;
+
+  @override
+  String get name;
+  @override
+  String get category;
+  @override
+  String? get description;
+  @override
+  String? get preparation;
+  @override
+  String? get turnaroundTime;
+  @override
+  int? get parametersCount;
+  @override
+  List<TestOfferLab> get labs;
+
+  /// Create a copy of TestOffersResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$TestOffersResponseImplCopyWith<_$TestOffersResponseImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 /// @nodoc
 mixin _$LabsFilter {
   String? get q => throw _privateConstructorUsedError;
@@ -1524,6 +2640,8 @@ mixin _$LabsFilter {
   int? get maxPriceEgp => throw _privateConstructorUsedError;
   bool get homeCollectionOnly => throw _privateConstructorUsedError;
   int get page => throw _privateConstructorUsedError;
+  double? get userLat => throw _privateConstructorUsedError;
+  double? get userLng => throw _privateConstructorUsedError;
 
   /// Create a copy of LabsFilter
   /// with the given fields replaced by the non-null parameter values.
@@ -1544,7 +2662,9 @@ abstract class $LabsFilterCopyWith<$Res> {
       String? sort,
       int? maxPriceEgp,
       bool homeCollectionOnly,
-      int page});
+      int page,
+      double? userLat,
+      double? userLng});
 }
 
 /// @nodoc
@@ -1568,6 +2688,8 @@ class _$LabsFilterCopyWithImpl<$Res, $Val extends LabsFilter>
     Object? maxPriceEgp = freezed,
     Object? homeCollectionOnly = null,
     Object? page = null,
+    Object? userLat = freezed,
+    Object? userLng = freezed,
   }) {
     return _then(_value.copyWith(
       q: freezed == q
@@ -1594,6 +2716,14 @@ class _$LabsFilterCopyWithImpl<$Res, $Val extends LabsFilter>
           ? _value.page
           : page // ignore: cast_nullable_to_non_nullable
               as int,
+      userLat: freezed == userLat
+          ? _value.userLat
+          : userLat // ignore: cast_nullable_to_non_nullable
+              as double?,
+      userLng: freezed == userLng
+          ? _value.userLng
+          : userLng // ignore: cast_nullable_to_non_nullable
+              as double?,
     ) as $Val);
   }
 }
@@ -1612,7 +2742,9 @@ abstract class _$$LabsFilterImplCopyWith<$Res>
       String? sort,
       int? maxPriceEgp,
       bool homeCollectionOnly,
-      int page});
+      int page,
+      double? userLat,
+      double? userLng});
 }
 
 /// @nodoc
@@ -1634,6 +2766,8 @@ class __$$LabsFilterImplCopyWithImpl<$Res>
     Object? maxPriceEgp = freezed,
     Object? homeCollectionOnly = null,
     Object? page = null,
+    Object? userLat = freezed,
+    Object? userLng = freezed,
   }) {
     return _then(_$LabsFilterImpl(
       q: freezed == q
@@ -1660,6 +2794,14 @@ class __$$LabsFilterImplCopyWithImpl<$Res>
           ? _value.page
           : page // ignore: cast_nullable_to_non_nullable
               as int,
+      userLat: freezed == userLat
+          ? _value.userLat
+          : userLat // ignore: cast_nullable_to_non_nullable
+              as double?,
+      userLng: freezed == userLng
+          ? _value.userLng
+          : userLng // ignore: cast_nullable_to_non_nullable
+              as double?,
     ));
   }
 }
@@ -1673,7 +2815,9 @@ class _$LabsFilterImpl implements _LabsFilter {
       this.sort,
       this.maxPriceEgp,
       this.homeCollectionOnly = false,
-      this.page = 1});
+      this.page = 1,
+      this.userLat,
+      this.userLng});
 
   @override
   final String? q;
@@ -1689,10 +2833,14 @@ class _$LabsFilterImpl implements _LabsFilter {
   @override
   @JsonKey()
   final int page;
+  @override
+  final double? userLat;
+  @override
+  final double? userLng;
 
   @override
   String toString() {
-    return 'LabsFilter(q: $q, city: $city, sort: $sort, maxPriceEgp: $maxPriceEgp, homeCollectionOnly: $homeCollectionOnly, page: $page)';
+    return 'LabsFilter(q: $q, city: $city, sort: $sort, maxPriceEgp: $maxPriceEgp, homeCollectionOnly: $homeCollectionOnly, page: $page, userLat: $userLat, userLng: $userLng)';
   }
 
   @override
@@ -1707,12 +2855,14 @@ class _$LabsFilterImpl implements _LabsFilter {
                 other.maxPriceEgp == maxPriceEgp) &&
             (identical(other.homeCollectionOnly, homeCollectionOnly) ||
                 other.homeCollectionOnly == homeCollectionOnly) &&
-            (identical(other.page, page) || other.page == page));
+            (identical(other.page, page) || other.page == page) &&
+            (identical(other.userLat, userLat) || other.userLat == userLat) &&
+            (identical(other.userLng, userLng) || other.userLng == userLng));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, q, city, sort, maxPriceEgp, homeCollectionOnly, page);
+  int get hashCode => Object.hash(runtimeType, q, city, sort, maxPriceEgp,
+      homeCollectionOnly, page, userLat, userLng);
 
   /// Create a copy of LabsFilter
   /// with the given fields replaced by the non-null parameter values.
@@ -1730,7 +2880,9 @@ abstract class _LabsFilter implements LabsFilter {
       final String? sort,
       final int? maxPriceEgp,
       final bool homeCollectionOnly,
-      final int page}) = _$LabsFilterImpl;
+      final int page,
+      final double? userLat,
+      final double? userLng}) = _$LabsFilterImpl;
 
   @override
   String? get q;
@@ -1744,6 +2896,10 @@ abstract class _LabsFilter implements LabsFilter {
   bool get homeCollectionOnly;
   @override
   int get page;
+  @override
+  double? get userLat;
+  @override
+  double? get userLng;
 
   /// Create a copy of LabsFilter
   /// with the given fields replaced by the non-null parameter values.

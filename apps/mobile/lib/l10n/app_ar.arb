@@ -22,6 +22,7 @@
   "retry": "إعادة المحاولة",
   "error": "حدث خطأ ما",
   "noResults": "لا توجد نتائج",
+  "patientTabHome": "الرئيسية",
   "patientTabLabs": "المعامل",
   "patientTabBookings": "الحجوزات",
   "patientTabResults": "النتائج",
@@ -98,6 +99,43 @@
       "distance": { "type": "String" }
     }
   },
+
+  "homeGreeting": "مرحبًا، {name} 👋",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "homeGreetingGuest": "أهلًا بك 👋",
+  "homeTrustBadge": "منصة مصر الموثوقة للمعامل الطبية",
+  "homeHeadline": "اعثر على أفضل المعامل الطبية القريبة منك",
+  "homeSubtitle": "قارن الأسعار والتقييمات واحجز موعدك فورًا.",
+  "homeSearchHint": "اسم التحليل أو الأعراض…",
+  "browseBy": "تصفح حسب",
+  "popular": "الأكثر بحثًا",
+  "topRated": "الأعلى تقييمًا",
+  "bestPrice": "أفضل سعر",
+  "featuredLabs": "معامل مميزة",
+  "featuredLabsSubtitle": "أعلى المعامل تقييمًا والمتاحة للحجز الآن",
+  "viewAll": "عرض الكل",
+  "whyChooseTestly": "لماذا TesTly؟",
+  "howItWorks": "كيف يعمل",
+  "featureComparePricesTitle": "قارن الأسعار",
+  "featureComparePricesDesc": "اطّلع على أسعار عدة معامل فورًا",
+  "featureReviewsTitle": "تقييمات موثوقة",
+  "featureReviewsDesc": "تقييمات حقيقية من مرضى حقيقيين",
+  "featureHomeCollectionTitle": "سحب العينة منزليًا",
+  "featureHomeCollectionDesc": "احجز سحب العينة في منزلك",
+  "featureDigitalResultsTitle": "نتائج رقمية",
+  "featureDigitalResultsDesc": "استلم نتائجك بصيغة PDF داخل التطبيق",
+  "stepSearchTitle": "ابحث",
+  "stepSearchDesc": "أدخل اسم التحليل أو الأعراض",
+  "stepCompareTitle": "قارن",
+  "stepCompareDesc": "اطّلع على المعامل والأسعار والتقييمات",
+  "stepBookTitle": "احجز",
+  "stepBookDesc": "حدد موعدك",
+  "stepResultsTitle": "استلم النتائج",
+  "stepResultsDesc": "استلم نتائجك الرقمية بصيغة PDF",
 
   "labsOfferingTest": "معامل تقدم {testName}",
   "@labsOfferingTest": {
@@ -306,6 +344,16 @@
   "security": "الأمان",
   "biometricUnlock": "الفتح بالبيومترية",
   "biometricUnlockSubtitle": "يتطلب المصادقة البيومترية عند فتح التطبيق",
+
+  "language": "اللغة",
+  "languageSystem": "لغة النظام",
+  "languageEnglish": "English",
+  "languageArabic": "العربية",
+
+  "theme": "المظهر",
+  "themeSystem": "مظهر النظام",
+  "themeLight": "فاتح",
+  "themeDark": "داكن",
 
   "noPendingBookings": "لا توجد حجوزات معلقة",
   "noConfirmedBookings": "لا توجد حجوزات مؤكدة",

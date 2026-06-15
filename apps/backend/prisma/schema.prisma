@@ -395,6 +395,9 @@ model ChatMessage {
   conversation_id String
   role            ChatRole
   content         String
+  // Structured agentic payload (e.g. lab/test cards the assistant surfaced),
+  // shaped as { tools: ToolResult[] }. Null for plain text messages.
+  metadata        Json?
   created_at      DateTime @default(now())
 
   conversation Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)

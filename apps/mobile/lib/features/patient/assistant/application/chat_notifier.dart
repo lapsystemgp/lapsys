@@ -57,7 +57,9 @@ class ChatNotifier extends Notifier<ChatState> {
       role: ChatRole.user,
       content: text,
     );
-    const assistantId = 'local-assistant';
+    // Unique per send — a fixed id would let later deltas also match the
+    // previous assistant bubble and rewrite it.
+    final assistantId = 'local-assistant-$now';
     final assistantMessage = AssistantMessage(
       id: assistantId,
       role: ChatRole.assistant,

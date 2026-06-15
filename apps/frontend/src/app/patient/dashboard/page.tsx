@@ -239,14 +239,15 @@ export default function PatientDashboardPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => router.push("/patient/assistant")} className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-all duration-150 font-medium shadow-sm">
+            <button onClick={() => router.push("/patient/assistant")} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-sm rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-all duration-150 font-medium shadow-sm">
               <HeartPulse className="w-4 h-4" />
-              AI Assistant
+              <span className="hidden sm:inline">AI Assistant</span>
             </button>
-            <button onClick={() => router.push("/labs")} className="px-3 py-1.5 text-sm border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-blue-300 transition-all duration-150 font-medium text-gray-700">
-              Browse Labs
+            <button onClick={() => router.push("/labs")} className="px-2 sm:px-3 py-1.5 text-sm border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-blue-300 transition-all duration-150 font-medium text-gray-700">
+              <span className="hidden sm:inline">Browse Labs</span>
+              <span className="sm:hidden">Labs</span>
             </button>
-            <button onClick={handleLogout} className="px-3 py-1.5 text-sm border border-gray-200 rounded-xl hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-150 font-medium text-gray-700">
+            <button onClick={handleLogout} className="px-2 sm:px-3 py-1.5 text-sm border border-gray-200 rounded-xl hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-150 font-medium text-gray-700">
               Logout
             </button>
           </div>
@@ -273,7 +274,7 @@ export default function PatientDashboardPage() {
           </div>
         )}
         {/* Tab pills — #6: font-semibold active, font-medium inactive */}
-        <div className="flex gap-1.5 mb-5 p-1 bg-white border border-gray-200 rounded-xl w-fit">
+        <div className="flex gap-1 sm:gap-1.5 mb-5 p-1 bg-white border border-gray-200 rounded-xl overflow-x-auto max-w-full">
           {(["bookings", "results", "trends", "profile"] as const).map((t) => (
             <button
               key={t}
@@ -300,7 +301,7 @@ export default function PatientDashboardPage() {
                   </div>
                   <div className="skeleton h-6 w-20 rounded-full" />
                 </div>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[0, 1, 2, 3].map((j) => <div key={j} className="skeleton h-10 rounded" />)}
                 </div>
               </div>
@@ -335,7 +336,7 @@ export default function PatientDashboardPage() {
                         <span className={`px-3 py-1 rounded-full font-medium ${bookingStatusClass(booking.status)}`}>{booking.status}</span>
                       </div>
                       {/* Booking fields — #11: label font-medium, #12: value font-semibold */}
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-gray-700">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-700">
                         <div>
                           <p className="text-gray-500 font-medium">{booking.bookingType === "HomeTestKit" ? "Order Date" : "Date & Time"}</p>
                           <p className="font-semibold">{formatDateTime(booking.scheduledAt)}</p>

@@ -60,12 +60,15 @@ export default function PatientAssistantPage() {
       setInput("");
       setIsStreaming(true);
 
+      const stamp = Date.now();
       const userMessage: UiMessage = {
-        id: `local-user-${Date.now()}`,
+        id: `local-user-${stamp}`,
         role: "user",
         content: text,
       };
-      const assistantId = "local-assistant";
+      // Unique per send — a fixed id would let later deltas also match the
+      // previous assistant bubble and rewrite it.
+      const assistantId = `local-assistant-${stamp}`;
       setMessages((prev) => [
         ...prev,
         userMessage,

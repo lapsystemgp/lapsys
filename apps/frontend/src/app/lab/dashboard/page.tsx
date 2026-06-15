@@ -358,7 +358,7 @@ export default function LabDashboardPage() {
       <main className="max-w-7xl mx-auto px-4 py-5">
         <Breadcrumb items={[{ label: "Lab Dashboard" }]} className="mb-4" />
         {/* 6. Tab pill buttons */}
-        <div className="flex gap-1.5 mb-5 p-1 bg-white border border-gray-200 rounded-xl w-fit flex-wrap">
+        <div className="flex flex-wrap gap-1.5 mb-5 p-1 bg-white border border-gray-200 rounded-xl">
           {(["bookings", "tests", "results", "schedule", "analytics", "reviews", "settings"] as Tab[]).map((item) => (
             <button
               key={item}
@@ -385,7 +385,7 @@ export default function LabDashboardPage() {
                   </div>
                   <div className="skeleton h-6 w-20 rounded-full" />
                 </div>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[0, 1, 2, 3].map((j) => <div key={j} className="skeleton h-10 rounded" />)}
                 </div>
               </div>
@@ -409,7 +409,7 @@ export default function LabDashboardPage() {
                       {/* status badge */}
                       <span className={`px-3 py-1 rounded-full font-medium ${statusClass(booking.status)}`}>{booking.status}</span>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm text-gray-700">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-gray-700">
                       <div>
                         {/* field labels */}
                         <p className="font-medium text-gray-500">Type</p>
@@ -551,7 +551,7 @@ export default function LabDashboardPage() {
                 <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
                   {/* h2 "Add Test" */}
                   <h2 className="text-lg font-bold text-gray-900 mb-3">Add Test</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                     {/* input fields border-gray-200 */}
                     <input value={newTest.name} onChange={(e) => setNewTest((p) => ({ ...p, name: e.target.value }))} placeholder="Test name" className="px-3 py-2 border border-gray-200 rounded-lg" />
                     <input value={newTest.category} onChange={(e) => setNewTest((p) => ({ ...p, category: e.target.value }))} placeholder="Category" className="px-3 py-2 border border-gray-200 rounded-lg" />
@@ -565,7 +565,7 @@ export default function LabDashboardPage() {
                     // test item cards
                     <div key={test.id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
                       {editingTestId === test.id ? (
-                        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-center">
                           {/* edit input fields border-gray-200 */}
                           <input
                             value={editingTest.name}
@@ -602,14 +602,14 @@ export default function LabDashboardPage() {
                           </button>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between gap-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                           <div>
                             {/* test name p */}
                             <p className="font-semibold text-gray-900">{test.name}</p>
                             {/* test category-price p */}
                             <p className="text-sm font-medium text-gray-600">{test.category} - EGP {test.priceEgp}</p>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex flex-wrap gap-2">
                             {/* Edit button */}
                             <button
                               onClick={() => startEditingTest(test)}
@@ -650,7 +650,7 @@ export default function LabDashboardPage() {
                         <h2 className="text-lg font-bold text-gray-900">{booking.test.name}</h2>
                         {/* Patient: text */}
                         <p className="text-sm font-medium text-gray-600">Patient: {booking.patient.fullName || "Patient"}</p>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                           {/* input fields border-gray-200 */}
                           <input
                             type="file"

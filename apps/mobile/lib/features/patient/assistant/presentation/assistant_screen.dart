@@ -1,9 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../application/chat_notifier.dart';
 import '../data/chat_models.dart';
+
+/// Brightness-aware palette helpers. The screen draws its own surfaces/bubbles,
+/// so it can't rely on the global theme picking the right neutral — these map a
+/// token to its light/dark constant based on the active brightness.
+extension _AssistantPalette on BuildContext {
+  bool get _isDark => Theme.of(this).brightness == Brightness.dark;
+  Color get cSurface => _isDark ? AppColors.surfaceDark : AppColors.surface;
+  Color get cSurfaceMuted =>
+      _isDark ? AppColors.surfaceMutedDark : AppColors.surfaceMuted;
+  Color get cForeground =>
+      _isDark ? AppColors.foregroundDark : AppColors.foreground;
+  Color get cLine => _isDark ? AppColors.lineSubtleDark : AppColors.lineSubtle;
+}
 
 class AssistantScreen extends ConsumerStatefulWidget {
   const AssistantScreen({super.key});
@@ -105,33 +119,265 @@ class _MessageBubble extends StatelessWidget {
     final isUser = message.role == ChatRole.user;
     final theme = Theme.of(context);
     final showTyping = message.isStreaming && message.content.isEmpty;
+    final showBubble = message.content.isNotEmpty || showTyping;
 
-    return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.8,
-        ),
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: isUser ? AppColors.brand : AppColors.surfaceMuted,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(isUser ? 16 : 4),
-            bottomRight: Radius.circular(isUser ? 4 : 16),
-          ),
-        ),
-        child: showTyping
-            ? const _TypingIndicator()
-            : Text(
-                message.content,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: isUser ? Colors.white : AppColors.foreground,
-                  height: 1.35,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment:
+            isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          if (showBubble)
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.8,
+              ),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: isUser ? AppColors.brand : context.cSurfaceMuted,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  topRight: const Radius.circular(16),
+                  bottomLeft: Radius.circular(isUser ? 16 : 4),
+                  bottomRight: Radius.circular(isUser ? 4 : 16),
                 ),
               ),
+              child: showTyping
+                  ? const _TypingIndicator()
+                  : Text(
+                      message.content,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: isUser ? Colors.white : context.cForeground,
+                        height: 1.35,
+                      ),
+                    ),
+            ),
+          for (final tool in message.tools)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: _ToolResultCards(tool: tool),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ToolResultCards extends StatelessWidget {
+  const _ToolResultCards({required this.tool});
+
+  final ToolResult tool;
+
+  @override
+  Widget build(BuildContext context) {
+    final cards = tool.tool == 'find_labs'
+        ? tool.labs.map<Widget>((l) => _LabCard(lab: l)).toList()
+        : tool.tests.map<Widget>((t) => _TestCard(test: t)).toList();
+    if (cards.isEmpty) return const SizedBox.shrink();
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width * 0.9,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < cards.length; i++)
+            Padding(
+              padding: EdgeInsets.only(bottom: i == cards.length - 1 ? 0 : 8),
+              child: cards[i],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LabCard extends StatelessWidget {
+  const _LabCard({required this.lab});
+
+  final AssistantLabCard lab;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => context.push('/patient/labs/${lab.labId}'),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: context.cSurface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: context.cLine),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: context.cSurfaceMuted,
+                  child: const Icon(Icons.science_outlined,
+                      size: 18, color: AppColors.brand),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        lab.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          const Icon(Icons.place_outlined,
+                              size: 13, color: AppColors.mutedForeground),
+                          const SizedBox(width: 2),
+                          Expanded(
+                            child: Text(
+                              lab.city ?? lab.address,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                  color: AppColors.mutedForeground),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                if (lab.priceEgp != null) ...[
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${lab.priceEgp} EGP',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.brand),
+                      ),
+                      Text('from',
+                          style: theme.textTheme.labelSmall
+                              ?.copyWith(color: AppColors.mutedForeground)),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+            if (lab.rating != null || lab.homeCollection) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 10,
+                runSpacing: 4,
+                children: [
+                  if (lab.rating != null)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star,
+                            size: 13, color: Color(0xFFF59E0B)),
+                        const SizedBox(width: 2),
+                        Text(
+                          '${lab.rating!.toStringAsFixed(1)} (${lab.reviews})',
+                          style: theme.textTheme.labelSmall,
+                        ),
+                      ],
+                    ),
+                  if (lab.homeCollection)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.home_outlined,
+                            size: 13, color: Color(0xFF059669)),
+                        const SizedBox(width: 2),
+                        Text('Home collection',
+                            style: theme.textTheme.labelSmall
+                                ?.copyWith(color: const Color(0xFF059669))),
+                      ],
+                    ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TestCard extends StatelessWidget {
+  const _TestCard({required this.test});
+
+  final AssistantTestCard test;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => context.push(
+        '/patient/tests/${Uri.encodeComponent(test.name)}'
+        '?category=${Uri.encodeComponent(test.category)}',
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: context.cSurface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: context.cLine),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    test.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${test.category} · ${test.labCount} '
+                    '${test.labCount == 1 ? 'lab' : 'labs'}',
+                    style: theme.textTheme.labelSmall
+                        ?.copyWith(color: AppColors.mutedForeground),
+                  ),
+                ],
+              ),
+            ),
+            if (test.minPriceEgp != null) ...[
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${test.minPriceEgp} EGP',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold, color: AppColors.brand),
+                  ),
+                  Text('from',
+                      style: theme.textTheme.labelSmall
+                          ?.copyWith(color: AppColors.mutedForeground)),
+                ],
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -268,8 +514,8 @@ class _Composer extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Container(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: AppColors.lineSubtle)),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: context.cLine)),
         ),
         padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
         child: Column(
@@ -289,7 +535,7 @@ class _Composer extends StatelessWidget {
                     decoration: InputDecoration(
                       hintText: l10n.assistantInputHint,
                       filled: true,
-                      fillColor: AppColors.surfaceMuted,
+                      fillColor: context.cSurfaceMuted,
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 10),
                       border: OutlineInputBorder(

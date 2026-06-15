@@ -375,5 +375,15 @@
     "placeholders": {
       "price": { "type": "Object" }
     }
-  }
+  },
+
+  "assistantTitle": "Health Assistant",
+  "assistantNewChat": "New chat",
+  "assistantInputHint": "Ask about a test, prep, or your health…",
+  "assistantEmptyTitle": "Hi! I'm your health assistant",
+  "assistantEmptyBody": "Ask me about lab tests, how to prepare, or what a result generally means. I can't replace a doctor's advice.",
+  "assistantDisclaimer": "AI assistant — not a substitute for professional medical advice.",
+  "assistantSuggestion1": "How do I prepare for a fasting blood test?",
+  "assistantSuggestion2": "What does a CBC test measure?",
+  "assistantSuggestion3": "What is HbA1c used for?"
 }

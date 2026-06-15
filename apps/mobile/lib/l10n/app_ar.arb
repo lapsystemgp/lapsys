@@ -365,5 +365,15 @@
     "placeholders": {
       "price": { "type": "Object" }
     }
-  }
+  },
+
+  "assistantTitle": "المساعد الصحي",
+  "assistantNewChat": "محادثة جديدة",
+  "assistantInputHint": "اسأل عن تحليل، أو التحضير له، أو صحتك…",
+  "assistantEmptyTitle": "مرحبًا! أنا مساعدك الصحي",
+  "assistantEmptyBody": "اسألني عن التحاليل المخبرية، وكيفية التحضير لها، أو ماذا تعني النتيجة بشكل عام. لا يمكنني أن أحل محل نصيحة الطبيب.",
+  "assistantDisclaimer": "مساعد ذكاء اصطناعي — ليس بديلًا عن الاستشارة الطبية المتخصصة.",
+  "assistantSuggestion1": "كيف أستعد لتحليل دم يتطلب الصيام؟",
+  "assistantSuggestion2": "ماذا يقيس تحليل صورة الدم الكاملة (CBC)؟",
+  "assistantSuggestion3": "فيمَ يُستخدم تحليل السكر التراكمي (HbA1c)؟"
 }

@@ -11,6 +11,7 @@ import '../../features/auth/presentation/admin_unsupported_screen.dart';
 import '../../features/patient/presentation/patient_shell.dart';
 import '../../features/patient/labs/presentation/labs_screen.dart';
 import '../../features/patient/labs/presentation/lab_detail_screen.dart';
+import '../../features/patient/labs/presentation/test_detail_screen.dart';
 import '../../features/patient/booking/data/booking_models.dart';
 import '../../features/patient/booking/presentation/booking_flow_screen.dart';
 import '../../features/patient/bookings/presentation/my_bookings_screen.dart';
@@ -19,6 +20,7 @@ import '../../features/patient/results/presentation/results_screen.dart';
 import '../../features/patient/results/presentation/result_detail_screen.dart';
 import '../../features/patient/profile/presentation/profile_screen.dart';
 import '../../features/patient/trends/presentation/trends_screen.dart';
+import '../../features/patient/assistant/presentation/assistant_screen.dart';
 import '../../features/patient/workspace/data/workspace_models.dart';
 import '../../features/lab/presentation/lab_shell.dart';
 import '../../features/lab/presentation/dashboard_screen.dart';
@@ -37,6 +39,7 @@ abstract final class Routes {
   static const labShell = '/lab';
   static const labPending = '/lab-pending';
   static const adminUnsupported = '/admin-unsupported';
+  static const assistant = '/patient/assistant';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -115,6 +118,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
 
+      // AI Health Assistant — full-screen, outside the shell.
+      GoRoute(
+        path: Routes.assistant,
+        builder: (_, __) => const AssistantScreen(),
+      ),
+
       // ─── Patient shell ────────────────────────────────────────────────────
       ShellRoute(
         builder: (_, __, child) => PatientShell(child: child),
@@ -128,6 +137,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: 'labs/:labId',
                 builder: (_, state) => LabDetailScreen(
                     labId: state.pathParameters['labId']!),
+              ),
+              GoRoute(
+                path: 'tests/:testName',
+                builder: (_, state) => TestDetailScreen(
+                  testName: Uri.decodeComponent(
+                      state.pathParameters['testName']!),
+                  category: state.uri.queryParameters['category'] ?? '',
+                ),
               ),
             ],
           ),

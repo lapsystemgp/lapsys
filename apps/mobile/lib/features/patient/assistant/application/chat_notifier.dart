@@ -87,6 +87,11 @@ class ChatNotifier extends Notifier<ChatState> {
             );
           case 'delta':
             _appendDelta(assistantId, event['text'] as String? ?? '');
+          case 'tool':
+            final raw = event['result'];
+            if (raw is Map<String, dynamic>) {
+              _appendTool(assistantId, ToolResult.fromJson(raw));
+            }
           case 'done':
             _finishAssistant(assistantId);
           case 'error':
@@ -119,6 +124,18 @@ class ChatNotifier extends Notifier<ChatState> {
         for (final m in state.messages)
           if (m.id == assistantId)
             m.copyWith(content: m.content + delta)
+          else
+            m,
+      ],
+    );
+  }
+
+  void _appendTool(String assistantId, ToolResult result) {
+    state = state.copyWith(
+      messages: [
+        for (final m in state.messages)
+          if (m.id == assistantId)
+            m.copyWith(tools: [...m.tools, result])
           else
             m,
       ],

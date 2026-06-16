@@ -17,7 +17,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth } from '@nestjs/swagger';
 import { Response, Request } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { AUTH_COOKIE_NAME } from './auth.constants';
+import { AUTH_COOKIE_NAME, buildAuthCookieOptions } from './auth.constants';
 import { PatientRegisterDto } from './dto/patient-register.dto';
 import { LabRegisterDto } from './dto/lab-register.dto';
 import { AuditLogService } from '../common/services/audit-log.service';
@@ -79,11 +79,8 @@ export class AuthController {
 
     // Web clients use the HTTP-only cookie; mobile clients use the token from the response body.
     response.cookie(AUTH_COOKIE_NAME, access_token, {
-      httpOnly: true,
-      path: '/',
+      ...buildAuthCookieOptions(),
       maxAge: 8 * 3600 * 1000, // 8 hours
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
     });
 
     return { message: 'Login successful', user: userData, access_token, refresh_token };
@@ -122,7 +119,8 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
     @Body() body: { refresh_token?: string },
   ) {
-    response.clearCookie(AUTH_COOKIE_NAME, { path: '/' });
+    // Match the attributes used when setting the cookie so the browser reliably clears it cross-site.
+    response.clearCookie(AUTH_COOKIE_NAME, buildAuthCookieOptions());
     if (body?.refresh_token) {
       await this.authService.revokeRefreshToken(body.refresh_token);
     }

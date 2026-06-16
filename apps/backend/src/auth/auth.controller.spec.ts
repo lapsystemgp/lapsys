@@ -152,7 +152,10 @@ describe('AuthController', () => {
       const res = mockRes();
       await controller.logout(res as any, {});
 
-      expect(res.clearCookie).toHaveBeenCalledWith('access_token', { path: '/' });
+      expect(res.clearCookie).toHaveBeenCalledWith(
+        'access_token',
+        expect.objectContaining({ path: '/' }),
+      );
     });
 
     it('revokes the refresh token when provided in the body (mobile logout)', async () => {

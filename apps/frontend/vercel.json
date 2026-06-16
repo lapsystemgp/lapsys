@@ -4,7 +4,13 @@
   "buildCommand": "next build --webpack",
   "installCommand": "npm install",
   "env": {
-    "NEXT_PUBLIC_API_BASE_URL": "https://testly-backend-production-c28a.up.railway.app",
+    "NEXT_PUBLIC_API_BASE_URL": "/api",
     "NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS": "false"
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://testly-backend-production-c28a.up.railway.app/:path*"
+    }
+  ]
 }

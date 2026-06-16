@@ -1,7 +1,14 @@
 import { z } from 'zod';
 
 const envSchema = z.object({
-  NEXT_PUBLIC_API_BASE_URL: z.string().url().default('http://localhost:3001'),
+  // Either an absolute URL (e.g. http://localhost:3001) or a relative path
+  // (e.g. /api) when the frontend proxies the backend via a same-origin rewrite.
+  NEXT_PUBLIC_API_BASE_URL: z
+    .string()
+    .refine((v) => v.startsWith('/') || /^https?:\/\//.test(v), {
+      message: 'must be an absolute http(s) URL or a path starting with "/"',
+    })
+    .default('http://localhost:3001'),
   NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS: z.enum(['true', 'false']).optional().default('true'),
 });
 

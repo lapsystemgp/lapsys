@@ -1,0 +1,326 @@
+[
+ {
+  "t": "p",
+  "text": "This chapter presents the engineering methodologies that shaped the **TesTly** platform and the concrete development tools used to realise it. TesTly is a medical lab-testing marketplace for Egypt, composed of four cooperating subsystems: a **NestJS** REST backend, a **Next.js** web application, a **Flutter** mobile application, and an agentic AI assistant powered by Google Gemini, all backed by a **PostgreSQL** database. Because the platform handles sensitive medical data and monetary transactions, the methodologies were selected deliberately to prioritise correctness, maintainability, and security. The chapter first explains the design methods that govern the structure of each subsystem (Section 3.1), then catalogues the development tools per layer (Section 3.2), and finally describes the project-management approach, namely the iterative delivery process and the version-control workflow (Section 3.3)."
+ },
+ {
+  "t": "h2",
+  "num": "3.1",
+  "text": "Design Methods"
+ },
+ {
+  "t": "p",
+  "text": "The design of TesTly follows a small set of well-established methodological principles, applied consistently across every subsystem so that the four applications form one coherent system rather than four loosely related programs. The unifying idea is **separation of concerns**: each layer is responsible for one well-defined category of behaviour, depends only on the layer beneath it through a stable contract, and can be reasoned about, tested, and replaced in isolation. The subsections below describe how this principle is expressed as layered backend architecture, contract-first REST API design, database-first modelling, mobile clean architecture, security-by-design, privacy-first data sharing, and component-based user interfaces."
+ },
+ {
+  "t": "h3",
+  "num": "3.1.1",
+  "text": "Layered, Modular Backend Architecture"
+ },
+ {
+  "t": "p",
+  "text": "The backend is built with **NestJS**, a TypeScript framework whose decorator-driven, modular design naturally enforces a layered architecture. Each business capability is organised into a feature area composed of three collaborating layers: **controllers** that expose HTTP routes and bind request payloads to typed objects, **services** that hold the business logic and orchestrate data access, and the **Prisma data-access layer** that performs type-safe database operations. Controllers never contain business logic, and services never parse HTTP requests directly; this strict separation keeps the rules of the domain independent of the transport mechanism."
+ },
+ {
+  "t": "p",
+  "text": "The platform is decomposed into clearly bounded feature areas, each corresponding to a real-world concern. The principal areas, together with their responsibilities, are summarised below."
+ },
+ {
+  "t": "table",
+  "caption": "Backend feature areas and their responsibilities",
+  "headers": [
+   "Feature area",
+   "Responsibility"
+  ],
+  "rows": [
+   [
+    "Auth",
+    "Registration, login, JWT issuance, refresh-token rotation, and role-based guards"
+   ],
+   [
+    "Public marketplace",
+    "Unauthenticated lab and test browsing, search, and comparison"
+   ],
+   [
+    "Bookings & payments",
+    "The booking lifecycle, availability, payment state, and kit logistics"
+   ],
+   [
+    "Patient & lab workspaces",
+    "Authenticated dashboards, result handling, and cross-lab health trends"
+   ],
+   [
+    "Admin",
+    "Lab onboarding governance and platform analytics"
+   ],
+   [
+    "Chat & FAQ",
+    "The agentic AI assistant and the deterministic guided-FAQ helper"
+   ],
+   [
+    "Notifications",
+    "Firebase Cloud Messaging push delivery"
+   ]
+  ]
+ },
+ {
+  "t": "p",
+  "text": "Cross-cutting concerns are handled centrally rather than being scattered through the feature areas. A global `ValidationPipe`, a standardised exception filter that emits a uniform error envelope of the form `{ statusCode, message, timestamp, path }`, a structured audit-logging service, and a configuration module that validates environment variables at boot all apply uniformly across every route. This modular, layered organisation is depicted in the backend component diagram."
+ },
+ {
+  "t": "h3",
+  "num": "3.1.2",
+  "text": "REST API Design with Swagger / OpenAPI"
+ },
+ {
+  "t": "p",
+  "text": "Communication between the backend and its two client applications is governed by a **RESTful API** designed around resources and the standard HTTP verbs. Resource paths name domain entities (for example `/public/labs`, `/bookings`, `/patient/workspace`, `/lab/results/:bookingId/upload`), and the verb expresses the intent: `GET` for reads, `POST` for creation, `PATCH` for partial updates, `PUT` for full replacement, and `DELETE` for removal. Across roughly fifty endpoints the design stays uniform: every response is camel-cased, paginated lists share a common `{ items, pagination }` shape, and every error is reported through the single standardised envelope, so that the web and mobile clients can consume the API through one predictable contract."
+ },
+ {
+  "t": "p",
+  "text": "The contract is documented automatically using **Swagger / OpenAPI** via the `@nestjs/swagger` package. A `DocumentBuilder` titled \"TesTly Backend API\" generates an interactive specification that is served at the `/api` path, giving developers a live, always-current reference of every route, its parameters, and its response shapes. Because the documentation is derived from the same decorated DTOs and controllers that implement the API, it cannot drift out of sync with the running code."
+ },
+ {
+  "t": "h3",
+  "num": "3.1.3",
+  "text": "Database-First Modelling with Prisma"
+ },
+ {
+  "t": "p",
+  "text": "Persistence follows a **database-first (schema-first) modelling** approach using the **Prisma** ORM over PostgreSQL. A single declarative schema file, `schema.prisma`, is the authoritative definition of the data model: it declares twenty entities (such as `User`, `PatientProfile`, `LabProfile`, `LabTest`, `Booking`, `ResultFile`, and the structured-results stack) and eleven enumerations that encode the system's state machines (for example `BookingStatus`, `PaymentStatus`, and `LabOnboardingStatus`). From this schema Prisma generates a fully typed client, so the database structure is reflected directly into the TypeScript type system and queries are checked at compile time."
+ },
+ {
+  "t": "p",
+  "text": "Schema evolution is managed through versioned **migrations**. The model grew through ten committed migrations, from the initial full schema to the addition of structured results, the lab-history-sharing privacy toggle, payment fields, lab coordinates, home-test-kit support, search indexes, and the chat models. Each migration is applied automatically on every deployment, so the live schema is always consistent with the code. The complete entity-relationship structure that results from this schema is shown in the entity-relationship diagram."
+ },
+ {
+  "t": "p",
+  "text": "Several deliberate conventions hold across the schema: primary keys are opaque UUIDs so that identifiers are safe to expose in URLs and do not leak row counts; monetary values are stored as integer Egyptian pounds in fields suffixed `_egp` to avoid floating-point rounding errors; and indexes are declared on the columns the application most often filters or sorts by, such as city, rating, and scheduled time."
+ },
+ {
+  "t": "h3",
+  "num": "3.1.4",
+  "text": "Mobile Clean Architecture with Riverpod"
+ },
+ {
+  "t": "p",
+  "text": "The Flutter mobile application is structured according to **clean architecture** in a **feature-first** layout: the `lib/` tree contains one folder per business capability (auth, labs, booking, results, trends, profile, assistant, and the lab workspace), and within each feature the same strict three-layer split is applied. This split mirrors the separation-of-concerns principle used on the backend and is summarised below."
+ },
+ {
+  "t": "table",
+  "caption": "The three layers of the mobile clean architecture",
+  "headers": [
+   "Layer",
+   "Folder",
+   "Responsibility"
+  ],
+  "rows": [
+   [
+    "Presentation",
+    "presentation/",
+    "Flutter widgets and screens; reads providers, never touches the network directly"
+   ],
+   [
+    "Application",
+    "application/",
+    "Riverpod notifiers and derived providers; state orchestration"
+   ],
+   [
+    "Data",
+    "data/",
+    "Repositories over Dio plus immutable models with JSON mapping"
+   ]
+  ]
+ },
+ {
+  "t": "p",
+  "text": "State management and dependency injection are provided by **Riverpod**. Three provider patterns recur: plain providers expose infrastructure and repositories as injectable singletons (which can be overridden in tests); `FutureProvider` (and its `family` variants) fetches and caches read-only server state, such as the single `workspaceProvider` that loads the patient's bookings, results, and profile in one call and is then sliced by derived selectors so each tab rebuilds only when its own data changes; and `Notifier`/`StateNotifier` classes drive stateful flows such as the multi-step booking wizard and the streaming AI chat. Because presentation widgets depend only on providers and immutable models, never constructing a network request themselves, the data layer is swappable and the user interface is testable with simple provider overrides."
+ },
+ {
+  "t": "h3",
+  "num": "3.1.5",
+  "text": "Security-by-Design"
+ },
+ {
+  "t": "p",
+  "text": "Because TesTly handles medical records and payments, security is treated as a design constraint from the outset rather than a feature added afterwards. The authentication scheme issues two credentials on login: a short-lived **access-token JWT** (signed with a required secret key and valid for eight hours) and an opaque **refresh token** valid for thirty days. Refresh tokens are never stored in plaintext; only their **SHA-256 hash** is persisted, and on each refresh the presented token is rotated, meaning the used token is revoked and a fresh pair is issued, which limits the damage a leaked token can cause."
+ },
+ {
+  "t": "p",
+  "text": "Passwords are never stored in clear form: they are hashed with **bcrypt** using a generated salt of cost factor ten, and the password-hash column is stripped from every object returned to a client. Authorisation is layered for defence in depth: a JWT guard proves identity, a roles guard enforces the actor type (Patient, Lab Staff, or Admin) declared by a `@Roles` decorator, a lab-active guard ensures only fully onboarded labs can transact, and each service performs an additional ownership check rather than trusting the route guard alone. The token is transported as an HTTP-only cookie for the web client (so that cross-site scripting cannot read it) and as a Bearer header for the mobile client, where it is held in the operating-system secure enclave through `flutter_secure_storage`."
+ },
+ {
+  "t": "h3",
+  "num": "3.1.6",
+  "text": "Privacy-First Cross-Lab Data Sharing"
+ },
+ {
+  "t": "p",
+  "text": "A defining design decision of TesTly is its **privacy-first** treatment of medical history shared across competing labs. Each patient profile carries a `lab_history_sharing` setting that defaults to the most restrictive value, `SAME_LAB_ONLY`, under which a lab can see only the bookings and results created at that same lab. A patient may opt in to `FULL_HISTORY_AUTHORIZED`, allowing any lab they have a booking with to see **cross-lab structured summaries and trends** — but never another lab's original PDF document, which always remains private to the issuing lab."
+ },
+ {
+  "t": "p",
+  "text": "This privacy boundary is enforced at the data-access layer, not merely in the user interface: when a lab requests a patient's context, the query's filter is built conditionally so that, in same-lab mode, results are hard-limited to that lab's own bookings at the database level, and a result PDF download link is produced only for the requesting lab's own uploads. The platform shares only normalised, comparable structured representations of analytes for cross-lab trending; this is precisely why the structured-results and canonical-marker subsystem exists, since it produces a shareable representation that does not require handing over another lab's authoritative document."
+ },
+ {
+  "t": "h3",
+  "num": "3.1.7",
+  "text": "Component-Based User Interfaces"
+ },
+ {
+  "t": "p",
+  "text": "Both client applications adopt a **component-based** approach in which the interface is assembled from small, reusable, independently testable units. On the web, a deliberate pattern separates \"smart\" route container components, which fetch data, own state, and drive navigation, from \"dumb\" presentational components, which receive everything through props and report back through callbacks; the two are connected by a typed API-client library so that the URL shape and data types live in a single place. On mobile, the same philosophy appears as a library of shared widgets (animated cards, empty and error states, loading skeletons) composed into feature screens. A shared design-token palette — a blue brand colour, neutral surfaces, and semantic status colours — is expressed once and reused across both clients, including the porting of the web colour tokens into the Flutter theme, so the two front-ends present a consistent visual identity over the same backend."
+ },
+ {
+  "t": "h2",
+  "num": "3.2",
+  "text": "Development Tools"
+ },
+ {
+  "t": "p",
+  "text": "This section catalogues the principal tools and libraries used to build TesTly, grouped by subsystem. For each tool, its nature and its specific role within the platform are described. The choice of tools was guided by maturity, type safety, and strong community support, all of which reduce risk in a project of this scope."
+ },
+ {
+  "t": "h3",
+  "num": "3.2.1",
+  "text": "Frontend & Web Tools"
+ },
+ {
+  "t": "b",
+  "items": [
+   "**Next.js 16** — a React framework providing the App Router, server-side rendering, and Edge middleware. It hosts every web screen for all three roles and implements the route-protection middleware that decodes the JWT to gate the `/patient`, `/lab`, `/booking`, and `/admin` route groups.",
+   "**React 19** — the underlying UI library that renders the component tree, manages local state, and drives the interactive dashboards.",
+   "**TypeScript** — the statically typed language used throughout the frontend; it mirrors the backend DTOs in the typed API-client layer, giving compile-time safety on every API call.",
+   "**Tailwind CSS 4** — a utility-first styling system configured entirely through CSS custom properties (with no JavaScript config file). It expresses the design tokens — brand colour, surfaces, radii, and shadows — and styles every screen consistently.",
+   "**Radix UI** — accessible, unstyled UI primitives (dialog and label) carried over from the design export, providing a foundation for accessible interactive elements.",
+   "**Recharts** — a React charting library used for the patient health-trend line charts (with reference-range bands and abnormal-point colouring) and the admin analytics dashboards (booking volume, revenue by city, and popular tests).",
+   "**zod** — a runtime schema-validation library that validates the frontend's environment variables at build and start time, throwing on invalid configuration so misconfiguration fails fast.",
+   "**jose** — a JavaScript library for working with JSON Web Tokens; the Edge middleware uses it to decode the access-token cookie and check expiry as a fast route-routing gate."
+  ]
+ },
+ {
+  "t": "h3",
+  "num": "3.2.2",
+  "text": "Backend Tools"
+ },
+ {
+  "t": "b",
+  "items": [
+   "**NestJS 11** — the TypeScript, decorator-driven Node.js framework that structures the backend into modules, controllers, and providers and supplies the global validation pipe, exception filter, and guard infrastructure.",
+   "**Prisma 5** — the type-safe ORM and migration tool; the `schema.prisma` file is the single source of truth for the data model, from which a typed client and versioned migrations are generated.",
+   "**PostgreSQL / Neon** — the relational database. Development runs against a local PostgreSQL 16 container, while production uses **Neon**, a serverless, branchable PostgreSQL platform, both reached through the same `DATABASE_URL` abstraction.",
+   "**Passport-JWT** — the authentication strategy (via `@nestjs/passport` and `passport-jwt`) that extracts the JWT from either the HTTP-only cookie (web) or the Bearer header (mobile) and validates it against the database on every request.",
+   "**class-validator** — together with `class-transformer`, it provides declarative DTO validation and type coercion enforced by the global validation pipe, so unknown request fields are rejected rather than silently ignored.",
+   "**Swagger** — the `@nestjs/swagger` module that generates the interactive OpenAPI documentation served at `/api`, derived from the same decorated controllers and DTOs that implement the API.",
+   "**bcrypt** — the password-hashing library used to hash passwords with a cost-factor-ten salt on registration and to compare them on login, ensuring plaintext passwords are never stored.",
+   "**Joi** — the schema library used by the configuration module to validate environment variables at boot, refusing to start the application if a required secret such as `JWT_SECRET` is missing."
+  ]
+ },
+ {
+  "t": "h3",
+  "num": "3.2.3",
+  "text": "Mobile Tools"
+ },
+ {
+  "t": "b",
+  "items": [
+   "**Flutter** — Google's cross-platform UI toolkit (with the Dart language) used to build the single native codebase that runs on both iOS and Android for patients and lab staff, including full English/Arabic localisation with RTL support and a light/dark theme.",
+   "**Riverpod** — the state-management and dependency-injection library that exposes repositories as injectable providers, caches server state with `FutureProvider`, and drives stateful flows with notifiers.",
+   "**Dio** — the HTTP client; a single shared instance carries a queued auth interceptor that attaches the Bearer token and performs silent token rotation on a 401 before retrying the original request.",
+   "**go_router** — the declarative routing package whose central redirect callback acts as the app's gatekeeper, routing users by authentication state and role and consuming notification deep links.",
+   "**fl_chart** — the charting library used on the health-trends screen to render customised line charts with abnormal-point highlighting and dashed reference-range lines.",
+   "**flutter_secure_storage** — the secure credential store that persists the access and refresh tokens in the iOS Keychain and the Android Keystore-backed encrypted preferences, the only place tokens are stored.",
+   "**google_maps_flutter** — the Google Maps plugin, provisioned together with location services and the `GOOGLE_MAPS_API_KEY` for geographic features such as nearest-lab sorting.",
+   "**firebase_messaging** — the Firebase Cloud Messaging plugin (with `firebase_core` and local notifications) that receives push notifications for booking and result events and supports deep-linking from a notification tap into the relevant screen."
+  ]
+ },
+ {
+  "t": "h3",
+  "num": "3.2.4",
+  "text": "AI, Cloud & Integration Tools"
+ },
+ {
+  "t": "b",
+  "items": [
+   "**Google GenAI / Gemini** — the `@google/genai` SDK with the `gemini-2.5-flash` model powers the agentic Health Assistant. A server-side function-calling loop lets the model call real catalog-lookup tools (`find_labs` and `search_tests`) backed by Prisma queries and stream the reply, with structured lab and test cards, to the client over Server-Sent Events.",
+   "**AWS S3** — the object-storage target for result PDFs. A pluggable storage adapter selects between local disk (development) and an S3-compatible backend (via `@aws-sdk/client-s3`) at startup, so the rest of the application is storage-agnostic and files are always streamed back through an authorisation-checked controller rather than a public URL.",
+   "**Firebase Cloud Messaging** — the push-notification service. The backend initialises the Firebase Admin SDK from a service-account credential and degrades gracefully to a no-op when the credential is absent, multicasting notifications to a user's registered devices and pruning stale tokens automatically.",
+   "**Docker** — used via Docker Compose to run the local PostgreSQL 16 database in a container with a persistent volume, giving every contributor a reproducible development database.",
+   "**Railway / Render** — the backend hosting platforms. Railway is the primary host (building with Nixpacks and running migrations on every deploy), with a Render blueprint checked in as an interchangeable alternative; the web frontend is deployed separately on Vercel with a same-origin `/api` rewrite proxy.",
+   "**Neon** — the serverless, branchable PostgreSQL platform used for the production database, reached through a pooled connection string and made resilient to cold starts by a Prisma middleware that retries transient connection errors."
+  ]
+ },
+ {
+  "t": "h2",
+  "num": "3.3",
+  "text": "Project Management"
+ },
+ {
+  "t": "p",
+  "text": "TesTly was developed by a small team over the course of a graduation year, which made a lightweight, iterative process more appropriate than a heavyweight, plan-driven one. The project combined an **agile, phased delivery** rhythm with a disciplined **Git-based version-control** workflow. The two subsections below describe each in turn."
+ },
+ {
+  "t": "h3",
+  "num": "3.3.1",
+  "text": "Agile and Sprints"
+ },
+ {
+  "t": "p",
+  "text": "Development proceeded in an **iterative, incremental** fashion in the spirit of agile methods, organised as a sequence of numbered **phases** that played the role of sprints. Each phase delivered a self-contained, working increment of functionality rather than a partial slice of every feature, so the system was always demonstrable and the next increment could build on a stable base. The phases progressed from a foundational core toward the final production-readiness milestone, as outlined below."
+ },
+ {
+  "t": "table",
+  "caption": "Representative delivery phases (sprint-style increments)",
+  "headers": [
+   "Phase",
+   "Increment delivered"
+  ],
+  "rows": [
+   [
+    "Foundation",
+    "Initial full database schema, identity, authentication, and the public marketplace"
+   ],
+   [
+    "Bookings & payments",
+    "The booking lifecycle, payment state machine, and cash/online settlement modes"
+   ],
+   [
+    "Workspaces",
+    "Authenticated patient and lab dashboards and result handling"
+   ],
+   [
+    "Phase 5",
+    "Structured results and the cross-lab canonical-marker normalisation stack"
+   ],
+   [
+    "Phase 6",
+    "The lab-history-sharing privacy toggle"
+   ],
+   [
+    "Later phases",
+    "Home-test-kit logistics, lab coordinates, search indexes, and chat models"
+   ],
+   [
+    "Phase 7",
+    "The guided agentic AI assistant and production-readiness hardening"
+   ]
+  ]
+ },
+ {
+  "t": "p",
+  "text": "The evidence of this phased rhythm is preserved directly in the codebase: the ten database migrations are named after the increments they introduced (for example a structured-results phase, a lab-history-sharing phase, and the chat-models phase), and the project culminated in a **Phase 7** milestone that added the agentic guided assistant alongside production-readiness work, including the cross-site authentication and same-origin-proxy fixes and a documented deployment checklist. Each increment was validated against the layer-appropriate test suites — Jest for the backend, Playwright for the web, and `flutter test` for mobile — before being treated as complete."
+ },
+ {
+  "t": "h3",
+  "num": "3.3.2",
+  "text": "Version Control"
+ },
+ {
+  "t": "p",
+  "text": "The source code is managed with **Git** and hosted on **GitHub** as a **monorepo** organised through **npm workspaces**. A single repository contains all three npm-managed applications under `apps/*` (the backend, the frontend, and — alongside them in the tree, with its own Dart toolchain — the mobile app), so one clone gives a reviewer the API, the website, and the phone app version-locked together. Because the backend's API contract is the shared dependency that both clients consume, keeping the applications side by side prevents the clients from drifting against an outdated version of the API."
+ },
+ {
+  "t": "p",
+  "text": "The team followed a **feature-branch** workflow: work proceeded on dedicated branches that were merged into the main branch through **pull requests**, giving an opportunity for review before integration. The project history shows this process in action through merged pull requests for the cross-site cookie and same-origin-proxy fixes. Commit messages follow the **conventional-commits** convention, where each message is prefixed by its type and scope — for example `fix(auth): use SameSite=None cross-site cookie in production` and `feat(assistant): agentic lab/test cards in chat` — which makes the history self-documenting and easy to scan. Continuous delivery is handled by the hosting platforms' native Git integrations: a push to the default branch triggers Railway or Render to build and migrate the backend and Vercel to build the frontend, each running the build commands declared in the repository's configuration files."
+ }
+]

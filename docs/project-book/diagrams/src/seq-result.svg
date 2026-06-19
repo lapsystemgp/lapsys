@@ -1,0 +1,181 @@
+<svg width="1300" height="950" viewBox="0 0 1300 950" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#0F6FC6"/>
+    </marker>
+    <marker id="arrowReturn" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#1B8A5A"/>
+    </marker>
+  </defs>
+
+  <!-- background -->
+  <rect x="0" y="0" width="1300" height="950" fill="#FFFFFF"/>
+
+  <!-- title -->
+  <text x="28" y="40" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="bold" fill="#03485B">Sequence: Result Upload &#8594; Delivery</text>
+  <text x="28" y="62" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#6B7280">TesTly &#8212; lab uploads the official PDF, the system normalises structured observations, then delivers a comparable, trendable result to the patient.</text>
+
+  <!-- ===== Lifeline head boxes ===== -->
+  <!-- Columns (centre x): LabStaff 150, ClientApp 360, NestJS API 600, AWS S3 820, Database 1020, Patient 1215 -->
+
+  <!-- Lab Staff -->
+  <rect x="78" y="88" width="144" height="48" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="150" y="110" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294" text-anchor="middle">Lab Staff</text>
+  <text x="150" y="127" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280" text-anchor="middle">LabStaff role</text>
+
+  <!-- Client App -->
+  <rect x="288" y="88" width="144" height="48" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="360" y="110" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294" text-anchor="middle">Client App</text>
+  <text x="360" y="127" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280" text-anchor="middle">Web / Mobile</text>
+
+  <!-- NestJS API -->
+  <rect x="524" y="88" width="152" height="48" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="600" y="110" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294" text-anchor="middle">NestJS API</text>
+  <text x="600" y="127" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280" text-anchor="middle">Results services</text>
+
+  <!-- AWS S3 -->
+  <rect x="748" y="88" width="144" height="48" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="820" y="110" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294" text-anchor="middle">AWS S3</text>
+  <text x="820" y="127" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280" text-anchor="middle">Object storage</text>
+
+  <!-- Database -->
+  <rect x="948" y="88" width="144" height="48" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="1020" y="110" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294" text-anchor="middle">Database</text>
+  <text x="1020" y="127" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280" text-anchor="middle">PostgreSQL / Prisma</text>
+
+  <!-- Patient -->
+  <rect x="1143" y="88" width="144" height="48" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="1215" y="110" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294" text-anchor="middle">Patient</text>
+  <text x="1215" y="127" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280" text-anchor="middle">Patient role</text>
+
+  <!-- ===== Lifelines (dashed) ===== -->
+  <line x1="150" y1="136" x2="150" y2="900" stroke="#D7E3F4" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="360" y1="136" x2="360" y2="900" stroke="#D7E3F4" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="600" y1="136" x2="600" y2="900" stroke="#D7E3F4" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="820" y1="136" x2="820" y2="900" stroke="#D7E3F4" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="1020" y1="136" x2="1020" y2="900" stroke="#D7E3F4" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="1215" y1="136" x2="1215" y2="900" stroke="#D7E3F4" stroke-width="2" stroke-dasharray="6 6"/>
+
+  <!-- ============================================================ -->
+  <!-- PHASE A: UPLOAD                                                -->
+  <!-- ============================================================ -->
+  <rect x="78" y="156" width="498" height="22" rx="6" fill="#0B5294"/>
+  <text x="90" y="171" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF">Phase A &#8212; Upload the official PDF (LabService.uploadResult)</text>
+
+  <!-- M1: Lab Staff -> Client App : select & upload result PDF -->
+  <line x1="150" y1="200" x2="358" y2="200" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="172" y="188" width="166" height="16" fill="#FFFFFF"/>
+  <text x="174" y="200" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">upload result PDF + summary</text>
+
+  <!-- M2: Client App -> NestJS API : POST /lab/results/:bookingId/upload -->
+  <line x1="360" y1="232" x2="598" y2="232" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="368" y="220" width="224" height="16" fill="#FFFFFF"/>
+  <text x="370" y="232" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">POST /lab/results/:bookingId/upload</text>
+
+  <!-- API self note: validate MIME + %PDF magic bytes -->
+  <rect x="606" y="246" width="232" height="38" rx="8" fill="#FFFFFF" stroke="#0B5294" stroke-width="1.5"/>
+  <text x="616" y="262" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#1A1A1A">Validate lab ownership, PDF MIME</text>
+  <text x="616" y="277" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#1A1A1A">&amp; %PDF magic bytes (max 10 MB)</text>
+
+  <!-- M3: NestJS API -> AWS S3 : store file under date-partitioned key -->
+  <line x1="600" y1="304" x2="818" y2="304" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="606" y="292" width="208" height="16" fill="#FFFFFF"/>
+  <text x="608" y="304" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">store PDF (results/YYYY-MM-DD/&#8230;)</text>
+
+  <!-- R3: AWS S3 -> NestJS API : object URL (return, green dashed) -->
+  <line x1="820" y1="330" x2="602" y2="330" stroke="#1B8A5A" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrowReturn)"/>
+  <rect x="664" y="318" width="96" height="16" fill="#FFFFFF"/>
+  <text x="666" y="330" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1B8A5A">stored object URL</text>
+
+  <!-- M4: NestJS API -> Database : save ResultFile (Uploaded) + ResultSummary -->
+  <line x1="600" y1="358" x2="1018" y2="358" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="640" y="346" width="334" height="16" fill="#FFFFFF"/>
+  <text x="642" y="358" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">save ResultFile (status = Uploaded) + ResultSummary (txn)</text>
+
+  <!-- ============================================================ -->
+  <!-- PHASE B: STRUCTURE & NORMALISE                                -->
+  <!-- ============================================================ -->
+  <rect x="78" y="382" width="942" height="22" rx="6" fill="#0F6FC6"/>
+  <text x="90" y="397" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF">Phase B &#8212; Enter &amp; normalise structured results (StructuredResultsService &#183; requires PDF first)</text>
+
+  <!-- M5: Lab Staff -> Client App : enter structured panels & observations -->
+  <line x1="150" y1="428" x2="358" y2="428" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="160" y="416" width="190" height="16" fill="#FFFFFF"/>
+  <text x="162" y="428" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">enter panels &amp; observations</text>
+
+  <!-- M6: Client App -> NestJS API : PUT /lab/results/:bookingId/structured -->
+  <line x1="360" y1="460" x2="598" y2="460" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="364" y="448" width="232" height="16" fill="#FFFFFF"/>
+  <text x="366" y="460" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">PUT /lab/results/:bookingId/structured</text>
+
+  <!-- M7: NestJS API -> Database : look up MarkerAlias -> CanonicalMarker -->
+  <line x1="600" y1="492" x2="1018" y2="492" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="636" y="480" width="346" height="16" fill="#FFFFFF"/>
+  <text x="638" y="492" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">resolve raw name &#8594; CanonicalMarker (MarkerAlias lookup)</text>
+
+  <!-- R7: Database -> NestJS API : canonical marker + default unit (return) -->
+  <line x1="1020" y1="518" x2="602" y2="518" stroke="#1B8A5A" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrowReturn)"/>
+  <rect x="700" y="506" width="220" height="16" fill="#FFFFFF"/>
+  <text x="702" y="518" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1B8A5A">marker code + default unit (or null)</text>
+
+  <!-- API self note: unit conversion -->
+  <rect x="606" y="532" width="340" height="54" rx="8" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="1.5"/>
+  <text x="616" y="549" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#1A1A1A" font-weight="bold">toCanonicalValue() &#8212; map to comparable unit</text>
+  <text x="616" y="565" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#1A1A1A">glucose mmol/L&#215;18&#8594;mg/dL; HbA1c IFCC&#8594;%; TSH&#8594;mIU/L</text>
+  <text x="616" y="580" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#1A1A1A">unknown unit &#8594; is_comparable = false (+ note)</text>
+
+  <!-- M8: NestJS API -> Database : save ResultPanel + ResultObservation -->
+  <line x1="600" y1="610" x2="1018" y2="610" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="624" y="598" width="372" height="16" fill="#FFFFFF"/>
+  <text x="626" y="610" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">save ResultPanel + ResultObservation (raw + value_in_canonical_unit)</text>
+
+  <!-- ============================================================ -->
+  <!-- PHASE C: DELIVER & NOTIFY                                      -->
+  <!-- ============================================================ -->
+  <rect x="78" y="634" width="1137" height="22" rx="6" fill="#03485B"/>
+  <text x="90" y="649" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF">Phase C &#8212; Deliver &amp; notify (setResultStatus &#8594; Delivered)</text>
+
+  <!-- M9: Lab Staff -> NestJS API (via Client) : set status Delivered -->
+  <line x1="150" y1="680" x2="598" y2="680" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="250" y="668" width="296" height="16" fill="#FFFFFF"/>
+  <text x="252" y="680" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">PATCH status = Delivered (also Booking &#8594; Completed)</text>
+
+  <!-- M10: NestJS API -> Database : ResultStatus Delivered, status event -->
+  <line x1="600" y1="710" x2="1018" y2="710" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="650" y="698" width="318" height="16" fill="#FFFFFF"/>
+  <text x="652" y="710" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">set ResultStatus Delivered + write status event</text>
+
+  <!-- M11: NestJS API -> Patient : notify (FCM "Result Ready") -->
+  <line x1="600" y1="740" x2="1213" y2="740" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="800" y="728" width="216" height="16" fill="#FFFFFF"/>
+  <text x="802" y="740" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">notify patient &#8212; FCM "Result Ready"</text>
+
+  <!-- M12: Patient -> NestJS API : open result (GET workspace / health-profile) -->
+  <line x1="1215" y1="772" x2="602" y2="772" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="760" y="760" width="296" height="16" fill="#FFFFFF"/>
+  <text x="762" y="772" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">open result &#8212; GET /patient/workspace &amp; health-profile</text>
+
+  <!-- M13: NestJS API -> Database : fetch comparable observations -->
+  <line x1="600" y1="802" x2="1018" y2="802" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="648" y="790" width="322" height="16" fill="#FFFFFF"/>
+  <text x="650" y="802" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">fetch comparable observations across all bookings</text>
+
+  <!-- R13: Database -> NestJS API : canonical-valued series (return) -->
+  <line x1="1020" y1="828" x2="602" y2="828" stroke="#1B8A5A" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrowReturn)"/>
+  <rect x="712" y="816" width="196" height="16" fill="#FFFFFF"/>
+  <text x="714" y="828" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1B8A5A">canonical-valued data points</text>
+
+  <!-- R12: NestJS API -> Patient : structured result + cross-lab trend (return) -->
+  <line x1="600" y1="860" x2="1213" y2="860" stroke="#1B8A5A" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrowReturn)"/>
+  <rect x="700" y="848" width="416" height="16" fill="#FFFFFF"/>
+  <text x="702" y="860" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1B8A5A">structured result + cross-lab trend (comparable units); PDF via /results/files/:id</text>
+
+  <!-- ===== Legend ===== -->
+  <rect x="78" y="888" width="600" height="40" rx="8" fill="#FFFFFF" stroke="#D7E3F4" stroke-width="1.5"/>
+  <line x1="92" y1="908" x2="132" y2="908" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="140" y="912" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">request / call</text>
+  <line x1="250" y1="908" x2="290" y2="908" stroke="#1B8A5A" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrowReturn)"/>
+  <text x="298" y="912" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">return / response</text>
+  <rect x="430" y="900" width="18" height="14" rx="3" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="1.5"/>
+  <text x="456" y="912" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">processing note (no DB round-trip)</text>
+</svg>

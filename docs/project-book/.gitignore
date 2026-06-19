@@ -1,0 +1,7 @@
+node_modules/
+unpacked/
+_proof/
+_shots/
+proof.html
+proof.pdf
+*.tmp

@@ -1,0 +1,198 @@
+[
+  {"t":"p","text":"This chapter situates **TesTly** within the wider landscape of medical diagnostic services and digital health technology. It first establishes the domain background: how patients in Egypt currently navigate laboratory testing, the global rise of electronic-health (e-health) and health-technology marketplaces, and the key technical and clinical concepts that underpin any modern laboratory platform. It then surveys the categories of existing applications that overlap with TesTly's problem space, naming representative real-world systems and identifying the features each category typically offers and the gaps it leaves. Finally, it justifies the engineering choices made for TesTly by comparing each layer of the technology stack against the principal alternatives. The purpose of this related-work review is twofold: to demonstrate that the problem TesTly addresses is real and inadequately served by existing solutions, and to show that the selected tools are a deliberate, defensible response to the project's requirements rather than arbitrary preferences."},
+
+  {"t":"h2","num":"2.1","text":"Background"},
+
+  {"t":"p","text":"A medical diagnostic laboratory is a facility that performs clinical tests on biological samples — blood, urine, and other specimens — to support the diagnosis, treatment, and monitoring of disease. In Egypt, laboratory testing is delivered by a fragmented mix of large national chains, hospital-affiliated laboratories, and a long tail of independent neighbourhood laboratories. Patients typically reach these laboratories through one of three paths: a physician's referral, a direct walk-in for a routine or self-requested panel, or, increasingly, an online enquiry. The conventional patient journey is notably manual: the patient learns of a laboratory by word of mouth or proximity, telephones or visits to ask about a test and its price, attends in person to provide a sample or arranges an informal home visit, and later returns to collect a paper or PDF result. Because prices for an identical test are rarely published and vary substantially between laboratories, the patient has no neutral means of comparing options before committing."},
+
+  {"t":"p","text":"This opacity is the central pain point that motivates a marketplace approach. A patient seeking a common panel — a complete blood count (CBC), a lipid profile, a thyroid panel, or a glycated-haemoglobin (HbA1c) test — must individually canvass laboratories to discover where the test is available, what it costs, how long results take, and whether the laboratory is accredited. There is no consolidated, patient-facing view of the market, no structured record of other patients' experiences, and no continuity of a patient's results when they move between laboratories. Results delivered as one-off documents cannot easily be trended over time, and a patient who uses different laboratories for successive tests accumulates a disconnected archive rather than a coherent health record."},
+
+  {"t":"h3","num":"2.1.1","text":"The Rise of E-Health and Health-Technology Marketplaces"},
+
+  {"t":"p","text":"Over the past decade, the broader e-health movement has reshaped how patients discover and consume health services. The same online-marketplace pattern that transformed retail, transport, and hospitality — aggregating fragmented supply, exposing transparent pricing and ratings, and enabling online transactions — has been applied to healthcare. In the Egyptian and wider Middle Eastern market, this is visible in the growth of doctor-booking platforms, online pharmacies, and tele-health services that connect patients to providers through a single digital storefront. These platforms succeed by addressing precisely the frictions described above: they make supply discoverable, make pricing comparable, and reduce the number of phone calls and physical visits a patient must make."},
+
+  {"t":"p","text":"Three capabilities recur across successful e-health products and are directly relevant to TesTly. **Online booking** lets a patient reserve a service — an appointment slot, a home visit, or a delivery — without a phone call, and gives the provider a managed queue rather than ad-hoc requests. **Tele-health and remote service models** extend the provider's reach beyond the physical premises; for a diagnostic laboratory the analogue is home sample collection and home test kits, which decouple the service from a clinic visit. **Digital results delivery** replaces paper with electronic documents and, in more advanced systems, with structured data that can be searched, charted, and integrated with other records. TesTly combines all three: it offers booking across lab-visit, home-collection, and home-test-kit modes; it supports online and cash payment; and it delivers results both as an authoritative PDF and as structured, queryable observations that enable cross-laboratory health-trend tracking."},
+
+  {"t":"h3","num":"2.1.2","text":"Key Concepts: LIS, LOINC, and Accreditation"},
+
+  {"t":"p","text":"Three concepts from clinical informatics frame the design of any laboratory platform and recur throughout this thesis. Understanding them clarifies both what existing systems do and where TesTly's contribution lies."},
+
+  {"t":"b","items":[
+    "**Laboratory Information System (LIS).** An LIS is the back-office software a laboratory uses internally to manage its operations: receiving test orders, tracking samples through the workflow, recording results, and producing reports. A traditional LIS is laboratory-centric and closed — it serves the single laboratory that operates it, not a network of laboratories or the patients across them. TesTly's lab-facing workspace performs an analogous operational role (catalogue, schedule, booking queue, results upload) but does so as a shared, multi-tenant marketplace component rather than a per-laboratory silo.",
+    "**LOINC (Logical Observation Identifiers Names and Codes).** LOINC is an international standard that assigns universal codes to laboratory observations so that the same analyte reported by different laboratories — under different local names and units — can be identified as the same measurement. This is the formal answer to the cross-laboratory comparability problem. TesTly does not adopt the full LOINC catalogue, but it implements the same underlying idea through a canonical-marker normalisation layer: it resolves each laboratory's differently-named, differently-united analytes (for example glucose reported in mmol/L versus mg/dL) into a canonical, comparable form so that values from different laboratories can be charted on one trend line.",
+    "**Accreditation.** Accreditation is formal recognition that a laboratory meets defined quality and competence standards. For a marketplace, accreditation is a trust signal that helps a patient choose between otherwise similar offerings. TesTly records each laboratory's accreditation as a first-class attribute, exposes it as a filter and a comparison field in the public marketplace, and surfaces it on laboratory and assistant result cards."
+  ]},
+
+  {"t":"p","text":"Together these concepts define the niche TesTly occupies. It is not merely a single laboratory's LIS exposed online, nor a generic appointment-booking tool, but a curated multi-laboratory marketplace that layers transparent discovery, multi-mode booking, secure digital results, and LOINC-style cross-laboratory normalisation over a network of accredited laboratories — with an agentic AI assistant grounded in the live catalogue as a discovery aid."},
+
+  {"t":"h2","num":"2.2","text":"Types of Applications"},
+
+  {"t":"p","text":"A number of existing application categories overlap with TesTly's problem space, each solving part of the patient's journey but none addressing it end-to-end as a transparent, cross-laboratory marketplace with longitudinal result tracking. This section surveys those categories, names representative real-world systems, and identifies the features and gaps of each. The categories are ordered from the most laboratory-specific to the most general."},
+
+  {"t":"h3","num":"2.2.1","text":"Single-Laboratory Websites and Apps"},
+
+  {"t":"p","text":"The most direct comparators are the websites and mobile applications operated by individual laboratory chains. In Egypt the prominent examples are **El Mokhtabar** and **Al Borg Laboratories**, two of the largest national chains, each of which offers an online presence through which a patient can browse that chain's own test catalogue, book a home visit or branch appointment, and retrieve results. These applications are typically polished and operationally complete because they are backed by a real laboratory and its internal LIS."},
+
+  {"t":"p","text":"Their defining limitation, however, is that they are **single-vendor storefronts**: each shows only its own laboratory's tests, its own prices, and its own branches. A patient using El Mokhtabar's app cannot compare its price for a lipid profile against Al Borg's, cannot see independent neighbourhood laboratories, and cannot consolidate results obtained from different chains into a single trend. Because there is no neutral intermediary, price transparency exists only within a vendor, not across the market. The result is that a price-sensitive or comparison-minded patient must install and check several separate apps — exactly the fragmentation a marketplace is meant to remove."},
+
+  {"t":"h3","num":"2.2.2","text":"Health-Service Marketplaces"},
+
+  {"t":"p","text":"A second category is the broader health-service marketplace that aggregates multiple providers. The leading regional example is **Vezeeta**, which began as a doctor-booking platform and expanded into laboratory tests, pharmacy, and other services; another is **Yodawy**, focused primarily on pharmacy and medication fulfilment with some diagnostic offerings. These platforms demonstrate the marketplace pattern in the Egyptian market: they aggregate supply, expose provider ratings, and enable online booking and payment across many vendors."},
+
+  {"t":"p","text":"For diagnostic testing specifically, however, these general health marketplaces treat laboratory tests as one vertical among many, and their laboratory experience is comparatively shallow. They typically offer booking and a degree of price visibility, but they do not deliver **structured, normalised results** that a patient can trend across laboratories over time, nor do they provide a privacy-controlled mechanism for a patient's longitudinal history to follow them when they change provider. Their value lies in breadth of services rather than depth in the laboratory domain. TesTly, by contrast, is purpose-built for laboratory testing and therefore invests in exactly the depth these platforms lack: cross-laboratory test comparison, structured result data, and longitudinal trend tracking."},
+
+  {"t":"h3","num":"2.2.3","text":"Pharmacy and Medication Applications"},
+
+  {"t":"p","text":"Pharmacy and medication-delivery applications — of which **Yodawy** is again a representative regional example, alongside numerous chain-pharmacy apps — share important interaction patterns with a laboratory marketplace: a searchable catalogue, a shopping or booking flow, online and cash-on-delivery payment, and a home-delivery logistics layer. The home-delivery model in particular maps neatly onto TesTly's home-collection and home-test-kit modes, and the cash-on-delivery option mirrors TesTly's cash payment variants."},
+
+  {"t":"p","text":"The relevance of this category is therefore primarily in the **transactional and fulfilment mechanics** rather than the clinical content. These applications confirm that Egyptian users are comfortable with online catalogues, home delivery, and mixed online/cash payment — assumptions TesTly relies on. What they do not provide is any notion of diagnostic results, structured clinical data, or health-trend tracking, because medication fulfilment has no result artefact to deliver. TesTly adopts their proven commerce patterns while adding the diagnostic and longitudinal-results dimension that a pharmacy app has no reason to support."},
+
+  {"t":"h3","num":"2.2.4","text":"Hospital Patient Portals"},
+
+  {"t":"p","text":"Many hospitals and integrated health systems provide a patient portal — a secure web or mobile front-end to the institution's electronic health record through which a patient can view appointments, laboratory results, and clinical documents. These portals are strong on **secure, structured results delivery** and on continuity of care within the institution: a patient's results, once in the portal, are retained and can often be viewed alongside prior values."},
+
+  {"t":"p","text":"Their limitation is that they are bounded by the institution. A hospital portal shows results produced by that hospital's own laboratories; it does not aggregate independent laboratories, expose comparative pricing, or let a patient trend results across institutions. It is a continuity-of-care tool for an existing patient of one provider, not a discovery-and-comparison marketplace for a patient choosing between providers. TesTly takes the secure, structured-results strength of the portal model and generalises it across a network of independent laboratories, adding the discovery, comparison, and cross-vendor trending that an institution-bound portal cannot offer."},
+
+  {"t":"h3","num":"2.2.5","text":"International Patient Portals and Lab Networks"},
+
+  {"t":"p","text":"Outside Egypt, the most mature comparators are the patient portals of large laboratory networks, notably **Quest Diagnostics** (MyQuest) and **Labcorp** (Labcorp Patient) in the United States. These systems are sophisticated: they offer online test ordering, appointment scheduling, secure structured results with reference ranges, and — significantly — historical result tracking that lets a patient see a given marker's values over time. They represent the state of the art in patient-facing laboratory technology."},
+
+  {"t":"p","text":"Even these advanced systems, however, are fundamentally **single-network**: Quest's portal trends results produced within Quest, and Labcorp's within Labcorp. The cross-network comparability problem — trending the same analyte across genuinely independent laboratories that name and unit it differently — is not their objective, because within one network the analyte names and units are already standardised internally. TesTly's distinguishing contribution is precisely to solve trending across independent laboratories through canonical-marker normalisation and unit conversion, a problem that a single-network portal does not face. Moreover, these international systems are tailored to their home healthcare and insurance context and are not localised for the Egyptian market, its pricing, its languages (Arabic and English), or its cash-payment norms."},
+
+  {"t":"h3","num":"2.2.6","text":"General Appointment-Booking Platforms"},
+
+  {"t":"p","text":"The most general category is the cross-domain appointment-booking platform exemplified by **Practo** (widely used in South Asia) and similar tools that schedule appointments across many kinds of health and non-health providers. These platforms excel at the scheduling primitive — calendars, slots, capacity, reminders — and at provider discovery by location and rating."},
+
+  {"t":"p","text":"Because they are domain-agnostic, however, they model a provider as a generic bookable resource and have no concept of a test catalogue with per-test pricing and preparation instructions, no diagnostic result artefact, and no clinical data model. They can book a visit to a laboratory but cannot represent what is being tested, what it costs at each laboratory, what preparation it requires, or what result it produces. TesTly reuses the scheduling primitive these platforms have proven but embeds it in a laboratory-specific domain model — schedule slots tied to a test catalogue, three booking modes, payment-method compatibility rules, and a results pipeline — that a general booking tool deliberately abstracts away."},
+
+  {"t":"h3","num":"2.2.7","text":"Feature Comparison and TesTly's Positioning"},
+
+  {"t":"p","text":"Table 2.1 consolidates the survey above into a feature matrix, scoring each application category against the seven capabilities that define TesTly's value proposition: cross-laboratory lab discovery, price transparency, home sample collection, online payment, structured (not merely PDF) results, cross-laboratory health-trend tracking, and an integrated AI assistant. The matrix makes the gap visible: no existing category combines all seven, and in particular the combination of cross-laboratory price transparency, structured cross-laboratory trends, and a catalogue-grounded AI assistant is unique to TesTly."},
+
+  {"t":"table","caption":"Feature comparison of application categories against TesTly's value proposition (✔ = typically present, ◐ = partial or vendor-limited, ✘ = absent)","headers":["Capability","Single-lab apps (El Mokhtabar, Al Borg)","Health marketplaces (Vezeeta, Yodawy)","Pharmacy apps (Yodawy)","Hospital portals","Intl. lab portals (Quest, Labcorp)","General booking (Practo)","TesTly"],"rows":[
+    ["Cross-lab discovery","✘","✔","◐","✘","✘","✔","✔"],
+    ["Price transparency","◐","◐","✔","✘","◐","◐","✔"],
+    ["Home sample collection","✔","◐","✔","✘","✔","✘","✔"],
+    ["Online payment","✔","✔","✔","◐","✔","✔","✔"],
+    ["Structured results","◐","✘","✘","✔","✔","✘","✔"],
+    ["Cross-lab health trends","✘","✘","✘","◐","◐","✘","✔"],
+    ["AI assistant","✘","◐","◐","✘","✘","✘","✔"]
+  ]},
+
+  {"t":"p","text":"The pattern in Table 2.1 is instructive. Single-laboratory apps are operationally complete but vendor-bound, so they cannot offer cross-laboratory discovery, comparison, or trending. General marketplaces and booking platforms offer breadth and discovery but lack diagnostic depth — no structured results, no trends. Portals (hospital and international) offer structured results and some trending but only within a single institution or network. Pharmacy apps contribute the commerce and home-delivery patterns but have no diagnostic dimension at all. TesTly is positioned deliberately at the intersection: it adopts the marketplace's discovery and price transparency, the pharmacy app's home-delivery and mixed-payment mechanics, the portal's secure structured results, and adds two capabilities that no comparator combines — privacy-controlled cross-laboratory trend tracking via canonical-marker normalisation, and an agentic AI assistant grounded in the real catalogue. Figure 2.1 (the system architecture) shows how these capabilities are realised across the platform's components."},
+
+  {"t":"figure","ref":"architecture","caption":"TesTly system architecture, showing the marketplace, booking, results, normalisation, and AI-assistant capabilities that together close the gaps identified in the application survey"},
+
+  {"t":"h2","num":"2.3","text":"Comparison of Used Development Tools"},
+
+  {"t":"p","text":"This section justifies the technology stack selected for TesTly by comparing each major layer against the principal alternatives that were realistically available. The guiding criteria throughout were: suitability for a single, type-safe, end-to-end TypeScript/Dart codebase shared by three applications; the security and data-integrity demands of a medical domain; the productivity and maintainability appropriate to a graduation project built by a small team; and the operational fit with low-cost managed hosting. Each comparison ends with the rationale for TesTly's choice. The stack as actually implemented is **NestJS 11** for the backend, **Next.js 16** for the web application, **Flutter** for mobile, **PostgreSQL** as the database (Neon-hosted in production), **Prisma 5** as the ORM, and **Google GenAI (Gemini)** for the AI assistant."},
+
+  {"t":"h3","num":"2.3.1","text":"Backend Framework: NestJS vs Express vs Django/Laravel"},
+
+  {"t":"p","text":"The backend is the security-critical core of the system: it owns authentication, authorisation, business rules, payment state, and access to medical data. The candidate frameworks were Express (a minimal Node.js framework), Django (Python) and Laravel (PHP) as full-featured non-JavaScript frameworks, and NestJS (a structured, TypeScript-first Node.js framework). Table 2.2 compares them on the axes that mattered for TesTly."},
+
+  {"t":"table","caption":"Backend framework comparison","headers":["Criterion","Express","Django / Laravel","NestJS (chosen)"],"rows":[
+    ["Language","JavaScript/TS","Python / PHP","TypeScript (first-class)"],
+    ["Architecture","Unopinionated, manual","Opinionated, MVC","Modular, DI-driven, decorator-based"],
+    ["Type safety with shared clients","Partial","None (different language)","End-to-end with TS web/mobile DTOs"],
+    ["Built-in structure (guards, pipes, DI)","None (assemble yourself)","Framework-provided","First-class (guards, pipes, filters)"],
+    ["Validation & OpenAPI","Add-on libraries","Built-in / add-on","class-validator + @nestjs/swagger"],
+    ["Learning fit for a TS team","Low ceremony","Requires new language","Structured but TS-native"]
+  ]},
+
+  {"t":"p","text":"Express, while ubiquitous, is deliberately unopinionated: it provides routing and middleware but no built-in structure for dependency injection, modular organisation, validation, or authorisation. For a system with layered role-based access control and many cross-cutting concerns, building that structure on bare Express would mean re-implementing what a higher-level framework provides. Django and Laravel are mature and feature-complete, but adopting either would split the codebase across two languages (Python or PHP on the server, TypeScript and Dart on the clients), forfeiting the type-safety and shared-contract benefits of a single-language stack."},
+
+  {"t":"p","text":"**TesTly chose NestJS** because it provides exactly the structure a security-sensitive marketplace needs while remaining TypeScript-native. Its decorator-driven, dependency-injection architecture made the layered guard pipeline — `JwtAuthGuard`, then `RolesGuard`, then a domain-specific `LabActiveGuard`, then per-service ownership checks — natural to express and to reason about. Its first-class support for validation pipes (with `class-validator`) and a global exception filter gave uniform input validation and error handling across every endpoint, and its `@nestjs/swagger` integration produced API documentation directly from the code. Critically, because NestJS is built on Express under the hood, TesTly retained the entire Express ecosystem while gaining the architecture; and because the server, the web client, and (via mirrored models) the mobile client all speak TypeScript, the API contract is shared and type-checked end-to-end. Figure 2.2 shows the resulting backend component structure and guard pipeline."},
+
+  {"t":"figure","ref":"component-backend","caption":"NestJS backend module structure and the layered authorisation guard pipeline that NestJS's dependency-injection architecture made natural to express"},
+
+  {"t":"h3","num":"2.3.2","text":"Web Framework: Next.js vs Create-React-App vs Angular vs Vue"},
+
+  {"t":"p","text":"The web application serves the public marketplace plus the patient, lab-staff, and admin dashboards. The candidates were Create-React-App (CRA, a client-only React scaffold), Angular and Vue (full client-side frameworks), and Next.js (a React meta-framework with server-side rendering, routing, and edge middleware). Table 2.3 compares them."},
+
+  {"t":"table","caption":"Web framework comparison","headers":["Criterion","Create-React-App","Angular","Vue","Next.js (chosen)"],"rows":[
+    ["Rendering model","Client-only SPA","Client-only SPA","Client-only SPA","SSR + SSG + client, App Router"],
+    ["Routing","Add library","Built-in","Add library","File-based (App Router)"],
+    ["Edge middleware (route guards)","None","None","None","Built-in (jose JWT check)"],
+    ["SEO for public storefront","Weak (client-rendered)","Weak","Weak","Strong (server-rendered)"],
+    ["Shared language with backend","TypeScript","TypeScript","TypeScript/JS","TypeScript"],
+    ["Ecosystem & deployment","Maturing/deprecated","Mature","Mature","Mature (Vercel-native)"]
+  ]},
+
+  {"t":"p","text":"CRA is effectively deprecated and produces a client-only single-page application with no server rendering — a poor fit for a public marketplace whose landing, search, and lab-detail pages benefit from being server-rendered for performance and discoverability. Angular and Vue are capable client frameworks, but both are primarily client-side and would still require a separate solution for server rendering and for the edge route-protection layer that TesTly relies on. Angular in particular imposes a heavier, more prescriptive structure than a small project needs."},
+
+  {"t":"p","text":"**TesTly chose Next.js** (App Router, React 19) because it uniquely combined three things the project required. First, server-side rendering for the unauthenticated storefront, so anonymous visitors can browse labs and tests without a registration wall. Second, **edge middleware**, which TesTly uses as a fast, JWT-decoding route guard (via `jose`) that redirects users away from protected `/patient`, `/lab`, and `/admin` route groups before the page shell even loads — a defence-in-depth layer above the backend's authoritative checks. Third, its tight integration with Vercel hosting, which enabled the same-origin `/api` rewrite proxy that makes the httpOnly authentication cookie first-party across the split web/API deployment. Sharing TypeScript with the NestJS backend completed the single-language story for the server-and-web pair."},
+
+  {"t":"h3","num":"2.3.3","text":"Mobile Framework: Flutter vs React Native vs Native"},
+
+  {"t":"p","text":"The mobile application targets both iOS and Android for patients and lab staff. The realistic options were fully native development (Swift/Kotlin, one codebase per platform), React Native (JavaScript/TypeScript, native widgets), and Flutter (Dart, with its own rendering engine). Table 2.4 compares them."},
+
+  {"t":"table","caption":"Mobile framework comparison","headers":["Criterion","Native (Swift + Kotlin)","React Native","Flutter (chosen)"],"rows":[
+    ["Codebases for iOS + Android","Two","One","One"],
+    ["Language","Swift / Kotlin","JavaScript/TypeScript","Dart"],
+    ["UI consistency across platforms","Diverges","Bridges native widgets","Own engine, pixel-consistent"],
+    ["Performance","Highest (native)","Good (bridge overhead)","Near-native (compiled)"],
+    ["Tooling maturity for a small team","High effort (×2)","Mature","Mature, single toolchain"],
+    ["Localisation / RTL (Arabic)","Per platform","Supported","First-class (flutter_localizations)"]
+  ]},
+
+  {"t":"p","text":"Building two fully native applications would have doubled the implementation and maintenance effort — an impractical cost for a graduation project that already maintains a backend and a web client. React Native offers a single codebase and would have let the team reuse JavaScript/TypeScript knowledge, but it bridges to native widgets, which can introduce inconsistency and bridge-related overhead. Flutter compiles to native code and renders through its own engine, giving pixel-consistent UI across both platforms from one codebase."},
+
+  {"t":"p","text":"**TesTly chose Flutter** for its single-codebase efficiency, near-native performance, and — importantly for the Egyptian market — its first-class localisation and right-to-left support, which the app uses to ship full English/Arabic parity (330 localised string keys per language) with automatic RTL layout. Flutter's mature ecosystem supplied the exact native integrations the project needed: secure token storage in the iOS Keychain and Android Keystore (`flutter_secure_storage`), push notifications (`firebase_messaging`), geolocation for distance-sorted search (`geolocator`), in-app PDF rendering of results (`pdfx`), and biometric unlock (`local_auth`). The app's feature-first clean architecture with Riverpod state management kept it testable, and its `haversineKm` distance calculation was made identical to the web client's so both front-ends display the same numbers from the one shared backend."},
+
+  {"t":"h3","num":"2.3.4","text":"Database: PostgreSQL vs MySQL vs MongoDB"},
+
+  {"t":"p","text":"The data layer must model a richly relational domain — users, profiles, labs, tests, schedule slots, bookings with payment and kit sub-states, results, structured observations, reviews, and conversations — with strong integrity guarantees appropriate to medical and financial data. The candidates were two relational databases, PostgreSQL and MySQL, and a document database, MongoDB. Table 2.5 compares them."},
+
+  {"t":"table","caption":"Database comparison","headers":["Criterion","MongoDB","MySQL","PostgreSQL (chosen)"],"rows":[
+    ["Data model","Document (schema-flexible)","Relational","Relational"],
+    ["Fit for highly relational domain","Weak (manual joins)","Strong","Strong"],
+    ["Transactions & integrity","Limited (per-document)","ACID","ACID, robust constraints"],
+    ["Constraint enforcement (unique, FK)","Application-level","Database-level","Database-level"],
+    ["Advanced types (JSONB, decimal)","Native JSON","Partial","JSONB + precise Decimal"],
+    ["Serverless managed option","Atlas","Several","Neon (used in production)"]
+  ]},
+
+  {"t":"p","text":"MongoDB's document model is flexible but a poor fit for TesTly's domain, which is heavily relational and depends on referential integrity (a booking references a patient, a lab, a test, and a slot) and on database-enforced uniqueness — most notably the `schedule_slot_id` unique constraint that prevents two patients double-booking the same slot, a guarantee TesTly relies on at the database level. MySQL is a capable relational option, but PostgreSQL offered a stronger feature set for this project: robust transactional integrity, precise `Decimal` types for clinical values and pricing, and a native `JSONB` type used to store the agentic assistant's structured tool-card payloads alongside relational data."},
+
+  {"t":"p","text":"**TesTly chose PostgreSQL** for its combination of strict relational integrity, transactional safety (the booking-creation flow runs inside a transaction and depends on a unique constraint to defeat double-booking races), and the advanced types its data model uses. In production the database is hosted on **Neon**, a serverless, branchable PostgreSQL platform, while local development runs the same PostgreSQL in Docker — so the schema and behaviour are identical across environments. To accommodate Neon's serverless cold-starts, the data layer adds a retry middleware for transient connection errors, a pragmatic resilience measure for serverless Postgres. Figure 2.3 shows the resulting entity-relationship model."},
+
+  {"t":"figure","ref":"erd","caption":"Entity-relationship diagram of the PostgreSQL schema, whose relational integrity and unique constraints underpin TesTly's booking and results guarantees"},
+
+  {"t":"h3","num":"2.3.5","text":"ORM: Prisma vs TypeORM vs Sequelize"},
+
+  {"t":"p","text":"An object-relational mapper sits between the NestJS backend and PostgreSQL, providing type-safe queries and managing schema migrations. The principal TypeScript options were Sequelize (a long-established, more loosely typed ORM), TypeORM (a decorator-based ORM common in the NestJS ecosystem), and Prisma (a schema-first toolkit with a generated, fully type-safe client). Table 2.6 compares them."},
+
+  {"t":"table","caption":"ORM comparison","headers":["Criterion","Sequelize","TypeORM","Prisma (chosen)"],"rows":[
+    ["Type safety","Weak","Partial (decorators)","Strong (generated client)"],
+    ["Schema source of truth","Model classes","Entity decorators","Single schema.prisma file"],
+    ["Migrations","Manual/CLI","CLI (can drift)","Generated, versioned migrations"],
+    ["Query ergonomics","Verbose","Moderate","Concise, autocompleted"],
+    ["Relational modelling fit","Good","Good","Excellent, explicit relations"]
+  ]},
+
+  {"t":"p","text":"Sequelize predates TypeScript-first design and offers comparatively weak compile-time type safety, which undercuts the end-to-end type-safety goal of the stack. TypeORM integrates naturally with NestJS's decorator style but spreads the schema across entity decorator definitions and is known for migration drift in larger schemas. Prisma takes a schema-first approach: a single `schema.prisma` file is the authoritative description of the data model, from which Prisma generates a fully typed client and versioned SQL migrations."},
+
+  {"t":"p","text":"**TesTly chose Prisma 5** because its generated, strongly-typed client extended the project's type-safety guarantee all the way down to the database, eliminating a class of runtime query errors at compile time. The single schema file served as a clear, reviewable source of truth that evolved through ten versioned migrations as the project grew — from the initial schema through structured results, lab-history sharing, payment fields, lab coordinates, home test kits, and the chat models. Prisma's concise, autocompleted query API kept the data-access code readable, and its migration tooling integrated cleanly with the deployment pipeline, which applies pending migrations automatically on every deploy. A thin retry middleware was layered over the Prisma client to handle serverless-Postgres transient errors."},
+
+  {"t":"h3","num":"2.3.6","text":"Generative AI: Google GenAI (Gemini) vs Alternatives"},
+
+  {"t":"p","text":"The AI assistant is an agentic, function-calling chatbot that streams replies and calls tools to look up real labs and tests from the catalogue. Selecting the model and SDK involved weighing capability, cost, streaming and function-calling support, and suitability for a high-volume, latency-sensitive, bilingual student-project assistant. The realistic alternatives were OpenAI's GPT models, Anthropic's Claude models, open-source self-hosted models, and Google's Gemini via the Google GenAI SDK. Table 2.7 compares the dimensions that mattered."},
+
+  {"t":"table","caption":"Generative-AI provider comparison","headers":["Criterion","Self-hosted open models","OpenAI GPT","Anthropic Claude","Google Gemini (chosen)"],"rows":[
+    ["Function calling / tools","Varies","Yes","Yes","Yes"],
+    ["Streaming responses","Varies","Yes","Yes","Yes (generateContentStream)"],
+    ["Cost for high-volume student use","Infra cost","Higher","Higher","Low (gemini-2.5-flash)"],
+    ["Latency for interactive chat","Hardware-bound","Good","Good","Fast (flash tier)"],
+    ["Operational overhead","High (host & scale)","Managed API","Managed API","Managed API"],
+    ["Arabic/English support","Varies","Good","Good","Good"]
+  ]},
+
+  {"t":"p","text":"Self-hosting an open-source model was rejected on operational grounds: provisioning and scaling inference hardware is impractical and costly for a graduation project, and would distract from the application itself. The major hosted providers — OpenAI's GPT and Anthropic's Claude — are highly capable and support both streaming and function calling, but for a student project serving a price-sensitive market the cost and latency profile of a fast, economical model was the deciding factor."},
+
+  {"t":"p","text":"**TesTly chose Google GenAI with the `gemini-2.5-flash` model** because it combined the required capabilities — native function calling for the agentic tool loop and token-by-token streaming via `generateContentStream` — with the low cost and fast response times of the Flash tier, which suits an interactive, high-volume assistant on a graduation-project budget. The function-calling support was essential: the assistant's defining behaviour is to call `find_labs` and `search_tests` tools that run real Prisma queries against the live catalogue, so its answers are grounded in actual labs and prices rather than hallucinated. Streaming let the clients render replies as they arrive and pop lab/test cards into view the instant a lookup resolves. The integration was designed to **degrade gracefully**: when no API key is configured the assistant cleanly disables itself rather than crashing the rest of the system, and a separate, deterministic non-LLM FAQ bot handles common questions without consuming model quota. Figure 2.4 shows the resulting agentic assistant request flow."},
+
+  {"t":"figure","ref":"seq-ai","caption":"Sequence of the agentic AI assistant: Gemini's streaming and function-calling features drive a server-side tool loop grounded in the live Prisma catalogue"},
+
+  {"t":"p","text":"Taken together, the choices in this section form a coherent whole rather than a set of independent decisions. A single TypeScript backend (NestJS) and web client (Next.js), a Dart mobile client (Flutter) mirroring the same API contract, a strongly-typed data layer (Prisma over PostgreSQL), and a cost-appropriate, capability-complete AI provider (Gemini) combine into a type-safe, maintainable, and secure platform whose every layer is justified against the alternatives by the requirements of a medical lab-testing marketplace built by a small team. The chapters that follow examine how these tools were assembled into the system's analysis, design, and implementation."}
+]

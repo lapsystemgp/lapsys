@@ -1,0 +1,131 @@
+<svg width="1250" height="880" viewBox="0 0 1250 880" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#0F6FC6"/>
+    </marker>
+  </defs>
+
+  <!-- background -->
+  <rect x="0" y="0" width="1250" height="880" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="32" y="44" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="bold" fill="#03485B">TesTly — Deployment Diagram (Production Topology)</text>
+  <text x="32" y="68" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#6B7280">Three-host split: web on Vercel, API on Railway (or Render), data &amp; integrations on managed cloud services. All traffic over HTTPS / TLS.</text>
+
+  <!-- left rail tier labels -->
+  <text x="34" y="146" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#6B7280" letter-spacing="1">CLIENT</text>
+  <text x="34" y="164" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#6B7280" letter-spacing="1">TIER</text>
+
+  <text x="34" y="362" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#6B7280" letter-spacing="1">CLOUD</text>
+  <text x="34" y="380" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#6B7280" letter-spacing="1">HOSTS</text>
+
+  <text x="34" y="704" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#6B7280" letter-spacing="1">MANAGED</text>
+  <text x="34" y="722" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#6B7280" letter-spacing="1">SERVICES</text>
+
+  <!-- ===================== CLIENT TIER ===================== -->
+  <!-- User Devices container (device node) -->
+  <rect x="370" y="100" width="510" height="116" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="625" y="128" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="bold" fill="#0B5294">User Devices</text>
+
+  <!-- Browser sub-box -->
+  <rect x="392" y="142" width="222" height="58" rx="10" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="503" y="167" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#0B5294">Web Browser</text>
+  <text x="503" y="187" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">desktop / mobile web</text>
+
+  <!-- Mobile sub-box -->
+  <rect x="636" y="142" width="222" height="58" rx="10" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="747" y="167" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#0B5294">Mobile App</text>
+  <text x="747" y="187" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">Flutter — iOS / Android</text>
+
+  <!-- ===================== CLOUD HOST TIER ===================== -->
+  <!-- Frontend host: Vercel -->
+  <rect x="120" y="300" width="430" height="150" rx="12" fill="#F4F8FE" stroke="#0B5294" stroke-width="2.5"/>
+  <text x="146" y="330" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#6B7280" letter-spacing="1">VERCEL  (edge / CDN host)</text>
+
+  <rect x="146" y="346" width="378" height="86" rx="10" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="335" y="374" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">Frontend — Next.js</text>
+  <text x="335" y="396" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">Next.js 16 (App Router) · React 19 · edge middleware</text>
+  <text x="335" y="416" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">same-origin /api/* rewrite proxy → backend</text>
+
+  <!-- Backend host: Railway / Render -->
+  <rect x="700" y="300" width="430" height="150" rx="12" fill="#F4F8FE" stroke="#0B5294" stroke-width="2.5"/>
+  <text x="726" y="330" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#6B7280" letter-spacing="1">RAILWAY  (primary)  ·  RENDER  (alternative)</text>
+
+  <rect x="726" y="346" width="378" height="86" rx="10" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="915" y="374" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">Backend — NestJS</text>
+  <text x="915" y="396" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">NestJS 11 REST API · Prisma ORM · NODE_ENV=production</text>
+  <text x="915" y="416" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">Nixpacks build · prisma migrate deploy on release</text>
+
+  <!-- ===================== MANAGED SERVICES TIER ===================== -->
+  <!-- Neon PostgreSQL -->
+  <rect x="120" y="648" width="245" height="128" rx="10" fill="#FFFFFF" stroke="#03485B" stroke-width="2"/>
+  <text x="242" y="680" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#03485B">Neon</text>
+  <text x="242" y="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#03485B">PostgreSQL</text>
+  <text x="242" y="726" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">serverless Postgres 16</text>
+  <text x="242" y="746" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">pooled, primary store</text>
+  <text x="242" y="764" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">users · bookings · results</text>
+
+  <!-- AWS S3 -->
+  <rect x="385" y="648" width="245" height="128" rx="10" fill="#FFFFFF" stroke="#03485B" stroke-width="2"/>
+  <text x="507" y="680" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#03485B">AWS S3</text>
+  <text x="507" y="706" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1A1A1A">object storage</text>
+  <text x="507" y="728" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">result PDFs (S3 driver)</text>
+  <text x="507" y="746" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">streamed via authenticated</text>
+  <text x="507" y="764" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">controller (never public)</text>
+
+  <!-- Firebase Cloud Messaging -->
+  <rect x="650" y="648" width="245" height="128" rx="10" fill="#FFFFFF" stroke="#03485B" stroke-width="2"/>
+  <text x="772" y="680" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#03485B">Firebase Cloud</text>
+  <text x="772" y="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#03485B">Messaging</text>
+  <text x="772" y="726" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">push notifications (FCM)</text>
+  <text x="772" y="746" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">Firebase Admin SDK</text>
+  <text x="772" y="764" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">device-token multicast</text>
+
+  <!-- Google GenAI -->
+  <rect x="915" y="648" width="245" height="128" rx="10" fill="#FFFFFF" stroke="#03485B" stroke-width="2"/>
+  <text x="1037" y="680" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#03485B">Google GenAI</text>
+  <text x="1037" y="706" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1A1A1A">Gemini API</text>
+  <text x="1037" y="728" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">AI health-assistant LLM</text>
+  <text x="1037" y="746" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">agentic function-calling</text>
+  <text x="1037" y="764" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">GEMINI_API_KEY</text>
+
+  <!-- ===================== ARROWS ===================== -->
+
+  <!-- Browser -> Vercel Frontend (HTTPS) -->
+  <path d="M 470,216 L 360,294" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="356" y="244" width="118" height="20" fill="#FFFFFF"/>
+  <text x="360" y="259" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">HTTPS (web app)</text>
+
+  <!-- Mobile -> Backend directly (HTTPS / Bearer) -->
+  <path d="M 800,216 L 905,294" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="800" y="240" width="178" height="20" fill="#FFFFFF"/>
+  <text x="804" y="255" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">HTTPS REST · Bearer token</text>
+
+  <!-- Vercel Frontend -> Backend (rewrite proxy, HTTPS) -->
+  <line x1="550" y1="389" x2="694" y2="389" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="556" y="362" width="132" height="20" fill="#FFFFFF"/>
+  <text x="560" y="377" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">HTTPS · /api rewrite</text>
+
+  <!-- Backend -> Neon PostgreSQL (SQL over TLS) -->
+  <path d="M 820,450 L 300,642" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="372" y="540" width="168" height="20" fill="#FFFFFF"/>
+  <text x="376" y="555" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">SQL / TLS (pooled, sslmode)</text>
+
+  <!-- Backend -> AWS S3 (HTTPS) -->
+  <path d="M 870,450 L 560,642" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="624" y="556" width="116" height="20" fill="#FFFFFF"/>
+  <text x="628" y="571" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">HTTPS · AWS SDK</text>
+
+  <!-- Backend -> FCM (HTTPS) -->
+  <path d="M 940,450 L 800,642" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="826" y="552" width="116" height="20" fill="#FFFFFF"/>
+  <text x="830" y="567" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">HTTPS · FCM push</text>
+
+  <!-- Backend -> Google GenAI (HTTPS) -->
+  <path d="M 1000,450 L 1040,642" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="1006" y="544" width="142" height="20" fill="#FFFFFF"/>
+  <text x="1010" y="559" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">HTTPS · prompt + tools</text>
+
+  <!-- Legend (bottom-left) -->
+  <text x="32" y="856" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280">Grounded in docs/project-book/research/infra.md (railway.json · render.yaml · vercel.json). Build/migrate run on each deploy; secrets injected via host dashboards.</text>
+</svg>

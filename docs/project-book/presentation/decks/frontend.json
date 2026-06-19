@@ -1,0 +1,290 @@
+[
+  {
+    "kind": "title",
+    "title": "The Web Frontend",
+    "subtitle": "What users see and click in the browser",
+    "intro": "The frontend is the actual TesTly website. It is the part you can see and touch: the pages, buttons, forms, and charts that patients, labs, and admins use every day.",
+    "bullets": [
+      "One website serves three kinds of users: patients, lab staff, and admins.",
+      "Anyone can browse labs and prices without signing up.",
+      "It talks to the backend server over the internet to get and save data.",
+      "Built with Next.js and React, two popular tools for making modern websites."
+    ]
+  },
+  {
+    "kind": "cards",
+    "title": "Tech Stack & Why",
+    "intro": "The main tools we used to build the website, and why we picked each one.",
+    "cards": [
+      {
+        "name": "Next.js (App Router)",
+        "tag": "Website framework",
+        "what": "A framework (a ready-made toolkit) for building websites with pages, navigation, and fast loading.",
+        "why": "It handles page routing, speed, and a security guard at the edge for us, so we write less low-level code."
+      },
+      {
+        "name": "React",
+        "tag": "UI library",
+        "what": "A library for building screens out of small reusable pieces called components, like Lego blocks.",
+        "why": "When data changes, React updates only the part of the screen that changed, which keeps everything fast and tidy."
+      },
+      {
+        "name": "TypeScript",
+        "tag": "Programming language",
+        "what": "JavaScript with type-checking: it makes you label what kind of data each thing is (number, text, etc.).",
+        "why": "It catches mistakes while we type, before users ever see a bug. Great safety net for a medical app."
+      },
+      {
+        "name": "Tailwind CSS",
+        "tag": "Styling",
+        "what": "A way to style pages by adding small ready-made class names directly on the elements.",
+        "why": "Fast to build a consistent look (colors, spacing, rounded cards) without writing big separate style files."
+      },
+      {
+        "name": "Radix UI",
+        "tag": "UI primitives",
+        "what": "A set of pre-built, accessible building blocks like dialogs (pop-up boxes) and labels.",
+        "why": "These tricky pieces are easy to get wrong (keyboard use, screen readers). Radix gets the hard parts right for us."
+      },
+      {
+        "name": "Recharts",
+        "tag": "Charts",
+        "what": "A library that draws charts and graphs (lines, bars, areas) from data.",
+        "why": "We need clear health-trend line charts and admin dashboards; Recharts draws them with little effort."
+      },
+      {
+        "name": "zod",
+        "tag": "Validation",
+        "what": "A tool that checks data really has the shape you expect, and complains loudly if not.",
+        "why": "We use it to validate settings (like the backend address) at build time, so a misconfigured app fails early instead of breaking for users."
+      },
+      {
+        "name": "jose",
+        "tag": "Token reading",
+        "what": "A small library that can read a login token (a JWT, a signed slip of identity info).",
+        "why": "The security guard inside Next.js uses it to peek at your role from the login token and decide which pages to show."
+      }
+    ]
+  },
+  {
+    "kind": "table",
+    "title": "Other Key Libraries",
+    "intro": "Smaller helpers that make the app smoother to build and nicer to use.",
+    "rows": [
+      {
+        "name": "lucide-react",
+        "what": "A collection of clean icons (little pictures) used all over the app.",
+        "why": "Consistent, professional-looking icons without drawing each one by hand."
+      },
+      {
+        "name": "clsx + tailwind-merge",
+        "what": "Helpers that combine and clean up the styling class names on an element.",
+        "why": "They let us turn styles on and off safely, with no clashing or duplicate styles."
+      },
+      {
+        "name": "Playwright",
+        "what": "A tool that opens the real website in a browser and clicks through it automatically.",
+        "why": "It tests the main journeys (search, login, booking) like a robot user, catching breakage before release."
+      }
+    ]
+  },
+  {
+    "kind": "diagram",
+    "title": "Where the Frontend Fits",
+    "image": "architecture",
+    "imageCaption": "The browser website sits on the left and talks to the backend server, which holds the data.",
+    "bullets": [
+      "The website never stores secret data itself; it asks the backend server for everything.",
+      "The same backend serves both the website and the phone app.",
+      "Charts, pages, and the AI chat are all just views of data the server sends back."
+    ]
+  },
+  {
+    "kind": "steps",
+    "title": "Role-Based Pages: Three Apps in One",
+    "intro": "The same website shows different dashboards depending on who you are.",
+    "image": "usecase-patient",
+    "imageCaption": "What a patient can do: browse, compare, book, see results, and view trends.",
+    "steps": [
+      {
+        "title": "Anyone (no login)",
+        "detail": "The public pages: the landing page, lab search, lab details, and test prices. You can browse and compare freely; no account needed."
+      },
+      {
+        "title": "Patient dashboard",
+        "detail": "After logging in as a patient: your bookings, your results, your health-trend charts, your profile, and the AI assistant."
+      },
+      {
+        "title": "Lab staff dashboard",
+        "detail": "For lab workers: a booking queue, their test catalogue, schedule, uploading results, and analytics about their lab."
+      },
+      {
+        "title": "Admin dashboard",
+        "detail": "For platform admins: approving or rejecting labs, viewing platform-wide stats, and managing users."
+      }
+    ]
+  },
+  {
+    "kind": "steps",
+    "title": "How Login Stays Safe in the Browser",
+    "intro": "Three simple ideas work together to keep your login secure.",
+    "steps": [
+      {
+        "title": "Step 1: A cookie the code can't read",
+        "detail": "When you log in, the server hands the browser a special login slip called an httpOnly cookie. 'httpOnly' means even the website's own JavaScript can't read it, so a hacker's script can't steal it."
+      },
+      {
+        "title": "Step 2: A guard at the edge checks your role",
+        "detail": "Before showing a protected page, a small program (Edge middleware) peeks at your login slip and checks your role. A patient can't open the admin page; a non-active lab is sent to an explanation page."
+      },
+      {
+        "title": "Step 3: A same-origin /api proxy keeps the cookie 'first-party'",
+        "detail": "The website and the server live on different web addresses. Browsers distrust cookies sent across different sites. So we route every request through the website's own address under /api, which quietly forwards it to the server. To the browser it all looks like one site, so the cookie is trusted and always sent."
+      },
+      {
+        "title": "Step 4: The real check still happens on the server",
+        "detail": "The edge guard is just a fast first gate. The backend server re-checks every request properly, so even a faked login slip gets rejected. This is called defence in depth: two locks, not one."
+      }
+    ]
+  },
+  {
+    "kind": "steps",
+    "title": "How the AI Assistant Answers Live",
+    "intro": "The health assistant types its answer to you word by word, and can show clickable cards.",
+    "image": "seq-booking",
+    "imageCaption": "Like booking, the assistant is a back-and-forth conversation between browser and server.",
+    "steps": [
+      {
+        "title": "Step 1: You send a question",
+        "detail": "For example, 'Where can I get a CBC test in Cairo?' The browser sends it to the server and opens a live connection."
+      },
+      {
+        "title": "Step 2: The answer streams in (Server-Sent Events)",
+        "detail": "Instead of waiting for the whole reply, the server streams it back in small pieces over an open pipe called Server-Sent Events. The text appears gradually, like someone typing to you."
+      },
+      {
+        "title": "Step 3: Clickable lab and test cards appear",
+        "detail": "The assistant can look up real labs and tests in the live catalogue and send them as cards. You can tap a card to jump straight to that lab or test page and book."
+      },
+      {
+        "title": "Step 4: It marks the message as done",
+        "detail": "A final signal tells the browser the answer is complete, so the typing dots stop and the message is saved."
+      }
+    ]
+  },
+  {
+    "kind": "steps",
+    "title": "How Health-Trend Charts Are Drawn",
+    "intro": "Patients can see their lab values over time, drawn as easy-to-read line charts.",
+    "steps": [
+      {
+        "title": "Step 1: Get the numbers",
+        "detail": "The browser asks the server for the patient's lab values over a chosen period (3, 6, or 12 months, or all time)."
+      },
+      {
+        "title": "Step 2: Draw a line per value",
+        "detail": "Recharts plots each measurement as a dot and joins the dots into a line, so you can see if a value is going up, down, or staying steady."
+      },
+      {
+        "title": "Step 3: Shade the normal range",
+        "detail": "A coloured band (called a reference area) shows the healthy range. If your line is inside the band, that value looks normal; outside it stands out."
+      },
+      {
+        "title": "Step 4: Colour the dots",
+        "detail": "Each dot is coloured: green if in range, red if abnormal, blue if unknown. A built-in disclaimer reminds users this is information, not medical advice."
+      }
+    ]
+  },
+  {
+    "kind": "algorithm",
+    "title": "Algorithm: Finding the Nearest Labs",
+    "intro": "When you sort labs by 'Nearest', the website needs to know how far each lab is from you. It works this out right in your browser, with no server help.",
+    "steps": [
+      {
+        "title": "Ask for your location",
+        "detail": "The browser asks for permission to use your device's GPS or location. We keep watching it (watchPosition) so the position improves as a better fix arrives, and we politely retry if you grant permission late."
+      },
+      {
+        "title": "Get each lab's coordinates",
+        "detail": "Every lab comes with its latitude and longitude (its spot on the map), sent from the server."
+      },
+      {
+        "title": "Measure distance with the haversine formula",
+        "detail": "The haversine formula calculates the distance between two points on the round surface of the Earth, using their latitude and longitude. We run it for you-versus-each-lab to get a distance in kilometres."
+      },
+      {
+        "title": "Sort by closeness",
+        "detail": "We sort the labs from nearest to farthest and show the distance on each card. All of this happens instantly in the browser."
+      }
+    ],
+    "why": "It gives patients an honest 'nearest first' list without sending their location to the server, which is faster and more private."
+  },
+  {
+    "kind": "algorithm",
+    "title": "Algorithm: Reading the Live AI Stream",
+    "intro": "The AI answer arrives as a fast trickle of tiny text pieces. The browser must turn that messy stream into clean, meaningful events it can act on.",
+    "steps": [
+      {
+        "title": "Open the stream",
+        "detail": "The browser sends the question and starts reading the reply as it arrives, instead of waiting for the whole thing."
+      },
+      {
+        "title": "Cut the stream into frames",
+        "detail": "The pieces arrive glued together. We split them at the blank lines that separate each message, so each chunk becomes one complete frame."
+      },
+      {
+        "title": "Label each frame by type",
+        "detail": "Every frame is read and tagged as one of a few known kinds: 'meta' (which conversation), 'delta' (a bit of text), 'tool' (lab/test cards), 'done' (finished), or 'error'."
+      },
+      {
+        "title": "Update the screen per type",
+        "detail": "Text frames get added to the growing message bubble; card frames become clickable cards; the 'done' frame stops the typing animation. Each type is handled safely with its expected shape."
+      }
+    ],
+    "why": "Turning a raw, fast text stream into clearly-typed events makes the live chat reliable and lets it show both words and rich clickable cards."
+  },
+  {
+    "kind": "cards",
+    "title": "Smart UX Details",
+    "intro": "Small touches across every page that make the app feel polished and trustworthy.",
+    "cards": [
+      {
+        "name": "Toast messages",
+        "tag": "Feedback",
+        "what": "Little pop-up notes in the corner that confirm an action ('Booking cancelled') or warn of an error.",
+        "why": "Users always get clear, instant feedback after every action, so nothing feels silent or broken."
+      },
+      {
+        "name": "Loading skeletons",
+        "tag": "Loading state",
+        "what": "Grey shimmering placeholders shown while real data is on its way.",
+        "why": "The page feels fast and alive instead of showing a blank screen while it waits."
+      },
+      {
+        "name": "Smart, friendly errors",
+        "tag": "Error handling",
+        "what": "The app knows the difference between 'not found', 'not allowed', and 'please log in', and reacts correctly to each.",
+        "why": "Users get a helpful message and the right next step instead of a confusing crash."
+      },
+      {
+        "name": "Floating FAQ chatbot",
+        "tag": "Help",
+        "what": "A simple help bubble on every page that answers common questions from a fixed list.",
+        "why": "Handles cheap, common questions instantly without using the costly AI, saving money and avoiding wrong answers."
+      }
+    ]
+  },
+  {
+    "kind": "title",
+    "title": "Putting It All Together",
+    "subtitle": "One website, three roles, built to be safe and clear",
+    "intro": "The frontend is a clean, modern website that lets patients, labs, and admins each do their job, while keeping logins safe and the experience smooth.",
+    "bullets": [
+      "Next.js + React + TypeScript give a fast, reliable, mistake-resistant website.",
+      "Login is protected by an unreadable cookie, an edge role-guard, and a same-origin proxy.",
+      "The AI assistant streams answers live and shows clickable lab and test cards.",
+      "Clever browser-side maths (haversine) finds the nearest labs instantly and privately.",
+      "Charts, toasts, skeletons, and friendly errors make it feel trustworthy for medical users."
+    ]
+  }
+]

@@ -1,0 +1,367 @@
+<svg width="1500" height="1180" viewBox="0 0 1500 1180" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="erdTitle erdDesc">
+  <title id="erdTitle">TesTly Entity-Relationship Diagram</title>
+  <desc id="erdDesc">Entity-relationship diagram of the TesTly PostgreSQL/Prisma database showing seventeen entities grouped into six clusters — auth and profiles, catalogue and scheduling, bookings and payments, results and markers, reviews, and AI assistant — with primary keys and foreign-key relationships annotated with cardinalities.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#0F6FC6"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1500" height="1180" fill="#FFFFFF"/>
+
+  <!-- ===================== TITLE ===================== -->
+  <text x="28" y="40" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="bold" fill="#03485B">TesTly — Entity-Relationship Diagram (PostgreSQL / Prisma)</text>
+  <text x="28" y="62" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#6B7280">PK = primary key. Cardinality on connectors: 1 = one, 1..1 = exactly one, 1..* = one-to-many, * = many.</text>
+
+  <!-- ===================== CLUSTER BANDS (subtle group fills) ===================== -->
+  <!-- Auth / Profiles band -->
+  <rect x="24" y="86" width="360" height="640" rx="14" fill="#F3F8FF" stroke="#D7E3F4" stroke-width="1.5"/>
+  <text x="40" y="110" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#0B5294">AUTH &amp; PROFILES</text>
+
+  <!-- Catalogue / Scheduling band -->
+  <rect x="404" y="86" width="330" height="300" rx="14" fill="#F3F8FF" stroke="#D7E3F4" stroke-width="1.5"/>
+  <text x="420" y="110" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#0B5294">CATALOGUE &amp; SCHEDULING</text>
+
+  <!-- Bookings / Payments band -->
+  <rect x="404" y="406" width="330" height="500" rx="14" fill="#F3F8FF" stroke="#D7E3F4" stroke-width="1.5"/>
+  <text x="420" y="430" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#0B5294">BOOKINGS &amp; PAYMENTS</text>
+
+  <!-- Results / Markers band -->
+  <rect x="754" y="86" width="722" height="640" rx="14" fill="#F3F8FF" stroke="#D7E3F4" stroke-width="1.5"/>
+  <text x="770" y="110" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#0B5294">RESULTS &amp; CROSS-LAB MARKERS</text>
+
+  <!-- Reviews band -->
+  <rect x="404" y="926" width="330" height="200" rx="14" fill="#F3F8FF" stroke="#D7E3F4" stroke-width="1.5"/>
+  <text x="420" y="950" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#0B5294">REVIEWS</text>
+
+  <!-- AI Assistant band -->
+  <rect x="24" y="926" width="360" height="200" rx="14" fill="#F3F8FF" stroke="#D7E3F4" stroke-width="1.5"/>
+  <text x="40" y="950" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#0B5294">AI ASSISTANT</text>
+
+  <!-- =================================================================== -->
+  <!-- CONNECTORS (drawn first so boxes sit on top) -->
+  <!-- =================================================================== -->
+
+  <!-- User 1-1 PatientProfile -->
+  <path d="M204,234 L204,278" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="184" y="247" width="64" height="18" fill="#FFFFFF"/>
+  <text x="190" y="260" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1 — 1..1</text>
+
+  <!-- User 1-1 LabProfile -->
+  <path d="M204,376 L204,420" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="184" y="389" width="64" height="18" fill="#FFFFFF"/>
+  <text x="190" y="402" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1 — 1..1</text>
+
+  <!-- User 1-* RefreshToken (down to small token box) -->
+  <path d="M120,376 L120,560" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="96" y="460" width="34" height="18" fill="#FFFFFF"/>
+  <text x="100" y="473" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..*</text>
+
+  <!-- User 1-* DeviceToken -->
+  <path d="M288,376 L288,560" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="288" y="460" width="34" height="18" fill="#FFFFFF"/>
+  <text x="292" y="473" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..*</text>
+
+  <!-- LabProfile 1-* LabTest (right into catalogue) -->
+  <path d="M364,448 L484,196" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="404" y="312" width="34" height="18" fill="#FFFFFF"/>
+  <text x="408" y="325" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..*</text>
+
+  <!-- LabProfile 1-* LabScheduleSlot -->
+  <path d="M364,470 L484,320" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="404" y="392" width="34" height="18" fill="#FFFFFF"/>
+  <text x="408" y="405" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..*</text>
+
+  <!-- PatientProfile 1-* Booking (down-right) -->
+  <path d="M270,330 L490,556" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="368" y="436" width="34" height="18" fill="#FFFFFF"/>
+  <text x="372" y="449" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..*</text>
+
+  <!-- LabProfile 1-* Booking -->
+  <path d="M300,520 L490,580" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="392" y="528" width="34" height="18" fill="#FFFFFF"/>
+  <text x="396" y="541" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..*</text>
+
+  <!-- LabTest 1-* Booking (down) -->
+  <path d="M540,234 L540,556" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="520" y="384" width="34" height="18" fill="#FFFFFF"/>
+  <text x="524" y="397" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..*</text>
+
+  <!-- LabScheduleSlot 1-1 Booking -->
+  <path d="M630,358 L630,556" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="610" y="436" width="40" height="18" fill="#FFFFFF"/>
+  <text x="614" y="449" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..1</text>
+
+  <!-- Booking 1-* BookingStatusEvent (down within bookings band) -->
+  <path d="M540,706 L540,772" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="520" y="730" width="34" height="18" fill="#FFFFFF"/>
+  <text x="524" y="743" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..*</text>
+
+  <!-- Booking 1-1 ResultFile (right into results band) -->
+  <path d="M734,584 L820,150" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="744" y="360" width="40" height="18" fill="#FFFFFF"/>
+  <text x="748" y="373" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..1</text>
+
+  <!-- Booking 1-1 ResultSummary -->
+  <path d="M734,600 L1070,150" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="900" y="368" width="40" height="18" fill="#FFFFFF"/>
+  <text x="904" y="381" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..1</text>
+
+  <!-- Booking 1-* ResultPanel -->
+  <path d="M734,628 L820,318" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="760" y="470" width="34" height="18" fill="#FFFFFF"/>
+  <text x="764" y="483" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..*</text>
+
+  <!-- ResultPanel 1-* ResultObservation -->
+  <path d="M920,330 L920,420" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="900" y="366" width="34" height="18" fill="#FFFFFF"/>
+  <text x="904" y="379" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..*</text>
+
+  <!-- CanonicalMarker 1-* ResultObservation -->
+  <path d="M1230,330 L1010,448" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="1110" y="376" width="34" height="18" fill="#FFFFFF"/>
+  <text x="1114" y="389" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..*</text>
+
+  <!-- CanonicalMarker 1-* MarkerAlias -->
+  <path d="M1300,330 L1300,420" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="1280" y="366" width="34" height="18" fill="#FFFFFF"/>
+  <text x="1284" y="379" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..*</text>
+
+  <!-- Booking 1-1 Review (down to reviews band) -->
+  <path d="M540,852 L540,1004" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="520" y="922" width="40" height="18" fill="#FFFFFF"/>
+  <text x="524" y="935" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..1</text>
+
+  <!-- PatientProfile 1-* Review (route down far-left margin, across bottom gutter, up into Review) -->
+  <path d="M80,300 L14,300 L14,1150 L520,1150 L520,1104" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+  <rect x="150" y="1141" width="180" height="18" fill="#FFFFFF"/>
+  <text x="156" y="1154" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">PatientProfile 1 — 1..* Review</text>
+
+  <!-- LabProfile 1-* Review (route down left margin, across bottom gutter, up into Review) -->
+  <path d="M80,500 L18,500 L18,1168 L600,1168 L600,1104" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+  <rect x="640" y="1159" width="170" height="18" fill="#FFFFFF"/>
+  <text x="646" y="1172" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">LabProfile 1 — 1..* Review</text>
+
+  <!-- User 1-* Conversation (down-left margin into AI band) -->
+  <path d="M120,376 L36,376 L36,1056 L42,1056" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+  <rect x="44" y="700" width="120" height="18" fill="#FFFFFF"/>
+  <text x="50" y="713" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">User 1 — 1..* Conv.</text>
+
+  <!-- Conversation 1-* ChatMessage -->
+  <path d="M204,1056 L264,1056" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="210" y="1032" width="34" height="18" fill="#FFFFFF"/>
+  <text x="214" y="1045" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">1..*</text>
+
+  <!-- =================================================================== -->
+  <!-- ENTITY BOXES -->
+  <!-- =================================================================== -->
+
+  <!-- ===== USER ===== -->
+  <g>
+    <rect x="80" y="124" width="248" height="110" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+    <text x="92" y="146" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="bold" fill="#0B5294">User</text>
+    <line x1="80" y1="154" x2="328" y2="154" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="92" y="172" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK (uuid)</text>
+    <text x="92" y="190" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">email  (unique)</text>
+    <text x="92" y="208" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">password_hash</text>
+    <text x="92" y="226" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">role  (Patient / LabStaff / Admin)</text>
+  </g>
+
+  <!-- ===== PATIENT PROFILE ===== -->
+  <g>
+    <rect x="80" y="278" width="248" height="98" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+    <text x="92" y="300" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="bold" fill="#0B5294">PatientProfile</text>
+    <line x1="80" y1="308" x2="328" y2="308" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="92" y="326" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK    user_id  FK→User (unique)</text>
+    <text x="92" y="344" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">full_name · phone · address</text>
+    <text x="92" y="362" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">lab_history_sharing (privacy)</text>
+  </g>
+
+  <!-- ===== LAB PROFILE ===== -->
+  <g>
+    <rect x="80" y="420" width="248" height="100" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+    <text x="92" y="442" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="bold" fill="#0B5294">LabProfile</text>
+    <line x1="80" y1="450" x2="328" y2="450" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="92" y="468" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK    user_id  FK→User (unique)</text>
+    <text x="92" y="486" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">lab_name · city · onboarding_status</text>
+    <text x="92" y="504" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">rating_average · review_count</text>
+  </g>
+
+  <!-- ===== REFRESH TOKEN ===== -->
+  <g>
+    <rect x="40" y="560" width="158" height="84" rx="10" fill="#FFFFFF" stroke="#0B5294" stroke-width="2"/>
+    <text x="52" y="582" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#0B5294">RefreshToken</text>
+    <line x1="40" y1="590" x2="198" y2="590" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="52" y="608" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK</text>
+    <text x="52" y="625" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">token_hash (unique)</text>
+    <text x="52" y="640" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">revoked · expires_at</text>
+  </g>
+
+  <!-- ===== DEVICE TOKEN ===== -->
+  <g>
+    <rect x="210" y="560" width="158" height="84" rx="10" fill="#FFFFFF" stroke="#0B5294" stroke-width="2"/>
+    <text x="222" y="582" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#0B5294">DeviceToken</text>
+    <line x1="210" y1="590" x2="368" y2="590" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="222" y="608" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK</text>
+    <text x="222" y="625" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">fcm_token (unique)</text>
+    <text x="222" y="640" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">platform</text>
+  </g>
+
+  <!-- ===== LAB TEST ===== -->
+  <g>
+    <rect x="484" y="124" width="234" height="110" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+    <text x="496" y="146" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="bold" fill="#0B5294">LabTest</text>
+    <line x1="484" y1="154" x2="718" y2="154" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="496" y="172" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK</text>
+    <text x="496" y="190" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">lab_profile_id  FK→LabProfile</text>
+    <text x="496" y="208" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">name · category · price_egp</text>
+    <text x="496" y="226" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">is_active</text>
+  </g>
+
+  <!-- ===== LAB SCHEDULE SLOT ===== -->
+  <g>
+    <rect x="484" y="262" width="234" height="96" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+    <text x="496" y="284" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">LabScheduleSlot</text>
+    <line x1="484" y1="292" x2="718" y2="292" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="496" y="310" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK</text>
+    <text x="496" y="328" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">lab_profile_id  FK→LabProfile</text>
+    <text x="496" y="346" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">starts_at · ends_at · capacity</text>
+  </g>
+
+  <!-- ===== BOOKING (hub) ===== -->
+  <g>
+    <rect x="448" y="556" width="280" height="150" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2.5"/>
+    <text x="460" y="580" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="bold" fill="#0B5294">Booking</text>
+    <line x1="448" y1="588" x2="728" y2="588" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="460" y="606" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK</text>
+    <text x="460" y="624" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">patient_profile_id  FK→PatientProfile</text>
+    <text x="460" y="642" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">lab_profile_id  FK    lab_test_id  FK</text>
+    <text x="460" y="660" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">schedule_slot_id  FK (unique)</text>
+    <text x="460" y="678" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">booking_type · status · scheduled_at</text>
+    <text x="460" y="696" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">total_price_egp · payment_status · kit_status</text>
+  </g>
+
+  <!-- ===== BOOKING STATUS EVENT ===== -->
+  <g>
+    <rect x="448" y="772" width="280" height="80" rx="10" fill="#FFFFFF" stroke="#0B5294" stroke-width="2"/>
+    <text x="460" y="794" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294">BookingStatusEvent</text>
+    <line x1="448" y1="802" x2="728" y2="802" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="460" y="820" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK    booking_id  FK→Booking</text>
+    <text x="460" y="838" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">status · note · actor_user_id (FK→User)</text>
+  </g>
+
+  <!-- ===== RESULT FILE ===== -->
+  <g>
+    <rect x="784" y="124" width="280" height="90" rx="10" fill="#FFFFFF" stroke="#0B5294" stroke-width="2"/>
+    <text x="796" y="146" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">ResultFile</text>
+    <line x1="784" y1="154" x2="1064" y2="154" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="796" y="172" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK    booking_id  FK (unique)</text>
+    <text x="796" y="190" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">status · file_url · mime_type</text>
+    <text x="796" y="208" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">uploaded_by_user_id  FK→User</text>
+  </g>
+
+  <!-- ===== RESULT SUMMARY ===== -->
+  <g>
+    <rect x="1094" y="124" width="280" height="90" rx="10" fill="#FFFFFF" stroke="#0B5294" stroke-width="2"/>
+    <text x="1106" y="146" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">ResultSummary</text>
+    <line x1="1094" y1="154" x2="1374" y2="154" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="1106" y="172" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK    booking_id  FK (unique)</text>
+    <text x="1106" y="190" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">summary (prose)</text>
+    <text x="1106" y="208" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">highlights (Json)</text>
+  </g>
+
+  <!-- ===== RESULT PANEL ===== -->
+  <g>
+    <rect x="784" y="238" width="272" height="92" rx="10" fill="#FFFFFF" stroke="#0B5294" stroke-width="2"/>
+    <text x="796" y="260" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">ResultPanel</text>
+    <line x1="784" y1="268" x2="1056" y2="268" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="796" y="286" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK    booking_id  FK→Booking</text>
+    <text x="796" y="304" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">name · test_date  (trend axis)</text>
+    <text x="796" y="322" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">sort_order</text>
+  </g>
+
+  <!-- ===== RESULT OBSERVATION ===== -->
+  <g>
+    <rect x="784" y="420" width="290" height="150" rx="10" fill="#FFFFFF" stroke="#0B5294" stroke-width="2"/>
+    <text x="796" y="442" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">ResultObservation</text>
+    <line x1="784" y1="450" x2="1074" y2="450" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="796" y="468" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK    panel_id  FK→ResultPanel</text>
+    <text x="796" y="486" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">canonical_marker_id  FK (nullable)</text>
+    <text x="796" y="504" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">raw_name · value_numeric · unit</text>
+    <text x="796" y="522" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">value_in_canonical_unit</text>
+    <text x="796" y="540" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">is_comparable · ref_low · ref_high</text>
+    <text x="796" y="558" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">comparability_note</text>
+  </g>
+
+  <!-- ===== CANONICAL MARKER ===== -->
+  <g>
+    <rect x="1180" y="238" width="280" height="92" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+    <text x="1192" y="260" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">CanonicalMarker</text>
+    <line x1="1180" y1="268" x2="1460" y2="268" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="1192" y="286" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK    code (unique)</text>
+    <text x="1192" y="304" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">display_name · default_unit</text>
+    <text x="1192" y="322" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">category · loinc_code</text>
+  </g>
+
+  <!-- ===== MARKER ALIAS ===== -->
+  <g>
+    <rect x="1180" y="420" width="280" height="82" rx="10" fill="#FFFFFF" stroke="#0B5294" stroke-width="2"/>
+    <text x="1192" y="442" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">MarkerAlias</text>
+    <line x1="1180" y1="450" x2="1460" y2="450" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="1192" y="468" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK</text>
+    <text x="1192" y="486" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">canonical_marker_id  FK (cascade)</text>
+    <text x="1192" y="504" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">alias_normalized (unique)</text>
+  </g>
+
+  <!-- ===== REVIEW ===== -->
+  <g>
+    <rect x="448" y="1004" width="280" height="100" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+    <text x="460" y="1026" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">Review</text>
+    <line x1="448" y1="1034" x2="728" y2="1034" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="460" y="1052" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK    booking_id  FK (unique)</text>
+    <text x="460" y="1070" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">patient_profile_id  FK    lab_profile_id  FK</text>
+    <text x="460" y="1088" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">rating (1–5) · comment · status</text>
+  </g>
+
+  <!-- ===== CONVERSATION ===== -->
+  <g>
+    <rect x="46" y="1010" width="158" height="92" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+    <text x="58" y="1032" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294">Conversation</text>
+    <line x1="46" y1="1040" x2="204" y2="1040" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="58" y="1058" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK</text>
+    <text x="58" y="1075" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">user_id  FK→User</text>
+    <text x="58" y="1092" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">title</text>
+  </g>
+
+  <!-- ===== CHAT MESSAGE ===== -->
+  <g>
+    <rect x="264" y="1010" width="104" height="92" rx="10" fill="#FFFFFF" stroke="#0B5294" stroke-width="2"/>
+    <text x="276" y="1032" font-family="Arial, Helvetica, sans-serif" font-size="13.5" font-weight="bold" fill="#0B5294">ChatMessage</text>
+    <line x1="264" y1="1040" x2="368" y2="1040" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="276" y="1058" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#1A1A1A"><tspan font-weight="bold">id</tspan>  PK</text>
+    <text x="276" y="1074" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#1A1A1A">conv._id  FK</text>
+    <text x="276" y="1090" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#1A1A1A">role · content</text>
+  </g>
+
+  <!-- ===================== LEGEND ===================== -->
+  <g>
+    <rect x="784" y="600" width="690" height="118" rx="10" fill="#FFFFFF" stroke="#D7E3F4" stroke-width="1.5"/>
+    <text x="800" y="624" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#03485B">Legend &amp; notes</text>
+
+    <rect x="800" y="638" width="22" height="14" rx="4" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+    <text x="830" y="650" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">Core / parent entity</text>
+
+    <rect x="800" y="660" width="22" height="14" rx="4" fill="#FFFFFF" stroke="#0B5294" stroke-width="2"/>
+    <text x="830" y="672" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">Child / dependent entity</text>
+
+    <line x1="800" y1="690" x2="824" y2="690" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="836" y="694" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#1A1A1A">FK relationship, arrow points to the child (the "many" side)</text>
+
+    <text x="1010" y="650" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#6B7280">1..1 = exactly one  ·  1..* = one-to-many</text>
+    <text x="1010" y="672" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#6B7280">Booking is the hub: 3 parents, 1 optional slot,</text>
+    <text x="1010" y="690" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#6B7280">and 5 child clusters (events, file, summary, panels, review).</text>
+    <text x="1010" y="708" font-family="Arial, Helvetica, sans-serif" font-size="12.5" fill="#6B7280">20 models / 11 enums total; FaqEntry is standalone (not shown).</text>
+  </g>
+
+</svg>

@@ -1,0 +1,270 @@
+<svg width="1350" height="950" viewBox="0 0 1350 950" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#0F6FC6"/>
+    </marker>
+  </defs>
+
+  <!-- background -->
+  <rect x="0" y="0" width="1350" height="950" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="32" y="44" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="bold" fill="#03485B">TesTly — Data-Flow Diagram (Level 1)</text>
+  <text x="32" y="68" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#6B7280">External entities (rectangles) exchange data flows with the six processes and five data stores of the NestJS API.</text>
+
+  <!-- Column headers -->
+  <text x="150" y="104" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#6B7280" letter-spacing="1">EXTERNAL ENTITIES</text>
+  <text x="675" y="104" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#6B7280" letter-spacing="1">PROCESSES</text>
+  <text x="1205" y="104" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#6B7280" letter-spacing="1">DATA STORES</text>
+
+  <!-- ===================== EXTERNAL ENTITIES (left) ===================== -->
+  <!-- Patient -->
+  <rect x="48" y="170" width="204" height="78" rx="4" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="150" y="206" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="bold" fill="#0B5294">Patient</text>
+  <text x="150" y="228" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">browses · books · pays · chats</text>
+
+  <!-- Lab Staff -->
+  <rect x="48" y="452" width="204" height="78" rx="4" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="150" y="488" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="bold" fill="#0B5294">Lab Staff</text>
+  <text x="150" y="510" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">catalog · results · fulfilment</text>
+
+  <!-- Admin -->
+  <rect x="48" y="744" width="204" height="78" rx="4" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="150" y="780" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="bold" fill="#0B5294">Admin</text>
+  <text x="150" y="802" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">onboarding · governance</text>
+
+  <!-- ===================== PROCESSES (center) ===================== -->
+  <!-- 1.0 Authentication -->
+  <rect x="540" y="138" width="270" height="74" rx="37" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="675" y="172" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">1.0  Authentication</text>
+  <text x="675" y="193" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">register · login · JWT · refresh</text>
+
+  <!-- 2.0 Lab & Catalog Mgmt -->
+  <rect x="540" y="252" width="270" height="74" rx="37" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="675" y="286" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">2.0  Lab &amp; Catalog Mgmt</text>
+  <text x="675" y="307" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">labs · tests · slots · search</text>
+
+  <!-- 3.0 Booking & Payment -->
+  <rect x="540" y="366" width="270" height="74" rx="37" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="675" y="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">3.0  Booking &amp; Payment</text>
+  <text x="675" y="421" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">lifecycle · online / cash · kits</text>
+
+  <!-- 4.0 Results -->
+  <rect x="540" y="480" width="270" height="74" rx="37" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="675" y="514" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">4.0  Results</text>
+  <text x="675" y="535" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">PDF · structured · trends</text>
+
+  <!-- 5.0 AI Assistant -->
+  <rect x="540" y="594" width="270" height="74" rx="37" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="675" y="628" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">5.0  AI Assistant</text>
+  <text x="675" y="649" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">agentic chat · SSE · tools</text>
+
+  <!-- 6.0 Notifications -->
+  <rect x="540" y="708" width="270" height="74" rx="37" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="675" y="742" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">6.0  Notifications</text>
+  <text x="675" y="763" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">FCM push on state change</text>
+
+  <!-- ===================== DATA STORES (right, open rectangles) ===================== -->
+  <!-- D1 Users / Profiles -->
+  <g>
+    <rect x="1098" y="150" width="214" height="56" fill="#FFFFFF" stroke="#03485B" stroke-width="2"/>
+    <line x1="1098" y1="150" x2="1098" y2="206" stroke="#03485B" stroke-width="6"/>
+    <text x="1118" y="176" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#03485B">D1  Users / Profiles</text>
+    <text x="1118" y="196" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280">users · patient / lab · tokens</text>
+  </g>
+
+  <!-- D2 Labs & Tests -->
+  <g>
+    <rect x="1098" y="264" width="214" height="56" fill="#FFFFFF" stroke="#03485B" stroke-width="2"/>
+    <line x1="1098" y1="264" x2="1098" y2="320" stroke="#03485B" stroke-width="6"/>
+    <text x="1118" y="290" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#03485B">D2  Labs &amp; Tests</text>
+    <text x="1118" y="310" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280">labs · tests · slots · reviews</text>
+  </g>
+
+  <!-- D3 Bookings -->
+  <g>
+    <rect x="1098" y="378" width="214" height="56" fill="#FFFFFF" stroke="#03485B" stroke-width="2"/>
+    <line x1="1098" y1="378" x2="1098" y2="434" stroke="#03485B" stroke-width="6"/>
+    <text x="1118" y="404" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#03485B">D3  Bookings</text>
+    <text x="1118" y="424" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280">bookings · status events</text>
+  </g>
+
+  <!-- D4 Results & Markers -->
+  <g>
+    <rect x="1098" y="492" width="214" height="56" fill="#FFFFFF" stroke="#03485B" stroke-width="2"/>
+    <line x1="1098" y1="492" x2="1098" y2="548" stroke="#03485B" stroke-width="6"/>
+    <text x="1118" y="518" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#03485B">D4  Results &amp; Markers</text>
+    <text x="1118" y="538" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280">PDF · panels · observations</text>
+  </g>
+
+  <!-- D5 Conversations -->
+  <g>
+    <rect x="1098" y="606" width="214" height="56" fill="#FFFFFF" stroke="#03485B" stroke-width="2"/>
+    <line x1="1098" y1="606" x2="1098" y2="662" stroke="#03485B" stroke-width="6"/>
+    <text x="1118" y="632" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#03485B">D5  Conversations</text>
+    <text x="1118" y="652" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280">threads · chat messages</text>
+  </g>
+
+  <!-- ============================================================= -->
+  <!-- ====================== DATA FLOWS =========================== -->
+  <!-- ============================================================= -->
+
+  <!-- Routing band between entities (right edge x=252) and processes (left edge x=540).      -->
+  <!-- Each flow gets its own label lane; lanes are vertically separated so no two collide.    -->
+
+  <!-- ===== Patient to / from processes ===== -->
+  <!-- Patient -> 1.0 Authentication (credentials) -->
+  <path d="M252,182 C380,178 430,176 538,174" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="332" y="158" width="86" height="18" fill="#FFFFFF"/>
+  <text x="336" y="172" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">credentials</text>
+
+  <!-- Patient -> 2.0 (browse / search) -->
+  <path d="M252,200 C400,210 440,270 538,282" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="298" y="216" width="132" height="18" fill="#FFFFFF"/>
+  <text x="302" y="230" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">search / filter query</text>
+
+  <!-- 6.0 Notifications -> Patient (push) — attaches at Patient right edge, label high -->
+  <path d="M540,742 C360,690 268,360 254,212" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="266" y="262" width="150" height="18" fill="#FFFFFF"/>
+  <text x="270" y="276" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">push notification (FCM)</text>
+
+  <!-- Patient -> 3.0 (booking + payment) -->
+  <path d="M252,230 C410,300 430,372 538,388" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="300" y="314" width="158" height="18" fill="#FFFFFF"/>
+  <text x="304" y="328" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">booking + payment req.</text>
+
+  <!-- 4.0 Results -> Patient (results / health profile) -->
+  <path d="M540,524 C420,470 280,300 252,244" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="320" y="360" width="156" height="18" fill="#FFFFFF"/>
+  <text x="324" y="374" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">results &amp; health trends</text>
+
+  <!-- Patient -> 5.0 (chat message) -->
+  <path d="M252,248 C360,420 410,592 538,614" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="300" y="430" width="110" height="18" fill="#FFFFFF"/>
+  <text x="304" y="444" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">chat message</text>
+
+  <!-- ===== Lab Staff to / from processes ===== -->
+  <!-- Lab Staff -> 1.0 Authentication (lab credentials) -->
+  <path d="M252,456 C420,400 440,212 538,196" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="438" y="234" width="100" height="18" fill="#FFFFFF"/>
+  <text x="442" y="248" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">lab credentials</text>
+
+  <!-- Lab Staff -> 2.0 (catalog / schedule edits) -->
+  <path d="M252,470 C420,440 450,304 538,294" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="446" y="338" width="120" height="18" fill="#FFFFFF"/>
+  <text x="450" y="352" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">tests / slots edits</text>
+
+  <!-- Lab Staff -> 3.0 (confirm / cash / kit) -->
+  <path d="M252,486 C400,456 440,408 538,402" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="300" y="466" width="166" height="18" fill="#FFFFFF"/>
+  <text x="304" y="480" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">confirm / cash / kit status</text>
+
+  <!-- Lab Staff -> 4.0 (upload result PDF + structured) -->
+  <path d="M252,500 C390,500 420,506 538,510" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="300" y="508" width="184" height="18" fill="#FFFFFF"/>
+  <text x="304" y="522" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">upload PDF + structured data</text>
+
+  <!-- 3.0 -> Lab Staff (booking queue) -->
+  <path d="M540,432 C420,490 380,510 252,514" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="300" y="556" width="148" height="18" fill="#FFFFFF"/>
+  <text x="304" y="570" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">booking queue</text>
+
+  <!-- ===== Admin to / from processes ===== -->
+  <!-- Admin -> 1.0 (admin login) -->
+  <path d="M252,748 C440,540 470,214 538,180" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="448" y="618" width="92" height="18" fill="#FFFFFF"/>
+  <text x="452" y="632" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">admin login</text>
+
+  <!-- Admin -> 2.0 (lab onboarding status) -->
+  <path d="M252,762 C430,640 460,330 538,304" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="300" y="700" width="184" height="18" fill="#FFFFFF"/>
+  <text x="304" y="714" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">activate / suspend lab status</text>
+
+  <!-- 2.0 / 3.0 -> Admin (governance + analytics) -->
+  <path d="M540,330 C470,560 470,720 252,790" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="288" y="752" width="196" height="18" fill="#FFFFFF"/>
+  <text x="292" y="766" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">governance &amp; analytics data</text>
+
+  <!-- ============================================================= -->
+  <!-- ============ PROCESSES <-> DATA STORES (right) ============== -->
+  <!-- ============================================================= -->
+
+  <!-- 1.0 <-> D1 Users/Profiles -->
+  <path d="M810,168 C950,168 980,176 1096,178" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M1096,190 C980,192 950,184 812,184" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="868" y="156" width="156" height="18" fill="#FFFFFF"/>
+  <text x="872" y="170" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">read / write accounts</text>
+
+  <!-- 2.0 <-> D2 Labs & Tests -->
+  <path d="M810,282 C950,282 980,290 1096,292" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M1096,304 C980,306 950,298 812,298" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="858" y="270" width="178" height="18" fill="#FFFFFF"/>
+  <text x="862" y="284" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">read / write catalog</text>
+
+  <!-- 3.0 <-> D3 Bookings -->
+  <path d="M810,396 C950,396 980,404 1096,406" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M1096,418 C980,420 950,412 812,412" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="852" y="384" width="190" height="18" fill="#FFFFFF"/>
+  <text x="856" y="398" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">persist booking + events</text>
+
+  <!-- 4.0 <-> D4 Results & Markers -->
+  <path d="M810,510 C950,510 980,518 1096,520" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M1096,532 C980,534 950,526 812,526" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="856" y="498" width="186" height="18" fill="#FFFFFF"/>
+  <text x="860" y="512" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">store / normalize results</text>
+
+  <!-- 5.0 <-> D5 Conversations -->
+  <path d="M810,624 C950,624 980,632 1096,634" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M1096,646 C980,648 950,640 812,640" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="858" y="612" width="180" height="18" fill="#FFFFFF"/>
+  <text x="862" y="626" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">persist conversation</text>
+
+  <!-- ============================================================= -->
+  <!-- ============ CROSS-PROCESS DATA-STORE READS ================ -->
+  <!-- ============================================================= -->
+
+  <!-- 3.0 Booking reads D2 (price / slot lookup) -->
+  <path d="M812,378 C940,350 1010,330 1096,300" fill="none" stroke="#0F6FC6" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <rect x="888" y="338" width="158" height="18" fill="#FFFFFF"/>
+  <text x="892" y="352" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">read test price / slot</text>
+
+  <!-- 4.0 Results reads D3 (booking ownership) -->
+  <path d="M812,492 C940,468 1010,448 1096,422" fill="none" stroke="#0F6FC6" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <rect x="888" y="452" width="156" height="18" fill="#FFFFFF"/>
+  <text x="892" y="466" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">read booking record</text>
+
+  <!-- 5.0 AI Assistant reads D2 (catalog tool calls) -->
+  <path d="M812,606 C940,470 1010,400 1096,318" fill="none" stroke="#0F6FC6" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <rect x="894" y="520" width="150" height="18" fill="#FFFFFF"/>
+  <text x="898" y="534" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">tool: query catalog</text>
+
+  <!-- 6.0 Notifications reads D1 (device tokens) -->
+  <path d="M812,720 C940,520 1010,300 1096,200" fill="none" stroke="#0F6FC6" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <rect x="900" y="612" width="150" height="18" fill="#FFFFFF"/>
+  <text x="904" y="626" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">read device tokens</text>
+
+  <!-- ============================================================= -->
+  <!-- ============ INTERNAL PROCESS -> 6.0 NOTIFY ================ -->
+  <!-- ============================================================= -->
+  <!-- 3.0 -> 6.0 (booking events trigger push) -->
+  <path d="M620,440 C610,560 615,660 620,706" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="500" y="568" width="160" height="18" fill="#FFFFFF"/>
+  <text x="504" y="582" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">booking event triggers</text>
+
+  <!-- 4.0 -> 6.0 (result-ready triggers push) -->
+  <path d="M730,554 C740,610 736,672 730,706" fill="none" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="744" y="620" width="148" height="18" fill="#FFFFFF"/>
+  <text x="748" y="634" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">result-ready trigger</text>
+
+  <!-- (6.0 Notifications -> Patient push flow is drawn in the Patient block above) -->
+
+  <!-- Footer note (left) -->
+  <text x="32" y="912" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280">Solid arrows = primary data flows; dashed arrows = cross-process reads of shared stores.</text>
+  <text x="32" y="930" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280">Grounded in research/backend.md and data-model.md.</text>
+
+  <!-- Legend (bottom-right, clear of the footer note) -->
+  <line x1="900" y1="908" x2="930" y2="908" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="936" y="912" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280">primary flow</text>
+  <line x1="1044" y1="908" x2="1074" y2="908" stroke="#0F6FC6" stroke-width="2" stroke-dasharray="5 4"/>
+  <text x="1080" y="912" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280">cross-process read</text>
+</svg>

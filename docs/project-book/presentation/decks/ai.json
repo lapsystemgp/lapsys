@@ -1,0 +1,228 @@
+[
+  {
+    "kind": "title",
+    "title": "The TesTly AI Assistant",
+    "subtitle": "A smart helper you chat with to find labs and tests",
+    "intro": "TesTly is an online marketplace for medical lab tests in Egypt. The AI Assistant is a chat box inside the app: you type a normal question, and it finds real labs and tests for you.",
+    "bullets": [
+      "Ask in plain words, like texting a knowledgeable friend",
+      "It shows real labs and tests you can tap and book",
+      "Built to be honest: it never makes up prices or fake labs"
+    ]
+  },
+  {
+    "kind": "cards",
+    "title": "What It Is, In Plain Words",
+    "intro": "Two different helpers live inside TesTly. They look similar but work very differently.",
+    "cards": [
+      {
+        "name": "The AI Health Assistant",
+        "tag": "Smart chat (uses AI)",
+        "what": "A chat helper that understands plain questions like 'I need a cheap blood sugar test near me' and replies in friendly language while showing real matching labs and tests.",
+        "why": "Patients do not know test names or lab prices; letting them just ask in their own words is far easier than browsing menus."
+      },
+      {
+        "name": "The Guided FAQ Bot",
+        "tag": "Simple help (no AI)",
+        "what": "A small pop-up helper that answers common questions (like 'how do I fast before a test?') by matching keywords to a short, hand-written list of answers.",
+        "why": "Common questions do not need expensive AI; a simple, predictable bot answers them instantly and for free."
+      }
+    ]
+  },
+  {
+    "kind": "cards",
+    "title": "Tech Stack & Why",
+    "intro": "The pieces we used to build the AI Assistant, and why each one was the right choice.",
+    "cards": [
+      {
+        "name": "Google Gemini",
+        "tag": "The AI brain",
+        "what": "Gemini is Google's AI that reads a question and writes a human-like answer. We use the model called 'gemini-2.5-flash'.",
+        "why": "The 'flash' version is fast and cheap, which suits a chat that must reply quickly and runs on a student-project budget."
+      },
+      {
+        "name": "@google/genai SDK",
+        "tag": "Connector to the AI",
+        "what": "A ready-made code library that lets our server talk to Gemini without us writing the low-level networking by hand.",
+        "why": "It is Google's official, up-to-date toolkit, so it supports the newest features like tool calling and live streaming out of the box."
+      },
+      {
+        "name": "Function Calling (Tools)",
+        "tag": "How AI uses real data",
+        "what": "A feature where the AI can ask our server to run a specific job, like 'look up labs for a blood test', instead of guessing the answer.",
+        "why": "This is what keeps the assistant honest: it pulls real labs and prices from our database instead of inventing them."
+      },
+      {
+        "name": "Server-Sent Events (SSE)",
+        "tag": "Live streaming",
+        "what": "A simple way for our server to keep sending pieces of the answer to your screen as they are ready, instead of waiting for the whole reply.",
+        "why": "You see the answer type out word-by-word and cards pop in instantly, so the chat feels alive and fast instead of frozen."
+      }
+    ]
+  },
+  {
+    "kind": "table",
+    "title": "Key Tools the AI Can Use",
+    "intro": "We gave the AI just two 'tools' (jobs it can ask our server to run). We kept the list tiny on purpose.",
+    "rows": [
+      {
+        "name": "find_labs",
+        "what": "Finds real labs that offer a given test, with their price, address, and rating. You can optionally narrow it to one city.",
+        "why": "Answers 'where can I get this test?' and 'which lab is cheapest?' using only real, approved labs from our database."
+      },
+      {
+        "name": "search_tests",
+        "what": "Looks up tests in our catalog and shows the lowest price and how many labs offer each one.",
+        "why": "Answers 'what does this test cost?' or 'what tests exist?' so a patient can compare before booking."
+      },
+      {
+        "name": "Two tools only (by design)",
+        "what": "We deliberately gave the AI a very small, clear set of tools rather than many complicated ones.",
+        "why": "A short, simple menu makes the AI far more reliable at picking the right tool and filling it in correctly."
+      }
+    ]
+  },
+  {
+    "kind": "steps",
+    "title": "How a Chat Works (Big Picture)",
+    "intro": "What happens from the moment you press send to the moment you see lab cards.",
+    "image": "seq-ai",
+    "imageCaption": "Your message travels to our server, the server works with Gemini and the database, then streams the answer back.",
+    "steps": [
+      {
+        "title": "Step 1: You send a message",
+        "detail": "You type something like 'where can I get a CBC in Cairo?' and the app sends it to our server over a live connection that stays open for the reply."
+      },
+      {
+        "title": "Step 2: The server runs the show",
+        "detail": "Our own server (not your phone) talks to Gemini. This keeps the secret AI key and the database safely on our side, away from the user's device."
+      },
+      {
+        "title": "Step 3: The answer streams back live",
+        "detail": "As Gemini writes, the server forwards each piece to your screen right away, and lab/test cards appear the instant a lookup finishes."
+      },
+      {
+        "title": "Step 4: The chat is saved",
+        "detail": "Both your question and the assistant's reply (including the cards) are stored, so reopening the conversation shows everything again exactly as before."
+      }
+    ]
+  },
+  {
+    "kind": "algorithm",
+    "title": "The Main Algorithm: The Tool-Calling Loop",
+    "intro": "The clever part. Instead of the AI guessing about labs and prices, it asks our server to look up real data, then writes its answer from that. This back-and-forth is called the 'function-calling loop'.",
+    "steps": [
+      {
+        "title": "1. You send a message",
+        "detail": "Your plain-language question, like 'I need a cheap blood sugar test near me', goes to the backend server."
+      },
+      {
+        "title": "2. Server hands Gemini your message PLUS a toolbox",
+        "detail": "The server passes your question to Gemini along with the list of tools it is allowed to use: find_labs and search_tests."
+      },
+      {
+        "title": "3. Gemini decides to call a tool",
+        "detail": "Gemini reads your question and realizes it needs real data, so instead of answering it says 'please run find_labs for a glucose test'. This is what 'function calling' means: the AI asks for a job to be done."
+      },
+      {
+        "title": "4. The server runs the tool on real data",
+        "detail": "The backend runs that lookup against the live database, returning only labs and tests that are active and approved, with their true prices and ratings."
+      },
+      {
+        "title": "5. Results go back to Gemini",
+        "detail": "The server sends the found labs back to Gemini so it now has real facts to talk about, not guesses."
+      },
+      {
+        "title": "6. Gemini writes a friendly answer",
+        "detail": "Now grounded in real data, Gemini writes a short, natural reply, for example 'I found 3 labs offering a glucose test, starting from 80 EGP. See the cards below.'"
+      },
+      {
+        "title": "7. The app shows the answer plus clickable cards",
+        "detail": "Your screen shows the friendly text and the lab/test cards. Tapping a card opens that lab or test so you can book it."
+      }
+    ],
+    "why": "This loop is the heart of the assistant: it lets the AI talk naturally while every fact comes from our real catalog, not its imagination."
+  },
+  {
+    "kind": "algorithm",
+    "title": "Why a Loop, Not Just One Answer",
+    "intro": "Sometimes one lookup is not enough, or the AI must look something up before it can reply. So the server repeats the conversation with Gemini until the answer is ready.",
+    "steps": [
+      {
+        "title": "Round by round",
+        "detail": "Each round, Gemini either calls a tool or writes its final answer. If it calls a tool, the server runs it and starts another round with the new results."
+      },
+      {
+        "title": "A safety limit of 4 rounds",
+        "detail": "The loop is capped at four rounds. This stops a confused AI from looping forever and keeps replies fast and cheap."
+      },
+      {
+        "title": "Cards appear before the text",
+        "detail": "Because the server runs the loop itself, it can show you the lab cards the moment a lookup finishes, even while the friendly summary is still being written."
+      }
+    ],
+    "why": "Running the loop on our server (not the user's device) means we control the cost, the speed limit, and the safety rules in one trusted place."
+  },
+  {
+    "kind": "algorithm",
+    "title": "The Guardrails: Keeping a Health AI Safe",
+    "intro": "AI can sometimes 'hallucinate' (confidently make things up). In a health and money app that is dangerous, so we built strict rules into the assistant.",
+    "steps": [
+      {
+        "title": "A strict rulebook (system prompt)",
+        "detail": "Before every chat, we give Gemini a fixed set of instructions it must follow, describing exactly what it may and may not do."
+      },
+      {
+        "title": "Never invent prices or labs",
+        "detail": "The rules forbid making up any lab, price, or availability. Real numbers may come only from the tools that read the real database."
+      },
+      {
+        "title": "Never act like a doctor",
+        "detail": "The assistant is told it is not a doctor: it must not diagnose illnesses or read a specific person's results, and it must tell users with emergency symptoms to seek care immediately."
+      },
+      {
+        "title": "Only real catalog data",
+        "detail": "It can explain what a test is in general terms, but anything specific (which lab, what price) must come from a real lookup, not a guess."
+      }
+    ],
+    "why": "In a health app, a made-up price or a wrong medical claim could harm or mislead a patient, so honesty is not optional, it is a core feature."
+  },
+  {
+    "kind": "cards",
+    "title": "The FAQ Bot: Simple On Purpose",
+    "intro": "The second, simpler helper. It uses no AI at all, and that is exactly the point.",
+    "cards": [
+      {
+        "name": "How it works",
+        "tag": "Rule-based keyword match",
+        "what": "It compares your question to a short, hand-written list of common questions and answers stored in the database, then returns the closest match.",
+        "why": "It is fully predictable: the same question always gives the same trusted answer, with no chance of the AI making something up."
+      },
+      {
+        "name": "What it handles",
+        "tag": "Common questions",
+        "what": "Things like fasting before a test, result timing, booking help, and privacy, plus quick-tap topic buttons.",
+        "why": "These questions repeat constantly, so a fixed answer is faster and friendlier than asking the AI every time."
+      },
+      {
+        "name": "Why have both",
+        "tag": "Smart split of work",
+        "what": "Simple, repeating questions go to the free FAQ bot; open-ended, catalog-aware questions go to the AI assistant.",
+        "why": "We save money and avoid risk on easy questions, and spend the AI's power only where it truly adds value."
+      }
+    ]
+  },
+  {
+    "kind": "diagram",
+    "title": "Putting It All Together",
+    "image": "architecture",
+    "imageCaption": "The AI Assistant is one part of TesTly: the web and mobile apps talk to one server, which talks to the database and to Google Gemini.",
+    "bullets": [
+      "You chat in plain words; the assistant finds real labs and tests, not made-up ones",
+      "Gemini does the talking, but our database provides every real fact via tool calls",
+      "Live streaming makes replies appear word-by-word with instant clickable cards",
+      "Strict guardrails keep it honest: no fake prices, no medical diagnoses",
+      "A simple no-AI FAQ bot handles common questions, saving the AI for the hard ones"
+    ]
+  }
+]

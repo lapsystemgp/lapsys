@@ -1,0 +1,1 @@
+{"name":"testly-project-book","private":true,"version":"1.0.0","description":"Generator for the TesTly graduation project book","dependencies":{"docx":"^9.7.1","mammoth":"^1.12.0"}}

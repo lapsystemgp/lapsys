@@ -1,0 +1,161 @@
+<svg width="1200" height="860" viewBox="0 0 1200 860" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#0F6FC6"/>
+    </marker>
+    <marker id="arrowReturn" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#6B7280"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="1200" height="860" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="32" y="40" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="bold" fill="#03485B">Lab Onboarding &amp; Approval — UML Sequence</text>
+  <text x="32" y="62" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#6B7280">TesTly: a new lab registers in PendingReview; an Admin reviews and activates (or rejects) it before it can transact.</text>
+
+  <!-- ===================== LIFELINE HEADERS ===================== -->
+  <!-- Lab (applicant)  x=130 -->
+  <rect x="40" y="86" width="180" height="46" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="130" y="108" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294" text-anchor="middle">Lab (applicant)</text>
+  <text x="130" y="125" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280" text-anchor="middle">LabStaff actor</text>
+
+  <!-- Client App  x=370 -->
+  <rect x="280" y="86" width="180" height="46" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="370" y="108" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294" text-anchor="middle">Client App</text>
+  <text x="370" y="125" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280" text-anchor="middle">Web / Mobile</text>
+
+  <!-- NestJS API  x=615 -->
+  <rect x="525" y="86" width="180" height="46" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="615" y="108" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294" text-anchor="middle">NestJS API</text>
+  <text x="615" y="125" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280" text-anchor="middle">Auth + Admin modules</text>
+
+  <!-- Database  x=860 -->
+  <rect x="770" y="86" width="180" height="46" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="860" y="108" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294" text-anchor="middle">Database</text>
+  <text x="860" y="125" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280" text-anchor="middle">PostgreSQL · Prisma</text>
+
+  <!-- Admin  x=1100 -->
+  <rect x="1010" y="86" width="150" height="46" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="1085" y="108" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294" text-anchor="middle">Admin</text>
+  <text x="1085" y="125" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280" text-anchor="middle">governance</text>
+
+  <!-- ===================== LIFELINES (dashed) ===================== -->
+  <line x1="130" y1="132" x2="130" y2="800" stroke="#D7E3F4" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="370" y1="132" x2="370" y2="800" stroke="#D7E3F4" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="615" y1="132" x2="615" y2="800" stroke="#D7E3F4" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="860" y1="132" x2="860" y2="800" stroke="#D7E3F4" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="1085" y1="132" x2="1085" y2="800" stroke="#D7E3F4" stroke-width="2" stroke-dasharray="6 6"/>
+
+  <!-- ===================== PHASE 1: REGISTRATION ===================== -->
+  <text x="32" y="166" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#03485B">1 · Registration</text>
+  <line x1="32" y1="174" x2="1168" y2="174" stroke="#E8F0FB" stroke-width="1"/>
+
+  <!-- M1: Lab -> Client App : fill registration form -->
+  <line x1="130" y1="196" x2="368" y2="196" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="158" y="183" width="184" height="16" fill="#FFFFFF"/>
+  <text x="160" y="195" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">fill lab registration form</text>
+
+  <!-- M2: Client App -> NestJS API : POST /auth/register/lab -->
+  <line x1="370" y1="226" x2="613" y2="226" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="386" y="213" width="214" height="16" fill="#FFFFFF"/>
+  <text x="388" y="225" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">POST /auth/register/lab</text>
+
+  <!-- M3: NestJS API -> DB : create User + LabProfile -->
+  <line x1="615" y1="256" x2="858" y2="256" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="616" y="243" width="252" height="16" fill="#FFFFFF"/>
+  <text x="618" y="255" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">create User + LabProfile (bcrypt hash)</text>
+
+  <!-- Status note on DB lifeline -->
+  <rect x="772" y="270" width="240" height="34" rx="6" fill="#FFFFFF" stroke="#1B8A5A" stroke-width="1.5"/>
+  <text x="892" y="284" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#1A1A1A" text-anchor="middle">onboarding_status =</text>
+  <text x="892" y="298" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="bold" fill="#0B5294" text-anchor="middle">PendingReview</text>
+
+  <!-- M4: DB --> API return (dashed return) -->
+  <line x1="858" y1="324" x2="617" y2="324" stroke="#6B7280" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrowReturn)"/>
+  <rect x="640" y="311" width="190" height="16" fill="#FFFFFF"/>
+  <text x="642" y="323" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">labProfileId persisted</text>
+
+  <!-- M5: API --> Client App : 201 created (account pending) -->
+  <line x1="613" y1="350" x2="372" y2="350" stroke="#6B7280" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrowReturn)"/>
+  <rect x="392" y="337" width="200" height="16" fill="#FFFFFF"/>
+  <text x="394" y="349" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">201 Created · awaiting review</text>
+
+  <!-- Note: LabActiveGuard blocks lab routes -->
+  <rect x="40" y="368" width="300" height="42" rx="8" fill="#FFFFFF" stroke="#C0392B" stroke-width="1.5"/>
+  <text x="190" y="386" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#C0392B" text-anchor="middle" font-weight="bold">LabActiveGuard blocks lab dashboard</text>
+  <text x="190" y="401" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#1A1A1A" text-anchor="middle">while status ≠ Active (login still works)</text>
+
+  <!-- ===================== PHASE 2: ADMIN REVIEW ===================== -->
+  <text x="32" y="446" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#03485B">2 · Admin review</text>
+  <line x1="32" y1="454" x2="1168" y2="454" stroke="#E8F0FB" stroke-width="1"/>
+
+  <!-- M6: Admin -> API : GET /admin/workspace (pending labs) -->
+  <line x1="1085" y1="478" x2="617" y2="478" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="676" y="465" width="332" height="16" fill="#FFFFFF"/>
+  <text x="842" y="477" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280" text-anchor="middle">GET /admin/workspace — open pending list</text>
+
+  <!-- M7: API -> DB : query labs + onboardingReadiness -->
+  <line x1="615" y1="508" x2="858" y2="508" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="616" y="495" width="252" height="16" fill="#FFFFFF"/>
+  <text x="618" y="507" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">query labs + 5-point readiness</text>
+
+  <!-- M8: DB --> API --> Admin : pending labs returned -->
+  <line x1="858" y1="538" x2="1083" y2="538" stroke="#6B7280" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrowReturn)"/>
+  <rect x="876" y="525" width="266" height="16" fill="#FFFFFF"/>
+  <text x="880" y="537" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">pending labs + missing requirements</text>
+
+  <!-- ===================== PHASE 3: DECISION ===================== -->
+  <text x="32" y="584" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#03485B">3 · Decision (approve or reject)</text>
+  <line x1="32" y1="592" x2="1168" y2="592" stroke="#E8F0FB" stroke-width="1"/>
+
+  <!-- alt fragment box -->
+  <rect x="92" y="606" width="1052" height="190" rx="8" fill="none" stroke="#6B7280" stroke-width="1.3" stroke-dasharray="3 3"/>
+  <path d="M92 606 h64 v18 l-12 10 h-52 z" fill="#E8F0FB" stroke="#6B7280" stroke-width="1.3"/>
+  <text x="104" y="620" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="bold" fill="#03485B">alt</text>
+  <text x="168" y="620" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280">[ readiness gate ]</text>
+
+  <!-- Branch A: APPROVE -->
+  <text x="104" y="642" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="bold" fill="#1B8A5A">[ ready → approve ]</text>
+
+  <!-- M9: Admin -> API : PATCH .../status = Active -->
+  <line x1="1085" y1="662" x2="617" y2="662" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="640" y="649" width="380" height="16" fill="#FFFFFF"/>
+  <text x="830" y="661" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280" text-anchor="middle">PATCH /admin/labs/:id/status { Active }</text>
+
+  <!-- M10: API -> DB : status = Active + audit -->
+  <line x1="615" y1="688" x2="858" y2="688" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="616" y="675" width="244" height="16" fill="#FFFFFF"/>
+  <text x="618" y="687" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1B8A5A" font-weight="bold">status = Active</text>
+  <text x="730" y="687" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280"> + audit log</text>
+
+  <!-- M11: API -> Lab : notify (FCM) lab approved -->
+  <line x1="613" y1="714" x2="132" y2="714" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="280" y="701" width="266" height="16" fill="#FFFFFF"/>
+  <text x="413" y="713" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280" text-anchor="middle">notify lab — approved, access granted</text>
+
+  <!-- M12: Lab now reaches dashboard -->
+  <line x1="130" y1="740" x2="613" y2="740" stroke="#1B8A5A" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="220" y="727" width="306" height="16" fill="#FFFFFF"/>
+  <text x="373" y="739" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1B8A5A" text-anchor="middle" font-weight="bold">GET /lab/workspace — passes LabActiveGuard</text>
+
+  <!-- divider between alt branches -->
+  <line x1="92" y1="752" x2="1144" y2="752" stroke="#6B7280" stroke-width="1" stroke-dasharray="3 3"/>
+
+  <!-- Branch B: REJECT -->
+  <text x="104" y="770" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="bold" fill="#C0392B">[ not ready → reject ]</text>
+
+  <!-- M-reject: Admin -> API : PATCH status { Rejected } -->
+  <line x1="1085" y1="784" x2="617" y2="784" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="630" y="771" width="392" height="16" fill="#FFFFFF"/>
+  <text x="826" y="783" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280" text-anchor="middle">PATCH /admin/labs/:id/status { Rejected }</text>
+
+  <!-- Reject outcome (annotation on the right of the branch label) -->
+  <text x="300" y="770" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#1A1A1A">onboarding_status = </text>
+  <text x="424" y="770" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="bold" fill="#C0392B">Rejected</text>
+  <text x="490" y="770" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#1A1A1A"> · notify lab; dashboard access denied</text>
+
+  <!-- Footer note -->
+  <text x="32" y="838" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280">Activation is gated: the API refuses status = Active unless the lab has a phone, accreditation, turnaround time, ≥1 active test, and ≥1 active schedule slot.</text>
+</svg>

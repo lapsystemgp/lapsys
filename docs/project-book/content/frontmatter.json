@@ -1,0 +1,62 @@
+{
+  "abstract": [
+    "Access to diagnostic laboratory testing in Egypt is hindered by a fragmented and opaque market. Prices for an identical test, such as a Complete Blood Count or a lipid profile, vary widely between laboratories and are rarely published, leaving patients with no neutral means of comparing options by price, quality, or proximity. Results are typically delivered as isolated PDF documents that cannot be trended over time, and there exists no privacy-respecting mechanism by which a patient's longitudinal clinical history can follow them when they change laboratories. Smaller laboratories, in turn, lack an affordable storefront, scheduling, and results-delivery infrastructure, while the ecosystem as a whole lacks a trusted, curated intermediary that verifies a laboratory is operationally complete before exposing it to patients.",
+    "This thesis presents TesTly, a curated, multi-actor medical lab-testing marketplace that connects patients with accredited laboratories across Egypt. The platform allows patients to discover and compare tests across laboratories, book through one of three fulfilment modes (lab visit, home sample collection, or mail-in home test kit), pay online or by cash, and receive results both as an authoritative PDF and as structured, queryable data. TesTly is delivered as a Next.js web application and a Flutter mobile application over a single NestJS backend that uses Prisma as its object-relational mapping layer over a PostgreSQL database. Its principal contributions are threefold: a clinical-normalisation engine that resolves each laboratory's differently named and differently united analytes into a canonical, comparable form to enable cross-laboratory health-trend tracking; a patient-controlled privacy model governing what laboratories may see of a patient's history; and an agentic artificial-intelligence health assistant, powered by Google Gemini, that grounds its conversational guidance in the live laboratory catalogue through a server-side function-calling loop.",
+    "Among the system's distinguishing features are layered, defence-in-depth security appropriate to medical data, including bcrypt password hashing, short-lived JSON Web Token access tokens combined with hashed, rotating refresh tokens, stacked role and lab-activation guards, and authorisation-checked PDF downloads. An administrator-gated onboarding process enforces a concrete five-point readiness check, guaranteeing that every bookable laboratory is operationally complete. The architecture exhibits graceful, configuration-driven flexibility: file storage is pluggable between local disk and Amazon S3, push notifications and the AI assistant degrade safely when unconfigured, and a single API serves two distinct clients. Cross-laboratory health trends, reference-range shading, and trend-direction analysis give patients a longitudinal view of their health that no single laboratory could previously provide.",
+    "The resulting system demonstrates a coherent, end-to-end workflow in which a patient can progress from an AI-assisted conversation to a compared, booked, paid, delivered, and trended test, while a laboratory can move from a gated registration to a fully operational storefront, all on one curated platform. Validated against a rich seeded demonstration dataset of twenty-one active laboratories across eleven Egyptian cities and exercised through per-layer automated testing, TesTly establishes a viable, security-conscious foundation for transparent and continuous diagnostic care in the Egyptian context."
+  ],
+  "acknowledgement": [
+    "The authors wish to express their sincere gratitude to their project supervisor for invaluable guidance, patience, and continuous encouragement throughout the course of this work. Deep appreciation is extended to the faculty and staff of the Department of Information Systems, Faculty of Computers and Informatics, Suez Canal University, for the knowledge and support that made this project possible. The authors are profoundly thankful to their families for their unwavering love, sacrifice, and moral support, and to their teammates and colleagues, whose dedication, collaboration, and shared commitment were essential to bringing TesTly to completion."
+  ],
+  "abbreviations": [
+    ["AI", "Artificial Intelligence"],
+    ["API", "Application Programming Interface"],
+    ["CI/CD", "Continuous Integration / Continuous Deployment"],
+    ["CRUD", "Create, Read, Update, Delete"],
+    ["CSV", "Comma-Separated Values"],
+    ["DTO", "Data Transfer Object"],
+    ["EGP", "Egyptian Pound"],
+    ["FCM", "Firebase Cloud Messaging"],
+    ["HTTP", "Hypertext Transfer Protocol"],
+    ["HTTPS", "Hypertext Transfer Protocol Secure"],
+    ["JWT", "JSON Web Token"],
+    ["LIS", "Laboratory Information System"],
+    ["LLM", "Large Language Model"],
+    ["LOINC", "Logical Observation Identifiers Names and Codes"],
+    ["MVP", "Minimum Viable Product"],
+    ["ORM", "Object-Relational Mapping"],
+    ["OTP", "One-Time Password"],
+    ["PDF", "Portable Document Format"],
+    ["RBAC", "Role-Based Access Control"],
+    ["REST", "Representational State Transfer"],
+    ["S3", "Simple Storage Service"],
+    ["SDK", "Software Development Kit"],
+    ["SPA", "Single-Page Application"],
+    ["SQL", "Structured Query Language"],
+    ["SSE", "Server-Sent Events"],
+    ["SSR", "Server-Side Rendering"],
+    ["UI/UX", "User Interface / User Experience"]
+  ],
+  "references": [
+    "[1] NestJS, \"NestJS Documentation — A progressive Node.js framework,\" 2024. [Online]. Available: https://docs.nestjs.com",
+    "[2] Vercel, \"Next.js Documentation,\" 2024. [Online]. Available: https://nextjs.org/docs",
+    "[3] Meta Open Source, \"React Documentation,\" 2024. [Online]. Available: https://react.dev",
+    "[4] Google, \"Flutter Documentation,\" 2024. [Online]. Available: https://docs.flutter.dev",
+    "[5] Prisma, \"Prisma ORM Documentation,\" 2024. [Online]. Available: https://www.prisma.io/docs",
+    "[6] The PostgreSQL Global Development Group, \"PostgreSQL 16 Documentation,\" 2024. [Online]. Available: https://www.postgresql.org/docs/16/",
+    "[7] Google, \"Google Gen AI SDK and Gemini API Documentation,\" 2024. [Online]. Available: https://ai.google.dev/gemini-api/docs",
+    "[8] Amazon Web Services, \"Amazon Simple Storage Service (S3) Documentation,\" 2024. [Online]. Available: https://docs.aws.amazon.com/s3/",
+    "[9] Google, \"Firebase Cloud Messaging Documentation,\" 2024. [Online]. Available: https://firebase.google.com/docs/cloud-messaging",
+    "[10] M. Jones, J. Bradley, and N. Sakimura, \"JSON Web Token (JWT),\" RFC 7519, Internet Engineering Task Force, May 2015. [Online]. Available: https://datatracker.ietf.org/doc/html/rfc7519",
+    "[11] Tailwind Labs, \"Tailwind CSS Documentation,\" 2024. [Online]. Available: https://tailwindcss.com/docs",
+    "[12] Riverpod, \"Riverpod — State Management for Flutter and Dart,\" 2024. [Online]. Available: https://riverpod.dev",
+    "[13] Regenstrief Institute, \"LOINC — Logical Observation Identifiers Names and Codes,\" 2024. [Online]. Available: https://loinc.org",
+    "[14] K. Beck et al., \"Manifesto for Agile Software Development,\" 2001. [Online]. Available: https://agilemanifesto.org",
+    "[15] R. T. Fielding, \"Architectural Styles and the Design of Network-based Software Architectures,\" Ph.D. dissertation, University of California, Irvine, 2000. [Online]. Available: https://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm",
+    "[16] OpenJS Foundation, \"Node.js Documentation,\" 2024. [Online]. Available: https://nodejs.org/docs",
+    "[17] Radix UI, \"Radix UI Primitives Documentation,\" 2024. [Online]. Available: https://www.radix-ui.com",
+    "[18] Recharts, \"Recharts — A composable charting library built on React components,\" 2024. [Online]. Available: https://recharts.org",
+    "[19] N. Provos and D. Mazières, \"A Future-Adaptable Password Scheme,\" in Proc. USENIX Annual Technical Conference, 1999. [Online]. Available: https://www.usenix.org/legacy/events/usenix99/provos.html",
+    "[20] WHATWG, \"HTML Living Standard — Server-Sent Events,\" 2024. [Online]. Available: https://html.spec.whatwg.org/multipage/server-sent-events.html"
+  ]
+}

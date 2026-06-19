@@ -1,0 +1,164 @@
+<svg width="1300" height="950" viewBox="0 0 1300 950" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#0F6FC6"/>
+    </marker>
+    <marker id="arrowgreen" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#1B8A5A"/>
+    </marker>
+  </defs>
+
+  <!-- background -->
+  <rect x="0" y="0" width="1300" height="950" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="32" y="44" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="bold" fill="#03485B">TesTly — System Architecture (Layered)</text>
+  <text x="32" y="68" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#6B7280">Clients reach the NestJS REST API through a same-origin /api proxy; the API integrates external services and data stores.</text>
+
+  <!-- ===================== LAYER LABELS (left rail) ===================== -->
+  <text x="32" y="118" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#6B7280" letter-spacing="1">CLIENTS</text>
+  <text x="32" y="312" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#6B7280" letter-spacing="1">API</text>
+  <text x="32" y="742" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#6B7280" letter-spacing="1">SERVICES</text>
+  <text x="32" y="760" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#6B7280" letter-spacing="1">&amp; DATA</text>
+
+  <!-- ===================== CLIENT LAYER ===================== -->
+  <!-- Web App -->
+  <rect x="300" y="92" width="320" height="96" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="460" y="128" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="bold" fill="#0B5294">Web App</text>
+  <text x="460" y="152" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1A1A1A">Next.js 16 / React 19</text>
+  <text x="460" y="172" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">httpOnly cookie session</text>
+
+  <!-- Mobile App -->
+  <rect x="680" y="92" width="320" height="96" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="840" y="128" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="bold" fill="#0B5294">Mobile App</text>
+  <text x="840" y="152" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1A1A1A">Flutter (iOS / Android)</text>
+  <text x="840" y="172" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">Bearer token (secure storage)</text>
+
+  <!-- ===================== /api PROXY ===================== -->
+  <rect x="500" y="220" width="300" height="58" rx="10" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="650" y="245" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294">Same-origin /api proxy</text>
+  <text x="650" y="265" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">Vercel rewrite /api/* → backend (first-party cookie)</text>
+
+  <!-- Client -> proxy arrows -->
+  <line x1="460" y1="188" x2="560" y2="218" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="840" y1="188" x2="740" y2="218" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- proxy -> API arrow -->
+  <line x1="650" y1="278" x2="650" y2="332" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="660" y="296" width="118" height="20" fill="#FFFFFF"/>
+  <text x="664" y="311" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">HTTPS / REST</text>
+
+  <!-- ===================== API BOUNDARY ===================== -->
+  <rect x="120" y="334" width="1060" height="354" rx="14" fill="#F4F8FE" stroke="#0B5294" stroke-width="2.5"/>
+  <text x="146" y="366" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="bold" fill="#0B5294">NestJS REST API</text>
+  <text x="146" y="386" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">NestJS 11 · global ValidationPipe · JwtAuthGuard / RolesGuard / LabActiveGuard · standardized error envelope</text>
+
+  <!-- Module sub-boxes: 4 columns x 2 rows + Prisma full-width row -->
+  <!-- Row 1 -->
+  <!-- Auth (JWT) -->
+  <rect x="146" y="402" width="232" height="74" rx="10" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="262" y="430" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294">Auth (JWT)</text>
+  <text x="262" y="452" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">login · refresh rotation</text>
+  <text x="262" y="468" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">bcrypt · RBAC roles</text>
+
+  <!-- Public Marketplace -->
+  <rect x="394" y="402" width="232" height="74" rx="10" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="510" y="430" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294">Public Marketplace</text>
+  <text x="510" y="452" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">labs · tests · search</text>
+  <text x="510" y="468" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">Haversine distance sort</text>
+
+  <!-- Bookings & Payments -->
+  <rect x="642" y="402" width="232" height="74" rx="10" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="758" y="430" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294">Bookings &amp; Payments</text>
+  <text x="758" y="452" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">lifecycle · slots · kits</text>
+  <text x="758" y="468" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">online / cash · refunds</text>
+
+  <!-- Patient / Lab Workspace API -->
+  <rect x="890" y="402" width="266" height="74" rx="10" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="1023" y="430" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294">Patient / Lab Workspace</text>
+  <text x="1023" y="452" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">dashboards · results (PDF)</text>
+  <text x="1023" y="468" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">structured trends · reviews</text>
+
+  <!-- Row 2 -->
+  <!-- Admin -->
+  <rect x="146" y="492" width="232" height="74" rx="10" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="262" y="520" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294">Admin</text>
+  <text x="262" y="542" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">lab onboarding gate</text>
+  <text x="262" y="558" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">governance · analytics</text>
+
+  <!-- AI Assistant (Chat) -->
+  <rect x="394" y="492" width="232" height="74" rx="10" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="510" y="520" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294">AI Assistant (Chat)</text>
+  <text x="510" y="542" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">agentic · SSE stream</text>
+  <text x="510" y="558" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">tool-calling on catalog</text>
+
+  <!-- FAQ -->
+  <rect x="642" y="492" width="232" height="74" rx="10" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="758" y="520" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294">FAQ</text>
+  <text x="758" y="542" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">non-LLM help system</text>
+  <text x="758" y="558" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">guided intents · search</text>
+
+  <!-- Notifications -->
+  <rect x="890" y="492" width="266" height="74" rx="10" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="1023" y="520" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294">Notifications</text>
+  <text x="1023" y="542" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">device tokens · multicast</text>
+  <text x="1023" y="558" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">push on state changes</text>
+
+  <!-- Prisma ORM (full width) -->
+  <rect x="146" y="586" width="1010" height="78" rx="10" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="651" y="616" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#0B5294">Prisma ORM (data-access layer)</text>
+  <text x="651" y="640" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1A1A1A">type-safe queries · migrations · $transaction · transient-error retry middleware</text>
+
+  <!-- ===================== EXTERNAL SERVICES / DATA ===================== -->
+  <!-- PostgreSQL (Neon) -->
+  <rect x="120" y="772" width="262" height="120" rx="10" fill="#FFFFFF" stroke="#03485B" stroke-width="2"/>
+  <text x="251" y="804" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#03485B">PostgreSQL</text>
+  <text x="251" y="826" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1A1A1A">Neon (serverless)</text>
+  <text x="251" y="850" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">primary relational store</text>
+  <text x="251" y="870" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">users · bookings · results</text>
+
+  <!-- AWS S3 -->
+  <rect x="402" y="772" width="262" height="120" rx="10" fill="#FFFFFF" stroke="#03485B" stroke-width="2"/>
+  <text x="533" y="804" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#03485B">AWS S3</text>
+  <text x="533" y="826" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1A1A1A">result PDFs</text>
+  <text x="533" y="850" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">object storage adapter</text>
+  <text x="533" y="870" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">local disk in dev</text>
+
+  <!-- Firebase Cloud Messaging -->
+  <rect x="684" y="772" width="262" height="120" rx="10" fill="#FFFFFF" stroke="#03485B" stroke-width="2"/>
+  <text x="815" y="804" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#03485B">Firebase Cloud</text>
+  <text x="815" y="824" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#03485B">Messaging</text>
+  <text x="815" y="850" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">push notifications (FCM)</text>
+  <text x="815" y="870" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">graceful no-op if unset</text>
+
+  <!-- Google GenAI (Gemini) -->
+  <rect x="966" y="772" width="262" height="120" rx="10" fill="#FFFFFF" stroke="#03485B" stroke-width="2"/>
+  <text x="1097" y="804" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#03485B">Google GenAI</text>
+  <text x="1097" y="826" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1A1A1A">Gemini 2.5 Flash</text>
+  <text x="1097" y="850" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">agentic chat LLM</text>
+  <text x="1097" y="870" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">function-calling loop</text>
+
+  <!-- ===================== API -> SERVICES ARROWS ===================== -->
+  <!-- Prisma -> PostgreSQL -->
+  <line x1="251" y1="664" x2="251" y2="770" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="206" y="708" width="92" height="20" fill="#FFFFFF"/>
+  <text x="210" y="723" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">SQL (pooled)</text>
+
+  <!-- Workspace API -> S3 (results) -->
+  <line x1="533" y1="664" x2="533" y2="770" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="490" y="708" width="100" height="20" fill="#FFFFFF"/>
+  <text x="494" y="723" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">store / stream</text>
+
+  <!-- Notifications -> FCM -->
+  <line x1="815" y1="664" x2="815" y2="770" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="774" y="708" width="92" height="20" fill="#FFFFFF"/>
+  <text x="778" y="723" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">FCM multicast</text>
+
+  <!-- Chat -> Gemini -->
+  <line x1="1097" y1="664" x2="1097" y2="770" stroke="#0F6FC6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="1052" y="708" width="96" height="20" fill="#FFFFFF"/>
+  <text x="1056" y="723" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280">prompt + tools</text>
+
+  <!-- Legend (bottom-left, compact) -->
+  <text x="32" y="922" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7280">Grounded in docs/project-book/research/backend.md and infra.md</text>
+</svg>

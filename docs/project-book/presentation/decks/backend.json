@@ -1,0 +1,291 @@
+[
+  {
+    "kind": "title",
+    "title": "The Backend — The Brain of TesTly",
+    "subtitle": "The server that runs everything behind the scenes",
+    "intro": "TesTly is a website and phone app where people in Egypt can find a medical lab, book a test, pay, and get their results. But the website and the app are just the screens you see. The backend is the brain that does the real work behind them.",
+    "bullets": [
+      "It listens to the web app and the phone app and answers their requests.",
+      "It checks the rules (who is allowed to do what) and keeps data safe.",
+      "It talks to the database, where all the information is stored.",
+      "Same brain serves both the website and the phone app."
+    ]
+  },
+  {
+    "kind": "steps",
+    "title": "What Does the Backend Actually Do?",
+    "intro": "Think of it like a waiter between you and the kitchen.",
+    "steps": [
+      {
+        "title": "1. It receives a request",
+        "detail": "When you tap 'Book this test' on the app, a message is sent to the backend asking it to do something."
+      },
+      {
+        "title": "2. It checks the rules",
+        "detail": "Are you logged in? Are you allowed to do this? Is the lab real and open? It refuses anything that breaks the rules."
+      },
+      {
+        "title": "3. It talks to the database",
+        "detail": "The database is the big organised storage of all data (users, labs, bookings, results). The backend reads from it or saves new information into it."
+      },
+      {
+        "title": "4. It sends back an answer",
+        "detail": "It replies to the app with a clear result, like 'Booking confirmed' or 'That time is already taken'."
+      }
+    ]
+  },
+  {
+    "kind": "diagram",
+    "title": "Where the Backend Sits in the System",
+    "image": "architecture",
+    "imageCaption": "The web app and phone app both talk to one backend, which talks to the database and a few helper services.",
+    "bullets": [
+      "Two front doors (website + phone app), one shared brain.",
+      "The backend is the only thing allowed to touch the database directly.",
+      "Helper services (file storage, push notifications, AI) hang off the side."
+    ]
+  },
+  {
+    "kind": "cards",
+    "title": "Tech Stack & Why We Chose It",
+    "intro": "These are the main building blocks of the backend, and the reason for each.",
+    "cards": [
+      {
+        "name": "NestJS",
+        "tag": "Main framework",
+        "what": "A toolkit for building the server in an organised, tidy way, splitting the code into neat sections called modules.",
+        "why": "It keeps a big project from turning into spaghetti, with clear places to add login checks, rules, and features."
+      },
+      {
+        "name": "TypeScript",
+        "tag": "Programming language",
+        "what": "JavaScript with type-checking, meaning it warns you when you use data the wrong way.",
+        "why": "It catches many mistakes while we write code, before users ever see a bug."
+      },
+      {
+        "name": "PostgreSQL (Neon)",
+        "tag": "Database",
+        "what": "The actual storage where all data lives. Neon is a cloud version that runs online without us managing a server.",
+        "why": "It is reliable, well-tested, and great at keeping money and medical data correct and consistent."
+      },
+      {
+        "name": "Prisma",
+        "tag": "Database helper",
+        "what": "A translator that lets our code talk to the database in plain, safe commands instead of raw database language.",
+        "why": "It makes database code easier and safer to write, and blocks a whole class of hacking attacks."
+      },
+      {
+        "name": "JWT + Passport",
+        "tag": "Login / identity",
+        "what": "JWT is a signed digital ticket that proves who you are. Passport is the helper that checks that ticket on every request.",
+        "why": "It lets the server remember you are logged in without storing a session for every user, so it scales easily."
+      },
+      {
+        "name": "bcrypt",
+        "tag": "Password safety",
+        "what": "A tool that scrambles passwords into unreadable text before saving them.",
+        "why": "If the database were ever stolen, the real passwords still cannot be read."
+      }
+    ]
+  },
+  {
+    "kind": "cards",
+    "title": "Tech Stack & Why (continued)",
+    "intro": "The helper services that handle files, alerts, documentation, and safety.",
+    "cards": [
+      {
+        "name": "AWS S3",
+        "tag": "File storage",
+        "what": "An online storage locker for big files, used to keep the lab result PDF documents.",
+        "why": "PDFs are too big to put in a normal database, and S3 stores them cheaply and safely at any scale."
+      },
+      {
+        "name": "Firebase Cloud Messaging",
+        "tag": "Push notifications",
+        "what": "Google's service for sending pop-up alerts to phones, like 'Your result is ready'.",
+        "why": "It is the standard, free, reliable way to reach both iPhone and Android phones."
+      },
+      {
+        "name": "Swagger",
+        "tag": "API documentation",
+        "what": "Auto-generated, browsable documentation listing every command the backend understands.",
+        "why": "It lets the team test and understand the backend without guessing, saving lots of time."
+      },
+      {
+        "name": "class-validator",
+        "tag": "Input checking",
+        "what": "A tool that checks incoming data is the right shape (a real email, a price that is a number, etc.).",
+        "why": "It stops bad or broken data at the front door before it can cause errors deeper in the system."
+      }
+    ]
+  },
+  {
+    "kind": "diagram",
+    "title": "Inside the Backend: The Modules",
+    "image": "component-backend",
+    "imageCaption": "The backend is split into clear sections, each handling one job.",
+    "bullets": [
+      "Auth handles login and who-you-are.",
+      "Bookings handles ordering and paying for tests.",
+      "Results handles the result PDFs and the health-trend data.",
+      "Each section is small and focused, so it is easy to understand and fix."
+    ]
+  },
+  {
+    "kind": "steps",
+    "title": "How Login & User Roles Work",
+    "intro": "How the backend knows who you are and what you are allowed to do.",
+    "imageCaption": "Login gives you two tickets, and guards check them on every request.",
+    "steps": [
+      {
+        "title": "1. You log in",
+        "detail": "You send your email and password. The backend uses bcrypt to check the password matches the scrambled one it stored."
+      },
+      {
+        "title": "2. You get two tickets",
+        "detail": "An access token (a short-lived ticket valid for 8 hours that proves who you are) and a refresh token (a long-lived ticket used to get a new access token later)."
+      },
+      {
+        "title": "3. Every request shows the ticket",
+        "detail": "The website carries the ticket in a secure cookie; the phone app carries it in the request header. One backend understands both."
+      },
+      {
+        "title": "4. Guards check your role",
+        "detail": "There are three roles: Patient, Lab Staff, and Admin. 'Role guards' make sure a patient can't open lab-only pages, and a not-yet-approved lab can't sell tests."
+      }
+    ]
+  },
+  {
+    "kind": "steps",
+    "title": "How Booking + Payment Works",
+    "intro": "What happens from picking a time slot to paying for the test.",
+    "image": "seq-booking",
+    "imageCaption": "The patient books a slot, the backend locks it in safely, then payment and confirmation follow.",
+    "steps": [
+      {
+        "title": "1. See free time slots",
+        "detail": "The app asks the backend which appointment times are still open at the chosen lab, and shows them to the patient."
+      },
+      {
+        "title": "2. Create the booking",
+        "detail": "The backend checks the rules (the lab is open, the test exists, the slot is free) and works out the price, including any home-visit fee."
+      },
+      {
+        "title": "3. Lock the slot safely",
+        "detail": "It saves the booking in one safe all-or-nothing step so the same time slot can never be grabbed by two people at once."
+      },
+      {
+        "title": "4. Pay, then confirm",
+        "detail": "The patient pays online or with cash. The lab then confirms the booking, and the patient gets a notification. An online booking can only be confirmed after it is paid."
+      }
+    ]
+  },
+  {
+    "kind": "steps",
+    "title": "How Lab Results Get Delivered",
+    "intro": "How a test result travels from the lab to the patient, safely.",
+    "image": "seq-result",
+    "imageCaption": "The lab uploads the PDF and the numbers, then the patient is notified and can download it.",
+    "steps": [
+      {
+        "title": "1. Lab uploads the official PDF",
+        "detail": "The backend double-checks the file really is a PDF (not just named like one) and keeps it under 10 MB, then stores it in S3."
+      },
+      {
+        "title": "2. Lab adds the numbers",
+        "detail": "The lab also enters the actual readings (like glucose level). These get cleaned up into a standard form for health trends."
+      },
+      {
+        "title": "3. Mark as delivered",
+        "detail": "The lab marks the result delivered. The booking is now complete and the patient gets a 'Result Ready' notification."
+      },
+      {
+        "title": "4. Patient downloads it",
+        "detail": "Only the right patient, lab, or admin can open the file. The backend checks this every time and never shares the raw storage link."
+      }
+    ]
+  },
+  {
+    "kind": "diagram",
+    "title": "How the Data Is Organised",
+    "image": "erd",
+    "imageCaption": "Every user, lab, booking, and result is a table, linked together. A Booking sits at the center.",
+    "bullets": [
+      "A booking connects a patient, a lab, and a test together.",
+      "Each booking can have a result file and structured readings.",
+      "Storing data in linked tables keeps it tidy and prevents contradictions."
+    ]
+  },
+  {
+    "kind": "algorithm",
+    "title": "Clever Bit 1: Comparing Results Across Different Labs",
+    "intro": "Different labs write the same test in different names and different units. So a patient who switches labs can't easily see if their health is improving or getting worse. We fix that by converting everything to one common form.",
+    "steps": [
+      {
+        "title": "Match the name",
+        "detail": "'Fasting glucose', 'FBS', and 'Fasting Blood Sugar' all mean the same thing. The backend uses a dictionary to recognise them as one marker."
+      },
+      {
+        "title": "Convert the unit",
+        "detail": "One lab reports glucose as 5.4 mmol/L, another as 97 mg/dL. The backend converts both to the same unit using fixed medical formulas (for glucose, multiply by 18)."
+      },
+      {
+        "title": "Flag anything unsure",
+        "detail": "If a unit isn't recognised, it is marked 'not comparable' instead of guessing, so a wrong number never goes on the patient's health chart."
+      }
+    ],
+    "why": "It lets a patient see one honest health trend over time, even when their tests came from several different labs."
+  },
+  {
+    "kind": "algorithm",
+    "title": "Clever Bit 2: Two People Can't Grab the Same Slot",
+    "intro": "Imagine two patients tap 'Book' on the exact same 10:00 AM slot at the exact same moment. Without protection, both could be booked and the lab is double-booked. We make that impossible.",
+    "steps": [
+      {
+        "title": "A database rule: one slot, one booking",
+        "detail": "The database is told that each time slot can be linked to only one active booking. It will physically refuse a second one."
+      },
+      {
+        "title": "All-or-nothing save (a transaction)",
+        "detail": "The booking is saved as a single bundled step. If anything goes wrong, the whole thing is undone, never half-saved."
+      },
+      {
+        "title": "Loser gets a friendly message",
+        "detail": "Whoever's request arrives second is cleanly rejected with 'That slot is already booked', instead of a crash or a double-booking."
+      }
+    ],
+    "why": "It guarantees the schedule is always correct, even when many people book at the very same second."
+  },
+  {
+    "kind": "algorithm",
+    "title": "Clever Bit 3: Staying Logged In, Safely",
+    "intro": "We want users to stay logged in for a long time without re-typing their password constantly. But a long-lived login ticket is dangerous if stolen. The trick is to rotate the ticket.",
+    "steps": [
+      {
+        "title": "Short ticket + long ticket",
+        "detail": "The access ticket expires fast (8 hours). The refresh ticket lasts longer (30 days) and is used quietly to get a fresh access ticket."
+      },
+      {
+        "title": "Rotate on every use",
+        "detail": "Each time the refresh ticket is used, the old one is thrown away and a brand-new one is issued. The old one stops working immediately."
+      },
+      {
+        "title": "Stored scrambled",
+        "detail": "Only a scrambled fingerprint of the refresh ticket is saved, never the real one, so a stolen database is useless to an attacker."
+      }
+    ],
+    "why": "If a refresh ticket is ever stolen, it works at most once before it is rotated out, sharply limiting the damage."
+  },
+  {
+    "kind": "title",
+    "title": "Putting It All Together",
+    "subtitle": "One brain, many safe jobs",
+    "intro": "The backend is the trusted middle layer that makes TesTly work. Everything a patient or lab does passes through it, gets checked, and is stored correctly.",
+    "bullets": [
+      "One backend serves both the website and the phone app.",
+      "Layered safety: login check, role check, lab-approval check, and ownership check.",
+      "Smart algorithms make results comparable, bookings race-proof, and logins secure.",
+      "Built to handle real money and real medical data carefully."
+    ]
+  }
+]

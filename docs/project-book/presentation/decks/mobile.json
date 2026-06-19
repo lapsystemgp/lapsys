@@ -1,0 +1,299 @@
+[
+  {
+    "kind": "title",
+    "title": "TesTly on Your Phone",
+    "subtitle": "One app for iPhone and Android",
+    "intro": "TesTly is also a phone app, not just a website. Patients and lab staff can do almost everything from their pocket.",
+    "bullets": [
+      "Built once with Flutter, runs on both iPhone and Android",
+      "Talks to the same backend server as the website",
+      "Search labs, book tests, see results, and chat with the AI helper"
+    ]
+  },
+  {
+    "kind": "diagram",
+    "title": "One App, Two Phones",
+    "intro": "Instead of writing two separate apps, we wrote one and it runs everywhere.",
+    "image": "architecture",
+    "imageCaption": "The phone app is one of two front doors to the same backend server.",
+    "bullets": [
+      "We write the app a single time using a tool called Flutter",
+      "Flutter turns that one project into a real iPhone app AND a real Android app",
+      "This saves a huge amount of time and keeps both phones working the same way",
+      "The phone app and the website share the exact same backend, so the data is always in sync"
+    ]
+  },
+  {
+    "kind": "cards",
+    "title": "Tech Stack & Why",
+    "intro": "The main tools we used to build the phone app, and the reason for each.",
+    "cards": [
+      {
+        "name": "Flutter & Dart",
+        "tag": "App framework",
+        "what": "Flutter is a toolkit for building phone apps; Dart is the programming language it uses.",
+        "why": "We write the app once and Flutter makes both the iPhone and Android versions, so we build twice as fast."
+      },
+      {
+        "name": "Riverpod",
+        "tag": "State manager",
+        "what": "It holds the app's live data (like your bookings) and keeps every screen showing the latest version.",
+        "why": "When data changes, only the screens that need it refresh, so the app stays fast and never shows stale info."
+      },
+      {
+        "name": "Dio",
+        "tag": "Networking",
+        "what": "The messenger that sends requests to the backend server and brings back the answers.",
+        "why": "It is reliable, handles timeouts, and lets us attach your login token to every request in one central place."
+      },
+      {
+        "name": "go_router",
+        "tag": "Navigation",
+        "what": "Decides which screen you see and moves you between screens (login, home, results, etc.).",
+        "why": "It can automatically send you to the right place based on whether you are logged in and your role."
+      },
+      {
+        "name": "fl_chart",
+        "tag": "Charts",
+        "what": "Draws the line graphs that show how your health numbers change over time.",
+        "why": "It is flexible enough to color bad readings red and draw the safe range, making trends easy to read."
+      },
+      {
+        "name": "flutter_secure_storage",
+        "tag": "Secure storage",
+        "what": "A locked safe inside the phone for storing secret data like your login token.",
+        "why": "It uses the phone's built-in hardware vault, so your login stays safe even if the phone is lost."
+      }
+    ]
+  },
+  {
+    "kind": "table",
+    "title": "Key Libraries & Why",
+    "intro": "Extra ready-made building blocks we added so we didn't have to build everything from scratch.",
+    "rows": [
+      {
+        "name": "firebase_messaging",
+        "what": "Receives push notifications from Google's servers, like 'Your result is ready'.",
+        "why": "It lets the app alert you even when it is closed, so you never miss an update."
+      },
+      {
+        "name": "google_maps_flutter",
+        "what": "Shows real Google Maps inside the app to display lab locations.",
+        "why": "Maps are the clearest way to show where a lab is; we use Google's proven map instead of drawing our own."
+      },
+      {
+        "name": "geolocator",
+        "what": "Asks the phone for your current location (with your permission).",
+        "why": "Knowing where you are lets the app find and sort the nearest labs to you."
+      },
+      {
+        "name": "pdfx",
+        "what": "Opens and displays your result PDF document right inside the app.",
+        "why": "You can read your official result without leaving the app or downloading a separate file."
+      },
+      {
+        "name": "share_plus",
+        "what": "Opens the phone's normal share menu to send a result to someone (e.g. your doctor).",
+        "why": "It reuses the phone's built-in sharing, so it feels natural and works with any app."
+      },
+      {
+        "name": "local_auth",
+        "what": "Unlocks the app using Face ID or your fingerprint.",
+        "why": "It adds a quick, private lock so only you can open your health data."
+      }
+    ]
+  },
+  {
+    "kind": "diagram",
+    "title": "How the App Is Organized: 3 Simple Layers",
+    "intro": "We split the code into three tidy layers so it stays easy to understand and fix.",
+    "image": "architecture",
+    "imageCaption": "Screens you see, the logic in the middle, and the data from the server.",
+    "bullets": [
+      "Layer 1 - What you see: the buttons, lists, and screens you tap on",
+      "Layer 2 - The logic & state: keeps track of data and decides what happens next",
+      "Layer 3 - The data: talks to the backend server and brings information in and out",
+      "Each layer only talks to its neighbor, so a screen never sends a network request directly - this keeps things clean and easy to test"
+    ]
+  },
+  {
+    "kind": "steps",
+    "title": "How the App Remembers Your Login Safely",
+    "intro": "After you log in once, you should not have to type your password every time. Here is how we keep you logged in without risking your account.",
+    "steps": [
+      {
+        "title": "Step 1: You log in",
+        "detail": "You type your email and password once. The backend checks them and sends back two secret keys: an access token and a refresh token."
+      },
+      {
+        "title": "Step 2: Keys go into the phone's vault",
+        "detail": "We save those keys in flutter_secure_storage, which is the iPhone Keychain or the Android Keystore - a hardware-protected safe. Plain settings never hold secrets."
+      },
+      {
+        "title": "Step 3: Every request carries the key",
+        "detail": "From then on, Dio quietly attaches the access token to each request to the server, so the server knows it is really you."
+      },
+      {
+        "title": "Step 4: Logout clears the vault",
+        "detail": "When you sign out, the keys are wiped from the safe and the app forgets you, so nobody else can use your session."
+      }
+    ]
+  },
+  {
+    "kind": "steps",
+    "title": "How the App Talks to the Backend",
+    "intro": "Every time you open a screen, the app fetches fresh data from the server. Here is the round trip.",
+    "image": "architecture",
+    "imageCaption": "The phone asks, the server answers, the screen updates.",
+    "steps": [
+      {
+        "title": "Step 1: The screen asks for data",
+        "detail": "For example the Bookings screen asks: 'give me this patient's bookings and results.' It asks through Riverpod, not directly."
+      },
+      {
+        "title": "Step 2: Dio sends the request with your token",
+        "detail": "Dio packages the request, attaches your access token so the server trusts it, and sends it over the internet to the backend."
+      },
+      {
+        "title": "Step 3: The server replies with JSON",
+        "detail": "The backend sends back the data in a simple text format called JSON. The app turns that text into neat Dart objects it can use."
+      },
+      {
+        "title": "Step 4: Riverpod shows it and remembers it",
+        "detail": "Riverpod hands the data to the screen and caches it, so going back to that screen is instant instead of asking the server again."
+      }
+    ]
+  },
+  {
+    "kind": "steps",
+    "title": "Maps & Finding Nearby Labs",
+    "intro": "When you search for a test, the app can show which labs are closest to you.",
+    "steps": [
+      {
+        "title": "Step 1: Ask for your location",
+        "detail": "Using geolocator, the app politely asks permission to know where you are. If you say no, it simply skips the distance sorting instead of breaking."
+      },
+      {
+        "title": "Step 2: Measure the distance to each lab",
+        "detail": "The app knows each lab's coordinates. It calculates the straight-line distance from you to every lab using a formula called haversine."
+      },
+      {
+        "title": "Step 3: Sort nearest first",
+        "detail": "Labs are reordered so the closest one is at the top, and each shows a friendly 'X km away' label."
+      },
+      {
+        "title": "Step 4: Show it on Google Maps",
+        "detail": "Lab locations can be displayed on a real Google Map (via google_maps_flutter), the clearest way to see exactly where to go."
+      }
+    ]
+  },
+  {
+    "kind": "steps",
+    "title": "How Push Notifications Work",
+    "intro": "The app can tap you on the shoulder with news like 'Your result is ready' even when it is closed.",
+    "steps": [
+      {
+        "title": "Step 1: The app gets a delivery address",
+        "detail": "On login, Firebase gives the phone a unique token - like a mailbox address. The app sends this address to our backend so it knows where to reach you."
+      },
+      {
+        "title": "Step 2: Something happens on the server",
+        "detail": "A lab uploads your result, or confirms your booking. The backend decides you should be told."
+      },
+      {
+        "title": "Step 3: Firebase delivers the message",
+        "detail": "The backend asks Firebase Cloud Messaging to deliver a notification to your phone's mailbox address. It arrives even if the app is shut."
+      },
+      {
+        "title": "Step 4: Tapping it opens the right screen",
+        "detail": "When you tap the notification, the app opens straight to that booking or result, instead of dumping you on the home screen."
+      }
+    ]
+  },
+  {
+    "kind": "algorithm",
+    "title": "Clever Bit: Automatic Token Refresh",
+    "intro": "Your access token expires after a while for safety. Without a fix, you would suddenly get logged out mid-action. We make the app quietly fix this by itself.",
+    "steps": [
+      {
+        "title": "Notice the expired key",
+        "detail": "When a request comes back saying 'not allowed' (error 401), the app realizes the access token has expired."
+      },
+      {
+        "title": "Quietly ask for a new one",
+        "detail": "It pulls out the longer-lived refresh token from the secure vault and asks the server for a brand-new access token - all in the background."
+      },
+      {
+        "title": "Save and retry",
+        "detail": "It stores the fresh token in the vault, then automatically retries the original request. You never noticed anything happened."
+      },
+      {
+        "title": "Handle a crowd safely",
+        "detail": "If several requests fail at the same moment, a queue makes sure they don't all rush to refresh at once - only one refresh happens, then everyone retries."
+      }
+    ],
+    "why": "This keeps you logged in smoothly for a long time while still expiring tokens often for security - you get safety without the annoyance."
+  },
+  {
+    "kind": "algorithm",
+    "title": "Clever Bit: Drawing Health-Trend Charts",
+    "intro": "We turn a list of past test results into an easy-to-read line graph so you can spot if a number is going up, down, or staying steady.",
+    "steps": [
+      {
+        "title": "Gather the readings",
+        "detail": "The app collects each past reading for a marker (like blood sugar) with its date and value, already made comparable across different labs by the backend."
+      },
+      {
+        "title": "Plot the line with fl_chart",
+        "detail": "fl_chart draws a line connecting the points over time, with the date along the bottom and the value up the side."
+      },
+      {
+        "title": "Highlight what matters",
+        "detail": "Readings outside the safe range are colored red, and dashed lines show the healthy low and high limits, so problems jump out instantly."
+      },
+      {
+        "title": "Add a plain-English badge",
+        "detail": "A small badge says 'rising', 'falling', or 'stable' with a short sentence, so you understand the trend even without reading the graph."
+      }
+    ],
+    "why": "A single PDF can't show change over time; this chart lets a patient actually see their health trend at a glance across many tests and labs."
+  },
+  {
+    "kind": "algorithm",
+    "title": "Clever Bit: Keeping Screens in Sync with Riverpod",
+    "intro": "When data changes in one place, every screen that shows it should update automatically - without us writing tricky code to refresh each one by hand.",
+    "steps": [
+      {
+        "title": "Fetch once, store centrally",
+        "detail": "The patient's bookings, results, and profile are fetched in a single call and kept in one shared place called a provider."
+      },
+      {
+        "title": "Each screen watches its slice",
+        "detail": "A screen 'watches' only the part it cares about - for example the Results tab watches just the results, not the whole bundle."
+      },
+      {
+        "title": "Change once, update everywhere",
+        "detail": "When the data updates, Riverpod automatically rebuilds only the screens watching that slice. Untouched screens are left alone."
+      },
+      {
+        "title": "Pull to refresh",
+        "detail": "Swiping down tells Riverpod to throw away the cached data and fetch fresh data, and the screen updates itself the moment it arrives."
+      }
+    ],
+    "why": "This makes the app feel alive and consistent - you never see one screen disagree with another - while keeping the code simple and fast."
+  },
+  {
+    "kind": "diagram",
+    "title": "Putting It All Together",
+    "intro": "Here is the whole phone app in one picture: one codebase, three layers, talking safely to one backend.",
+    "image": "usecase-patient",
+    "imageCaption": "Everything a patient can do from their phone, powered by the shared backend.",
+    "bullets": [
+      "One Flutter app gives us both iPhone and Android - less work, perfect parity",
+      "Three clean layers keep the code tidy: screens, logic, and data",
+      "Dio plus a secure vault keep you logged in safely with automatic token refresh",
+      "Maps, location, charts, and push notifications make it a full, helpful health companion",
+      "Because it shares the backend with the website, your data is always the same everywhere"
+    ]
+  }
+]

@@ -1,0 +1,75 @@
+<svg width="1180" height="600" viewBox="0 0 1180 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#0F6FC6"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1180" height="600" fill="#FFFFFF"/>
+
+  <text x="32" y="46" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="bold" fill="#03485B">TesTly — Home Sample-Collection Workflow</text>
+  <text x="32" y="70" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#6B7280">Cross-actor flow across the patient, the laboratory, and the lab's collector</text>
+
+  <!-- flow arrows -->
+  <line x1="362" y1="230" x2="416" y2="230" stroke="#0F6FC6" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="722" y1="230" x2="776" y2="230" stroke="#0F6FC6" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="930" y1="292" x2="930" y2="406" stroke="#0F6FC6" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="778" y1="470" x2="724" y2="470" stroke="#0F6FC6" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="418" y1="470" x2="364" y2="470" stroke="#0F6FC6" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- ===== Row 1 ===== -->
+  <!-- Step 1 — Patient -->
+  <rect x="145" y="144" width="130" height="26" rx="13" fill="#E8F0FB" stroke="#0B5294" stroke-width="1.5"/>
+  <text x="210" y="161" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0B5294" text-anchor="middle">PATIENT</text>
+  <rect x="60" y="170" width="300" height="120" rx="12" fill="#FFFFFF" stroke="#0B5294" stroke-width="2"/>
+  <text x="210" y="208" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0B5294" text-anchor="middle">1 · Request &amp; Pay</text>
+  <text x="210" y="234" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#6B7280" text-anchor="middle">Book a home collection; pay online</text>
+  <text x="210" y="252" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#6B7280" text-anchor="middle">or choose cash-on-collection</text>
+
+  <!-- Step 2 — Lab -->
+  <rect x="505" y="144" width="130" height="26" rx="13" fill="#E3F1FB" stroke="#0F6FC6" stroke-width="1.5"/>
+  <text x="570" y="161" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0F6FC6" text-anchor="middle">LAB</text>
+  <rect x="420" y="170" width="300" height="120" rx="12" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="570" y="208" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0F6FC6" text-anchor="middle">2 · Confirm</text>
+  <text x="570" y="234" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#6B7280" text-anchor="middle">Lab reviews and confirms the</text>
+  <text x="570" y="252" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#6B7280" text-anchor="middle">request; the time slot is reserved</text>
+
+  <!-- Step 3 — Collector -->
+  <rect x="865" y="144" width="130" height="26" rx="13" fill="#E2F3F6" stroke="#2E7D9A" stroke-width="1.5"/>
+  <text x="930" y="161" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#2E7D9A" text-anchor="middle">COLLECTOR</text>
+  <rect x="780" y="170" width="300" height="120" rx="12" fill="#FFFFFF" stroke="#2E7D9A" stroke-width="2"/>
+  <text x="930" y="208" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#2E7D9A" text-anchor="middle">3 · Home Visit</text>
+  <text x="930" y="234" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#6B7280" text-anchor="middle">Collector visits, collects the</text>
+  <text x="930" y="252" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#6B7280" text-anchor="middle">sample (takes cash if applicable)</text>
+
+  <!-- ===== Row 2 ===== -->
+  <!-- Step 4 — Lab -->
+  <rect x="865" y="384" width="130" height="26" rx="13" fill="#E3F1FB" stroke="#0F6FC6" stroke-width="1.5"/>
+  <text x="930" y="401" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0F6FC6" text-anchor="middle">LAB</text>
+  <rect x="780" y="410" width="300" height="120" rx="12" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="930" y="448" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0F6FC6" text-anchor="middle">4 · Analysis</text>
+  <text x="930" y="474" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#6B7280" text-anchor="middle">Sample is processed and</text>
+  <text x="930" y="492" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#6B7280" text-anchor="middle">analysed in the laboratory</text>
+
+  <!-- Step 5 — Lab -->
+  <rect x="505" y="384" width="130" height="26" rx="13" fill="#E3F1FB" stroke="#0F6FC6" stroke-width="1.5"/>
+  <text x="570" y="401" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0F6FC6" text-anchor="middle">LAB</text>
+  <rect x="420" y="410" width="300" height="120" rx="12" fill="#FFFFFF" stroke="#0F6FC6" stroke-width="2"/>
+  <text x="570" y="448" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#0F6FC6" text-anchor="middle">5 · Result Upload</text>
+  <text x="570" y="474" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#6B7280" text-anchor="middle">Official PDF + structured</text>
+  <text x="570" y="492" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#6B7280" text-anchor="middle">observations are uploaded</text>
+
+  <!-- Step 6 — Patient -->
+  <rect x="145" y="384" width="130" height="26" rx="13" fill="#DCE9F8" stroke="#03485B" stroke-width="1.5"/>
+  <text x="210" y="401" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#03485B" text-anchor="middle">PATIENT</text>
+  <rect x="60" y="410" width="300" height="120" rx="12" fill="#DCE9F8" stroke="#03485B" stroke-width="2.2"/>
+  <text x="210" y="448" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#03485B" text-anchor="middle">6 · Delivered</text>
+  <text x="210" y="474" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#6B7280" text-anchor="middle">Push notification; patient views</text>
+  <text x="210" y="492" font-family="Arial, Helvetica, sans-serif" font-size="11.5" fill="#6B7280" text-anchor="middle">the PDF and updated trends</text>
+
+  <!-- notification touch-points -->
+  <rect x="498" y="300" width="144" height="22" rx="11" fill="#EAF1FB" stroke="#9FBEE8" stroke-width="1"/>
+  <text x="570" y="315" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#0B5294" text-anchor="middle">push · patient notified</text>
+  <rect x="138" y="538" width="144" height="22" rx="11" fill="#EAF1FB" stroke="#9FBEE8" stroke-width="1"/>
+  <text x="210" y="553" font-family="Arial, Helvetica, sans-serif" font-size="10.5" fill="#0B5294" text-anchor="middle">push · result ready</text>
+</svg>

@@ -87,7 +87,7 @@
  },
  {
   "t": "p",
-  "text": "Persistence follows a **database-first (schema-first) modelling** approach using the **Prisma** ORM over PostgreSQL. A single declarative schema file, `schema.prisma`, is the authoritative definition of the data model: it declares twenty entities (such as `User`, `PatientProfile`, `LabProfile`, `LabTest`, `Booking`, `ResultFile`, and the structured-results stack) and eleven enumerations that encode the system's state machines (for example `BookingStatus`, `PaymentStatus`, and `LabOnboardingStatus`). From this schema Prisma generates a fully typed client, so the database structure is reflected directly into the TypeScript type system and queries are checked at compile time."
+  "text": "Persistence follows a **database-first (schema-first) modelling** approach using the **Prisma** ORM over PostgreSQL. A single declarative schema file, `schema.prisma`, is the authoritative definition of the data model: it declares nineteen entities (such as `User`, `PatientProfile`, `LabProfile`, `LabTest`, `Booking`, `ResultFile`, and the structured-results stack) and eleven enumerations that encode the system's state machines (for example `BookingStatus`, `PaymentStatus`, and `LabOnboardingStatus`). From this schema Prisma generates a fully typed client, so the database structure is reflected directly into the TypeScript type system and queries are checked at compile time."
  },
  {
   "t": "p",
@@ -311,6 +311,15 @@
   "text": "The evidence of this phased rhythm is preserved directly in the codebase: the ten database migrations are named after the increments they introduced (for example a structured-results phase, a lab-history-sharing phase, and the chat-models phase), and the project culminated in a **Phase 7** milestone that added the agentic guided assistant alongside production-readiness work, including the cross-site authentication and same-origin-proxy fixes and a documented deployment checklist. Each increment was validated against the layer-appropriate test suites — Jest for the backend, Playwright for the web, and `flutter test` for mobile — before being treated as complete."
  },
  {
+  "t": "p",
+  "text": "Figure 3.1 lays these increments out on a single timeline, showing how the project advanced from a foundational core through bookings and workspaces to structured results, the privacy model, the home-logistics features, and finally the agentic assistant and production-readiness milestone across the graduation year."
+ },
+ {
+  "t": "figure",
+  "ref": "sprint-timeline",
+  "caption": "The project's phased, sprint-style delivery timeline — from the foundational core (schema, auth, marketplace) through bookings and payments, workspaces, structured results, the privacy toggle, and home logistics, to the agentic AI assistant and production hardening."
+ },
+ {
   "t": "h3",
   "num": "3.3.2",
   "text": "Version Control"
@@ -322,5 +331,40 @@
  {
   "t": "p",
   "text": "The team followed a **feature-branch** workflow: work proceeded on dedicated branches that were merged into the main branch through **pull requests**, giving an opportunity for review before integration. The project history shows this process in action through merged pull requests for the cross-site cookie and same-origin-proxy fixes. Commit messages follow the **conventional-commits** convention, where each message is prefixed by its type and scope — for example `fix(auth): use SameSite=None cross-site cookie in production` and `feat(assistant): agentic lab/test cards in chat` — which makes the history self-documenting and easy to scan. Continuous delivery is handled by the hosting platforms' native Git integrations: a push to the default branch triggers Railway or Render to build and migrate the backend and Vercel to build the frontend, each running the build commands declared in the repository's configuration files."
+ },
+ {
+  "t": "p",
+  "text": "Figure 3.2 illustrates this branch-and-review workflow together with the continuous-delivery path that a merge into the main branch triggers across the three hosting platforms."
+ },
+ {
+  "t": "figure",
+  "ref": "git-workflow",
+  "caption": "The Git feature-branch workflow and continuous-delivery pipeline — feature branches open pull requests for review, merge into main, and trigger automated build, migration, and deployment on Railway/Render (API) and Vercel (web)."
+ },
+ {
+  "t": "h3",
+  "num": "3.3.3",
+  "text": "Risk Management"
+ },
+ {
+  "t": "p",
+  "text": "Because TesTly handles medical data and money, the project maintained an explicit view of the risks that could threaten its delivery or its users, together with the concrete mitigations built into the system. Table 3.4 records the principal risks with a qualitative likelihood and impact rating and the mitigation actually present in the implementation. A recurring theme is that most mitigations are not promises but mechanisms already described in this thesis — the layered guard chain, the database-level booking constraint, the AI safety guardrails, and the graceful-degradation design — which is what turns a risk register into evidence of a risk-aware build rather than a paper exercise."
+ },
+ {
+  "t": "table",
+  "caption": "Project and product risk register with mitigations",
+  "headers": ["Risk", "Likelihood", "Impact", "Mitigation in TesTly"],
+  "widths": [2550, 1150, 1050, 4250],
+  "rows": [
+    ["Breach of medical / personal data", "Low–Med", "High", "Layered RBAC guard chain, bcrypt passwords, SHA-256-hashed rotating refresh tokens, ownership-checked authenticated PDF downloads, and privacy-by-default cross-lab sharing."],
+    ["Double-booking or lost payment state", "Low", "High", "ACID transactions with a database `@unique` constraint on the schedule slot, an explicit payment state machine, and an append-only status-event audit trail."],
+    ["AI assistant gives unsafe or invented advice", "Med", "High", "Tool calls grounded in live Prisma data (no invented labs/prices), a bounded tool loop, and system-prompt medical-safety guardrails (non-diagnosis, emergency escalation)."],
+    ["Unvetted or low-quality labs reach patients", "Med", "Med", "Administrator onboarding-readiness gate (five requirements) before a lab is bookable, plus the booking-gated review and rating system."],
+    ["Payment fraud / failed settlement", "Med", "High", "Payment-before-confirmation gate for online orders and idempotent cash recording today; a real gateway with webhook reconciliation and idempotency is the first future-work item."],
+    ["Third-party outage (storage, push, AI)", "Med", "Low–Med", "Graceful degradation — object storage falls back to local disk, push becomes a no-op, and the chat endpoint returns service-unavailable — so the core API keeps working."],
+    ["Weak two-sided adoption (cold start)", "Med", "High", "Curation builds early patient trust, low-cost onboarding lowers the barrier for labs, free patient access protects demand, and a seeded launch catalogue avoids an empty marketplace."],
+    ["Operational hardening gaps (secrets, rate limits)", "Med", "High", "Environment-variable validation at boot today; secret management, rate limiting, and an automated CI gate are documented as required next steps before any real deployment."],
+    ["Scope creep within a fixed timeframe", "Med", "Med", "A MoSCoW-prioritised backlog, self-contained phased increments, and layer-appropriate test gates kept each release demonstrable and bounded."]
+  ]
  }
 ]

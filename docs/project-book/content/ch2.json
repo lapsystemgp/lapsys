@@ -194,5 +194,42 @@
 
   {"t":"figure","ref":"seq-ai","caption":"Sequence of the agentic AI assistant: Gemini's streaming and function-calling features drive a server-side tool loop grounded in the live Prisma catalogue"},
 
-  {"t":"p","text":"Taken together, the choices in this section form a coherent whole rather than a set of independent decisions. A single TypeScript backend (NestJS) and web client (Next.js), a Dart mobile client (Flutter) mirroring the same API contract, a strongly-typed data layer (Prisma over PostgreSQL), and a cost-appropriate, capability-complete AI provider (Gemini) combine into a type-safe, maintainable, and secure platform whose every layer is justified against the alternatives by the requirements of a medical lab-testing marketplace built by a small team. The chapters that follow examine how these tools were assembled into the system's analysis, design, and implementation."}
+  {"t":"p","text":"Taken together, the choices in this section form a coherent whole rather than a set of independent decisions. A single TypeScript backend (NestJS) and web client (Next.js), a Dart mobile client (Flutter) mirroring the same API contract, a strongly-typed data layer (Prisma over PostgreSQL), and a cost-appropriate, capability-complete AI provider (Gemini) combine into a type-safe, maintainable, and secure platform whose every layer is justified against the alternatives by the requirements of a medical lab-testing marketplace built by a small team. The chapters that follow examine how these tools were assembled into the system's analysis, design, and implementation."},
+
+  {"t":"h2","num":"2.4","text":"Business Model and Market Positioning"},
+  {"t":"p","text":"Because TesTly is an Information Systems project, it is conceived not only as a piece of software but as a potentially viable business. This section frames the platform's value proposition, the revenue model that could sustain it, the market it targets, and how it is positioned against the named competitors surveyed earlier. The current implementation simulates the online payment step (Section 5.5), so the monetisation described here is the intended commercial model rather than a live revenue stream; it is nonetheless the lens through which the design decisions — a curated, transaction-centred, multi-lab marketplace — were made."},
+
+  {"t":"h3","num":"2.4.1","text":"Value Proposition"},
+  {"t":"p","text":"TesTly creates value on both sides of a two-sided market, and for the ecosystem that connects them."},
+  {"t":"b","items":[
+    "**For patients (demand side).** A free, neutral place to discover accredited labs, compare the price of an identical test across providers, book through the collection mode that suits them, and keep a structured, trendable record of their results across labs — with an AI assistant to guide them. The patient pays only for the test (plus an optional convenience surcharge for home service), never for access to the marketplace.",
+    "**For laboratories (supply side).** A low-cost digital storefront, booking queue, scheduling, and results-delivery system that a small or independent lab could not easily build alone, together with access to demand it would otherwise never reach — all behind an administrator-gated onboarding process that lends the lab credibility.",
+    "**For the ecosystem.** A trusted, curated intermediary that verifies a lab is operationally complete before exposing it to patients, addressing the absence of any neutral quality signal in the current fragmented market."
+  ]},
+
+  {"t":"h3","num":"2.4.2","text":"Revenue Model"},
+  {"t":"p","text":"TesTly's intended revenue model is the classic marketplace combination of transaction commissions and supply-side subscriptions, supplemented by optional promotion and service fees. Crucially, the burden falls on the supply side and on optional convenience, keeping core patient access free so as not to suppress the demand-side network effects on which a marketplace depends. The principal streams are summarised in Table 2.8."},
+  {"t":"table","caption":"TesTly's intended revenue streams","headers":["Revenue stream","Description","Payer"],"widths":[2200,4500,2300],"rows":[
+    ["Booking commission","A percentage fee on each completed, paid booking transacted through the platform — the primary marketplace revenue.","Laboratory"],
+    ["Lab subscription (SaaS)","Tiered monthly plans unlocking premium workspace features such as deeper analytics, larger catalogues, and priority support.","Laboratory"],
+    ["Featured placement","Optional paid promotion that highlights a lab or test in search and comparison results, clearly labelled as promoted.","Laboratory"],
+    ["Home-service convenience fee","A margin on the home sample-collection (+100 EGP) and home-test-kit (+150 EGP) surcharges the platform already models.","Patient (optional)"],
+    ["Future: insurance & data","Settlement fees from insurance integration and anonymised, aggregated market analytics sold back to labs (see Chapter 6).","Insurer / Laboratory"]
+  ]},
+
+  {"t":"h3","num":"2.4.3","text":"Target Market and Adoption"},
+  {"t":"p","text":"The platform targets the Egyptian diagnostic-testing market. On the demand side the priority segments are price-sensitive urban patients and, especially, chronic-disease patients (diabetes, thyroid, cardiovascular) who undergo the same panels repeatedly and benefit most from cross-lab price comparison and longitudinal trend tracking. On the supply side the most receptive segment is the long tail of independent and small-chain laboratories that lack their own digital channel, with larger chains a secondary segment seeking incremental demand. Adoption is bootstrapped by the curation model itself: because only vetted, operationally complete labs appear, early patients encounter a trustworthy catalogue, and because onboarding is low-cost, labs can join without up-front risk — the two sides reinforcing each other as the catalogue grows."},
+
+  {"t":"h3","num":"2.4.4","text":"Competitive Positioning"},
+  {"t":"p","text":"Table 2.1 compared application *categories*; Table 2.9 sharpens that into a direct, head-to-head comparison against the three named systems an Egyptian patient is most likely to use today — the regional health-services marketplace **Vezeeta** and the two largest national lab chains, **El Mokhtabar** and **Al Borg**. The comparison isolates the capabilities on which TesTly competes. The pattern is decisive: the single-chain apps are operationally strong but vendor-bound, and even the broad marketplace does not offer cross-lab price comparison for an identical test, structured cross-lab result trends, or a catalogue-grounded AI assistant — precisely the differentiators on which TesTly is built."},
+  {"t":"table","caption":"Head-to-head competitive comparison against the leading named alternatives (✔ = present, ✘ = absent)","headers":["Capability","TesTly","Vezeeta","El Mokhtabar","Al Borg"],"widths":[3400,1400,1400,1400,1400],"rows":[
+    ["Cross-lab price comparison for one test","✔","✘","✘","✘"],
+    ["Catalogue-grounded AI assistant","✔","✘","✘","✘"],
+    ["Structured cross-lab result trends","✔","✘","✘","✘"],
+    ["Multi-lab marketplace (not single vendor)","✔","✔","✘","✘"],
+    ["Curated, admin-vetted onboarding","✔","✘","✘","✘"],
+    ["Home sample collection","✔","✔","✔","✔"],
+    ["Online booking","✔","✔","✔","✔"],
+    ["Digital (PDF) results","✔","✔","✔","✔"]
+  ]}
 ]

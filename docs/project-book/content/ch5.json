@@ -37,6 +37,21 @@
     ["TC-16","Mobile auth","Encounter a 401 mid-session on mobile","Auth interceptor silently refreshes the token and retries the original request","Pass"]
   ]},
   {"t":"figure","ref":"seq-booking","caption":"End-to-end booking and payment sequence exercised by the functional test cases"},
+  {"t":"h3","num":"5.1.5","text":"Test Coverage Summary"},
+  {"t":"p","text":"Table 5.2 consolidates the scale of the system and of the verification effort into a single set of figures. The test-file counts are taken directly from the repository, the endpoint count from the backend controllers, and the functional pass rate from the representative cases of Table 5.1, each confirmed by an automated suite or by the seeded-data QA walkthrough. The availability and response-time goals stated earlier are engineering targets rather than measured production metrics, and no code-coverage percentage is claimed because coverage was not formally collected."},
+  {"t":"table","caption":"TesTly system and test metrics at a glance","headers":["Metric","Value"],"widths":[5700,3300],"rows":[
+    ["Applications over one shared API","3 — NestJS backend, Next.js web, Flutter mobile"],
+    ["Backend REST endpoints","52"],
+    ["Database schema","19 models, 11 enumerations, 10 migrations"],
+    ["Backend unit / integration test files (Jest)","18"],
+    ["Backend end-to-end harness (Jest + Supertest)","1 (full-application smoke test)"],
+    ["Web end-to-end journeys (Playwright)","3 (patient, lab, admin)"],
+    ["Mobile widget / unit test files (flutter_test + mocktail)","20"],
+    ["Total automated test files","42"],
+    ["Documented functional test cases (Table 5.1)","16"],
+    ["Functional test-case pass rate","16 / 16 (100%)"],
+    ["Seeded demo dataset","1 admin, 21 active labs, plus pending/rejected labs and patients with historical results"]
+  ]},
 
   {"t":"h2","num":"5.2","text":"User Experience Testing"},
   {"t":"p","text":"Beyond verifying that features work, the project evaluated whether they are pleasant and accessible to use. User-experience (UX) testing focused on usability, responsive and adaptive design, dark-mode support, accessibility, and navigation, and was conducted through guided demonstration walkthroughs of the patient, lab, and admin journeys against the seeded dataset."},
@@ -63,7 +78,19 @@
   ]},
   {"t":"figure","ref":"usecase-patient","caption":"Patient journey evaluated during the user-experience walkthroughs"},
 
-  {"t":"h2","num":"5.3","text":"Advantages and Benefits of the System"},
+  {"t":"h2","num":"5.3","text":"Case Study: A Patient's End-to-End Journey"},
+  {"t":"p","text":"To show the platform solving a concrete problem rather than merely listing features, this section follows one representative scenario from end to end. The figures are illustrative, drawn over the seeded demonstration catalogue. **Mona**, a 41-year-old in Ismailia managing type-2 diabetes, has been asked by her physician for three tests: a **Complete Blood Count (CBC)**, **Vitamin D (25-OH)**, and **HbA1c**. In the conventional market she would telephone several labs one by one, with no way to compare prices and no record that carries forward from her last visit."},
+  {"t":"p","text":"On TesTly she instead searches each test from the public storefront — no account needed — and the comparison view lists every active, accredited lab offering it, ranked by price, rating, and distance. Three accredited labs near her offer all three tests; Table 5.3 shows the basket priced at each."},
+  {"t":"table","caption":"Case-study price comparison of Mona's three-test basket across three nearby accredited labs (illustrative figures, EGP)","headers":["Test","CityLab","Nile Diagnostics","Delta Labs"],"widths":[2400,2200,2200,2200],"rows":[
+    ["Complete Blood Count (CBC)","120","90","140"],
+    ["Vitamin D (25-OH)","380","320","420"],
+    ["HbA1c","180","150","200"],
+    ["**Basket total**","**680**","**560**","**760**"]
+  ]},
+  {"t":"p","text":"The comparison is immediate and decisive: **Nile Diagnostics** offers the cheapest basket at **560 EGP** — 200 EGP less than the most expensive option — while also showing a 4.6-star rating and offering home sample collection. Mona books all three tests at Nile as a single **home collection** (a +100 EGP convenience surcharge), choosing a morning slot that the system reserves for her atomically, and pays online through the (simulated) gateway. She tracks the booking through its status timeline and receives a push notification the evening before reminding her to fast for the HbA1c and glucose work."},
+  {"t":"p","text":"After the visit, Nile uploads her official result as a PDF and enters the structured observations alongside it. Mona opens the result as a plain-language summary and an authoritative PDF — and, crucially, her new **HbA1c of 6.8%** joins a trend line that already contains a **7.2%** reading taken three months earlier at *Delta Labs*. Although the two labs reported the marker under different names and conventions, TesTly's canonical-marker normalisation places both points on one chart, with reference-range shading, so Mona can see at a glance that her glycaemic control is improving — continuity that no single-vendor app could give her because the earlier result came from a competitor."},
+  {"t":"p","text":"In a single sitting, then, the platform converted a fragmented, opaque, phone-driven errand into a transparent, comparison-first transaction that saved money, fitted Mona's schedule through home collection, and — most distinctively — preserved her longitudinal health record across two competing laboratories. This is precisely the problem set out in Chapter 1, resolved end to end."},
+  {"t":"h2","num":"5.4","text":"Advantages and Benefits of the System"},
   {"t":"p","text":"Evaluated against the fragmented status quo of laboratory testing in Egypt — where patients phone individual labs, cannot compare prices, and collect paper results that no system aggregates — TesTly delivers several concrete advantages."},
   {"t":"b","items":[
     "**Unified marketplace.** TesTly brings many accredited labs into a single, searchable storefront, letting patients discover and compare tests by price, rating, distance, accreditation, and turnaround time. The same test offered by multiple labs is grouped into one comparison view that surfaces the cheapest price and the number of labs offering it.",
@@ -76,7 +103,7 @@
     "**Security and privacy by design.** Health data is protected with bcrypt password hashing, rotating SHA-256-hashed refresh tokens, layered role-based access control, ownership-checked authenticated PDF downloads with magic-byte validation, and a patient-controlled lab-history sharing setting that governs exactly what each lab may see."
   ]},
 
-  {"t":"h2","num":"5.4","text":"Limitations of the System"},
+  {"t":"h2","num":"5.5","text":"Limitations of the System"},
   {"t":"p","text":"As a graduation project delivered within a fixed timeframe, TesTly has a number of honest limitations. Documenting them transparently both scopes the present work and frames the future work discussed in the next chapter."},
   {"t":"b","items":[
     "**Payment gateway is a simulation.** Online payment is implemented as a faithful demo (`demo-online-payment`) that mirrors what a real gateway webhook would do — setting a synthetic reference and the appropriate status — but no real charge is made and no live PayMob integration is wired in. The design localises this so a real provider could be dropped in later.",

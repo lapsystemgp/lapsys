@@ -1,0 +1,69 @@
+<svg width="1000" height="940" viewBox="0 0 1000 940" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#0F6FC6"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1000" height="940" fill="#FFFFFF"/>
+
+  <text x="32" y="46" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="bold" fill="#03485B">TesTly — Patient Journey</text>
+  <text x="32" y="70" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#6B7280">End-to-end activity flow, from anonymous discovery to cross-lab health-trend tracking</text>
+
+  <!-- connector arrows (drawn first, behind boxes) -->
+  <line x1="560" y1="192" x2="560" y2="234" stroke="#0F6FC6" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="560" y1="308" x2="560" y2="350" stroke="#0F6FC6" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="560" y1="424" x2="560" y2="466" stroke="#0F6FC6" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="560" y1="540" x2="560" y2="582" stroke="#0F6FC6" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="560" y1="656" x2="560" y2="698" stroke="#0F6FC6" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="560" y1="772" x2="560" y2="814" stroke="#0F6FC6" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 1 -->
+  <circle cx="255" cy="156" r="19" fill="#0B5294"/>
+  <text x="255" y="162" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="middle">1</text>
+  <rect x="300" y="120" width="520" height="72" rx="12" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="560" y="149" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="bold" fill="#0B5294" text-anchor="middle">Discover</text>
+  <text x="560" y="171" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280" text-anchor="middle">Search labs &amp; tests on the public storefront — no account needed</text>
+
+  <!-- Step 2 -->
+  <circle cx="255" cy="272" r="19" fill="#0B5294"/>
+  <text x="255" y="278" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="middle">2</text>
+  <rect x="300" y="236" width="520" height="72" rx="12" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="560" y="265" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="bold" fill="#0B5294" text-anchor="middle">Compare</text>
+  <text x="560" y="287" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280" text-anchor="middle">Rank every lab by price, rating, distance &amp; accreditation</text>
+
+  <!-- Step 3 -->
+  <circle cx="255" cy="388" r="19" fill="#0B5294"/>
+  <text x="255" y="394" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="middle">3</text>
+  <rect x="300" y="352" width="520" height="72" rx="12" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="560" y="381" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="bold" fill="#0B5294" text-anchor="middle">Book</text>
+  <text x="560" y="403" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280" text-anchor="middle">Choose the test, the lab, and a future time slot</text>
+
+  <!-- Step 4 -->
+  <circle cx="255" cy="504" r="19" fill="#0B5294"/>
+  <text x="255" y="510" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="middle">4</text>
+  <rect x="300" y="468" width="520" height="72" rx="12" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="560" y="497" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="bold" fill="#0B5294" text-anchor="middle">Choose collection mode</text>
+  <text x="560" y="519" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280" text-anchor="middle">Lab visit  ·  Home collection (+100 EGP)  ·  Home test kit (+150 EGP)</text>
+
+  <!-- Step 5 -->
+  <circle cx="255" cy="620" r="19" fill="#0B5294"/>
+  <text x="255" y="626" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="middle">5</text>
+  <rect x="300" y="584" width="520" height="72" rx="12" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="560" y="613" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="bold" fill="#0B5294" text-anchor="middle">Pay</text>
+  <text x="560" y="635" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280" text-anchor="middle">Online (demo gateway)  ·  or cash at lab / to collector / on delivery</text>
+
+  <!-- Step 6 -->
+  <circle cx="255" cy="736" r="19" fill="#0B5294"/>
+  <text x="255" y="742" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="middle">6</text>
+  <rect x="300" y="700" width="520" height="72" rx="12" fill="#E8F0FB" stroke="#0B5294" stroke-width="2"/>
+  <text x="560" y="729" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="bold" fill="#0B5294" text-anchor="middle">Receive result</text>
+  <text x="560" y="751" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280" text-anchor="middle">Authoritative PDF  +  structured, normalised observations</text>
+
+  <!-- Step 7 -->
+  <circle cx="255" cy="852" r="19" fill="#03485B"/>
+  <text x="255" y="858" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="middle">7</text>
+  <rect x="300" y="816" width="520" height="72" rx="12" fill="#DCE9F8" stroke="#03485B" stroke-width="2.2"/>
+  <text x="560" y="845" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="bold" fill="#03485B" text-anchor="middle">Track trends</text>
+  <text x="560" y="867" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7280" text-anchor="middle">Cross-lab health-marker trends over time, with reference bands</text>
+</svg>

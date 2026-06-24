@@ -29,24 +29,29 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(
-          labsListProvider(const LabsFilter(sort: 'rating')),
-        ),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            _Hero(searchRoute: _searchRoute),
-            const SizedBox(height: 20),
-            FadeSlideIn(index: 1, child: _PopularSearches(terms: _popularTerms, searchRoute: _searchRoute)),
-            const SizedBox(height: 24),
-            FadeSlideIn(index: 2, child: _FeaturedLabs(searchRoute: _searchRoute)),
-            const SizedBox(height: 28),
-            FadeSlideIn(index: 3, child: const _WhyChoose()),
-            const SizedBox(height: 28),
-            FadeSlideIn(index: 4, child: const _HowItWorks()),
-            const SizedBox(height: 32),
-          ],
+      backgroundColor: AppColors.brand,
+      body: SafeArea(
+        top: true,
+        bottom: false,
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(
+            labsListProvider(const LabsFilter(sort: 'rating')),
+          ),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              _Hero(searchRoute: _searchRoute),
+              const SizedBox(height: 20),
+              FadeSlideIn(index: 1, child: _PopularSearches(terms: _popularTerms, searchRoute: _searchRoute)),
+              const SizedBox(height: 24),
+              FadeSlideIn(index: 2, child: _FeaturedLabs(searchRoute: _searchRoute)),
+              const SizedBox(height: 28),
+              FadeSlideIn(index: 3, child: const _WhyChoose()),
+              const SizedBox(height: 28),
+              FadeSlideIn(index: 4, child: const _HowItWorks()),
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
     );
@@ -83,9 +88,7 @@ class _Hero extends ConsumerWidget {
         ),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
+      child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,7 +197,6 @@ class _Hero extends ConsumerWidget {
             ],
           ),
         ),
-      ),
     );
   }
 }

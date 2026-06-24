@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../data/auth_repository.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../l10n/app_localizations.dart';
+import 'widgets/pre_login_settings_row.dart';
 
 enum RegisterMode { patient, lab }
 
@@ -88,6 +89,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             key: _formKey,
             child: Column(
               children: [
+                const PreLoginSettingsRow(),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailCtrl,
                   keyboardType: TextInputType.emailAddress,

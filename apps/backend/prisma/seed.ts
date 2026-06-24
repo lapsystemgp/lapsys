@@ -1116,12 +1116,12 @@ async function main() {
 
   await seedCanonicalMarkers();
 
-  // ── Create schedule slots for the next 7 days ───────────────────────────
+  // ── Create schedule slots for the next 30 days ──────────────────────────
   const baseDate = new Date();
   const slotData: Prisma.LabScheduleSlotCreateManyInput[] = [];
 
   for (const { profile, data } of labProfiles) {
-    for (let day = 1; day <= 7; day++) {
+    for (let day = 1; day <= 30; day++) {
       for (const time of data.timeSlots) {
         slotData.push({
           lab_profile_id: profile.id,

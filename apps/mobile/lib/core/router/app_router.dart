@@ -29,6 +29,7 @@ import '../../features/lab/presentation/lab_bookings_screen.dart';
 import '../../features/lab/presentation/lab_booking_detail_screen.dart';
 import '../../features/lab/presentation/analytics_screen.dart';
 import '../../features/lab/presentation/reviews_screen.dart';
+import '../../features/lab/presentation/lab_profile_screen.dart';
 import '../../features/lab/data/lab_workspace_models.dart';
 
 abstract final class Routes {
@@ -235,6 +236,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 ),
               ),
             ],
+          ),
+          GoRoute(
+            path: '/lab/profile',
+            builder: (_, __) => const LabProfileScreen(),
           ),
         ],
       ),

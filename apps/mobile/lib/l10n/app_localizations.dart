@@ -290,6 +290,12 @@ abstract class AppLocalizations {
   /// **'Bookings'**
   String get labTabBookings;
 
+  /// No description provided for @labTabProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get labTabProfile;
+
   /// No description provided for @fullName.
   ///
   /// In en, this message translates to:

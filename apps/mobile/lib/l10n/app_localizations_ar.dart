@@ -106,6 +106,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get labTabBookings => 'الحجوزات';
 
   @override
+  String get labTabProfile => 'الملف الشخصي';
+
+  @override
   String get fullName => 'الاسم الكامل';
 
   @override

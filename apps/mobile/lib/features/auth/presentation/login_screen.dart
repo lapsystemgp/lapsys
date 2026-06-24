@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../application/session_notifier.dart';
+import 'widgets/pre_login_settings_row.dart';
 import '../../../shared/widgets/animations.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -67,7 +68,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 48),
+                const PreLoginSettingsRow(),
+                const SizedBox(height: 16),
                 FadeSlideIn(
                   index: 0,
                   child: Text(

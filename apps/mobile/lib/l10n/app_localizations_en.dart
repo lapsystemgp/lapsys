@@ -107,6 +107,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labTabBookings => 'Bookings';
 
   @override
+  String get labTabProfile => 'Profile';
+
+  @override
   String get fullName => 'Full Name';
 
   @override

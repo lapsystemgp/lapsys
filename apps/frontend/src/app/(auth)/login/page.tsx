@@ -25,10 +25,6 @@ function LoginRouteInner() {
           router.push(`/unauthorized?reason=${labUnauthorizedReason(lab_onboarding_status)}`);
           return;
         }
-        if (role === "admin") {
-          router.push("/admin/dashboard");
-          return;
-        }
         if (role === "lab") {
           router.push("/lab/dashboard");
           return;
@@ -36,10 +32,6 @@ function LoginRouteInner() {
         router.push("/patient/dashboard");
       }}
       onLogin={(role) => {
-        if (role === "admin") {
-          router.push("/admin/dashboard");
-          return;
-        }
         if (role === "lab") {
           router.push("/lab/dashboard");
           return;

@@ -13,6 +13,7 @@ class LabShell extends StatelessWidget {
     '${Routes.labShell}/analytics',
     '${Routes.labShell}/reviews',
     '${Routes.labShell}/bookings',
+    '${Routes.labShell}/profile',
   ];
 
   int _locationToIndex(String location) {
@@ -53,6 +54,11 @@ class LabShell extends StatelessWidget {
             icon: const Icon(Icons.event_note_outlined),
             activeIcon: const Icon(Icons.event_note),
             label: l10n.labTabBookings,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person_outlined),
+            activeIcon: const Icon(Icons.person),
+            label: l10n.labTabProfile,
           ),
         ],
       ),

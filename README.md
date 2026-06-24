@@ -58,9 +58,10 @@ After running `npm run db:seed`, your database will be seeded with comprehensive
 > **All accounts share the same password: `password123`**
 
 ### 1. Admin Flow
-- **Login**: `admin@testly.com`
+- **Login page**: `/admin/login` — dedicated dark-themed page, not linked from anywhere. Admins navigate there directly by URL.
+- **Email**: `admin@testly.com`
 - **What to test**:
-  - Navigate to `/admin` to view the Admin Workspace overview.
+  - Navigate to `/admin/dashboard` to view the Admin Workspace overview.
   - Review the pending labs list. You will see `Pending Lab (Demo)` (`pendinglab@testly.com`). You can click to **Approve** or **Reject** the onboarding application.
   - Review recent platform transactions, including cash and online payments.
 

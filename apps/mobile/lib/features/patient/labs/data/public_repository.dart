@@ -64,6 +64,22 @@ class PublicRepository {
     }
   }
 
+  Future<List<SuggestionItem>> getSuggestions(String q, {int limit = 8}) async {
+    try {
+      final response = await _dio.get(
+        '/public/search/suggest',
+        queryParameters: {'q': q, 'limit': limit},
+      );
+      final data = response.data as Map<String, dynamic>;
+      final list = data['suggestions'] as List;
+      return list
+          .map((e) => SuggestionItem.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   Future<PublicLabDetailResponse> getLabDetail(
     String labId, {
     String? q,

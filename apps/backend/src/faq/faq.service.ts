@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { FaqSearchQueryDto } from './dto/faq-search-query.dto';
 import { FaqAskDto } from './dto/faq-ask.dto';
+import { fuzzySearchFaq } from '../common/utils/search.utils';
 
 const GUIDED_INTENTS = [
   {
@@ -41,47 +41,15 @@ export class FaqService {
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 8;
 
-    const where: Prisma.FaqEntryWhereInput = {
-      is_active: true,
-      ...(category.length > 0 ? { category: { equals: category, mode: 'insensitive' } } : {}),
-      ...(q.length > 0
-        ? {
-            OR: [
-              { question: { contains: q, mode: 'insensitive' } },
-              { answer: { contains: q, mode: 'insensitive' } },
-              { tags: { hasSome: q.split(/\s+/).filter((part) => part.length > 1) } },
-            ],
-          }
-        : {}),
-    };
+    const { items, totalCount } = await fuzzySearchFaq(
+      this.prisma,
+      q,
+      category,
+      page,
+      pageSize,
+    );
 
-    const [totalCount, rows] = await Promise.all([
-      this.prisma.faqEntry.count({ where }),
-      this.prisma.faqEntry.findMany({
-        where,
-        orderBy: [{ updated_at: 'desc' }],
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        select: {
-          id: true,
-          question: true,
-          answer: true,
-          category: true,
-          tags: true,
-        },
-      }),
-    ]);
-
-    return {
-      items: rows.map((row) => ({
-        id: row.id,
-        question: row.question,
-        answer: row.answer,
-        category: row.category ?? null,
-        tags: row.tags,
-      })),
-      pagination: { page, pageSize, totalCount },
-    };
+    return { items, pagination: { page, pageSize, totalCount } };
   }
 
   async ask(dto: FaqAskDto) {

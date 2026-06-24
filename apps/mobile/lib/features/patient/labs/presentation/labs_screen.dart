@@ -42,13 +42,13 @@ class LabsScreen extends ConsumerStatefulWidget {
 }
 
 class _LabsScreenState extends ConsumerState<LabsScreen> {
-  final _searchCtrl = TextEditingController();
+  final _searchController = SearchController();
 
   @override
   void initState() {
     super.initState();
     final q = widget.initialQuery;
-    if (q != null && q.isNotEmpty) _searchCtrl.text = q;
+    if (q != null && q.isNotEmpty) _searchController.text = q;
     // Seed the shared search/filter providers from the launch arguments once
     // the first frame is up (can't mutate providers during initState build).
     if ((q != null && q.isNotEmpty) || widget.initialSort != null) {
@@ -67,7 +67,7 @@ class _LabsScreenState extends ConsumerState<LabsScreen> {
 
   @override
   void dispose() {
-    _searchCtrl.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -99,21 +99,61 @@ class _LabsScreenState extends ConsumerState<LabsScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-                  child: SearchBar(
-                    controller: _searchCtrl,
-                    hintText: l10n.searchHint,
-                    leading: const Icon(Icons.search),
-                    trailing: [
-                      if (_searchCtrl.text.isNotEmpty)
-                        IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchCtrl.clear();
-                            _applySearch('');
-                          },
-                        ),
-                    ],
-                    onChanged: _applySearch,
+                  child: SearchAnchor(
+                    searchController: _searchController,
+                    viewHintText: l10n.searchHint,
+                    viewOnChanged: _applySearch,
+                    viewOnSubmitted: (value) {
+                      _searchController.closeView(value);
+                      _applySearch(value);
+                    },
+                    builder: (context, controller) => SearchBar(
+                      controller: controller,
+                      hintText: l10n.searchHint,
+                      leading: const Icon(Icons.search),
+                      trailing: [
+                        if (controller.text.isNotEmpty)
+                          IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              controller.clear();
+                              _applySearch('');
+                            },
+                          ),
+                      ],
+                      onTap: () => controller.openView(),
+                      onChanged: _applySearch,
+                    ),
+                    suggestionsBuilder: (context, controller) async {
+                      final text = controller.text.trim();
+                      if (text.length < 2) return const <Widget>[];
+                      try {
+                        final suggestions = await ref
+                            .read(publicRepositoryProvider)
+                            .getSuggestions(text);
+                        if (suggestions.isEmpty) return const <Widget>[];
+                        return suggestions.map((s) {
+                          final IconData icon;
+                          if (s.type == 'abbreviation') {
+                            icon = Icons.auto_awesome_outlined;
+                          } else if (s.type == 'category') {
+                            icon = Icons.category_outlined;
+                          } else {
+                            icon = Icons.science_outlined;
+                          }
+                          return ListTile(
+                            leading: Icon(icon, size: 20),
+                            title: Text(s.label),
+                            onTap: () {
+                              _searchController.closeView(s.query);
+                              _applySearch(s.query);
+                            },
+                          );
+                        }).toList();
+                      } catch (_) {
+                        return const <Widget>[];
+                      }
+                    },
                   ),
                 ),
                 TabBar(

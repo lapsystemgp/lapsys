@@ -155,6 +155,28 @@ class TestOffersResponse with _$TestOffersResponse {
       _$TestOffersResponseFromJson(json);
 }
 
+// ─── Autocomplete suggestion ──────────────────────────────────────────────────
+
+class SuggestionItem {
+  const SuggestionItem({
+    required this.label,
+    required this.query,
+    required this.type,
+  });
+
+  final String label;
+  final String query;
+
+  /// 'test' | 'category' | 'abbreviation'
+  final String type;
+
+  factory SuggestionItem.fromJson(Map<String, dynamic> json) => SuggestionItem(
+        label: json['label'] as String,
+        query: json['query'] as String,
+        type: json['type'] as String,
+      );
+}
+
 // ─── Labs filter (used as FutureProvider.family key) ─────────────────────────
 
 @freezed

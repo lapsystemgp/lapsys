@@ -178,3 +178,18 @@ export async function fetchTestOffers(params: { name: string; category?: string 
   );
 }
 
+export type SuggestionItem = {
+  label: string;
+  query: string;
+  type: 'test' | 'category' | 'abbreviation';
+};
+
+export type SuggestResponse = {
+  suggestions: SuggestionItem[];
+};
+
+export async function fetchSuggestions(q: string, limit = 8): Promise<SuggestResponse> {
+  if (q.trim().length < 2) return { suggestions: [] };
+  return apiFetch<SuggestResponse>(`/public/search/suggest${toQueryString({ q: q.trim(), limit })}`);
+}
+

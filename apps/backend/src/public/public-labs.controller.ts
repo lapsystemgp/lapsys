@@ -2,6 +2,13 @@ import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common
 import { LabOnboardingStatus, Prisma, ReviewStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { clampFloat, clampInt, haversineKm, parseBoolean, parseCsv } from './public-utils';
+import {
+  expandTokens,
+  fuzzyContains,
+  fuzzyMatchTestsByLab,
+  fuzzySearchLabTests,
+  tokenize,
+} from '../common/utils/search.utils';
 
 type PublicLabCard = {
   id: string;
@@ -50,6 +57,7 @@ type PublicLabDetail = {
 function normalizeContains(input: string) {
   return input.trim();
 }
+
 
 @Controller('public/labs')
 export class PublicLabsController {
@@ -105,56 +113,40 @@ export class PublicLabsController {
 
     const baseLabIds = baseLabs.map((lab) => lab.id);
 
-    const stopwords = new Set(['test', 'tests']);
-    const rawTokens = q.split(/\s+/).filter(Boolean);
-    const filteredTokens = rawTokens.filter((t) => !stopwords.has(t.toLowerCase()));
-    const tokens = filteredTokens.length > 0 ? filteredTokens : rawTokens;
+    const tokens = tokenize(q);
 
     // If q is present, show labs matching either lab name/address OR test catalog.
     let allowedLabIds = new Set<string>(baseLabIds);
     let minPriceForQueryByLab = new Map<string, number>();
 
     if (tokens.length > 0) {
+      const expandedTokens = expandTokens(tokens);
       const nameAndAddressMatchLabIds = new Set(
         baseLabs
           .filter((lab) =>
-            tokens.every((t) => {
-              const lower = t.toLowerCase();
-              return lab.lab_name.toLowerCase().includes(lower) || lab.address.toLowerCase().includes(lower);
-            }),
+            expandedTokens.every((alternatives) =>
+              alternatives.some(
+                (alt) => fuzzyContains(lab.lab_name, alt) || fuzzyContains(lab.address, alt),
+              ),
+            ),
           )
           .map((lab) => lab.id),
       );
 
-      const byTest = await this.prisma.labTest.groupBy({
-        by: ['lab_profile_id'],
-        where: {
-          lab_profile_id: { in: baseLabIds },
-          is_active: true,
-          AND: tokens.map((t) => ({
-            OR: [
-              { name: { contains: t, mode: 'insensitive' } },
-              { category: { contains: t, mode: 'insensitive' } },
-              { description: { contains: t, mode: 'insensitive' } },
-            ],
-          })),
-        },
-        _min: { price_egp: true },
-      });
-
-      const testMatchLabIds = new Set(byTest.map((row) => row.lab_profile_id));
-      allowedLabIds = new Set([...nameAndAddressMatchLabIds, ...testMatchLabIds]);
-
-      for (const row of byTest) {
-        if (typeof row._min.price_egp === 'number') {
-          minPriceForQueryByLab.set(row.lab_profile_id, row._min.price_egp);
-        }
-      }
+      const testMatchMap = await fuzzyMatchTestsByLab(this.prisma, tokens, baseLabIds);
+      allowedLabIds = new Set([...nameAndAddressMatchLabIds, ...testMatchMap.keys()]);
+      minPriceForQueryByLab = testMatchMap;
     }
 
     const allowedLabs = baseLabs.filter((lab) => allowedLabIds.has(lab.id));
 
     if (allowedLabs.length === 0) {
+      // Log zero-result searches (fire-and-forget)
+      if (tokens.length > 0 && q.trim().length > 0) {
+        void this.prisma.searchZeroResultLog
+          .create({ data: { query: q.trim(), source: 'labs' } })
+          .catch(() => {});
+      }
       return { items: [], pagination: { page, pageSize, totalCount: 0 } };
     }
 
@@ -298,51 +290,17 @@ export class PublicLabsController {
       };
     });
 
-    const detailStopwords = new Set(['test', 'tests']);
-    const detailRawTokens = q.split(/\s+/).filter(Boolean);
-    const detailFiltered = detailRawTokens.filter((t) => !detailStopwords.has(t.toLowerCase()));
-    const detailTokens = detailFiltered.length > 0 ? detailFiltered : detailRawTokens;
+    const detailTokens = tokenize(q);
 
-    const testsWhere: Prisma.LabTestWhereInput = {
-      lab_profile_id: lab.id,
-      is_active: true,
-      ...(detailTokens.length > 0
-        ? {
-            AND: detailTokens.map((t) => ({
-              OR: [
-                { name: { contains: t, mode: 'insensitive' } },
-                { category: { contains: t, mode: 'insensitive' } },
-                { description: { contains: t, mode: 'insensitive' } },
-              ],
-            })),
-          }
-        : {}),
-      ...(category.length > 0 && category !== 'all' ? { category } : {}),
-    };
-
-    const totalCount = await this.prisma.labTest.count({ where: testsWhere });
-
-    const tests = await this.prisma.labTest.findMany({
-      where: testsWhere,
-      orderBy:
-        sort === 'name'
-          ? { name: 'asc' }
-          : sort === 'price_desc'
-            ? { price_egp: 'desc' }
-            : { price_egp: 'asc' },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      select: {
-        id: true,
-        name: true,
-        category: true,
-        price_egp: true,
-        description: true,
-        preparation: true,
-        turnaround_time: true,
-        parameters_count: true,
-      },
-    });
+    const { items: tests, totalCount } = await fuzzySearchLabTests(
+      this.prisma,
+      lab.id,
+      detailTokens,
+      category,
+      sort,
+      page,
+      pageSize,
+    );
 
     const card: PublicLabCard = {
       id: lab.id,

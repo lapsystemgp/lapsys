@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
-import { AlertCircle, ArrowLeft, MapPin, Star, Clock, Home, SlidersHorizontal, Info, Search, FlaskConical, ChevronRight } from 'lucide-react';
-import { fetchPublicLabs, fetchPublicTests, type PublicLabCard, type PublicTestCard } from '../../lib/publicApi';
+import { AlertCircle, ArrowLeft, MapPin, Star, Clock, Home, SlidersHorizontal, Info, Search, FlaskConical, ChevronRight, Zap, Tag } from 'lucide-react';
+import { fetchPublicLabs, fetchPublicTests, fetchSuggestions, type PublicLabCard, type PublicTestCard, type SuggestionItem } from '../../lib/publicApi';
 import { Breadcrumb } from '../../components/Breadcrumb';
 
 interface LabComparisonProps {
@@ -35,6 +35,11 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
 
   const effectiveSearchQuery = localSearchQuery.trim();
   const [activeTab, setActiveTab] = useState<'tests' | 'labs'>(searchQuery.trim() ? 'tests' : 'labs');
+
+  const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchWrapperRef = useRef<HTMLDivElement>(null);
 
   const watchIdRef = useRef<number | null>(null);
   const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -106,6 +111,48 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
     }).catch(() => {});
     return () => { if (permStatus) permStatus.onchange = null; };
   }, []);
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    const handleMouseDown = (e: MouseEvent) => {
+      if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown);
+      if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current);
+    };
+  }, []);
+
+  const handleSearchChange = (value: string) => {
+    setLocalSearchQuery(value);
+    setActiveTab(value.trim() ? 'tests' : 'labs');
+
+    if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current);
+    if (value.trim().length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    suggestTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await fetchSuggestions(value.trim());
+        setSuggestions(res.suggestions);
+        setShowSuggestions(res.suggestions.length > 0);
+      } catch {
+        setSuggestions([]);
+      }
+    }, 280);
+  };
+
+  const applySuggestion = (s: SuggestionItem) => {
+    setLocalSearchQuery(s.query);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    setActiveTab('tests');
+  };
 
   const requestKey = useMemo(
     () =>
@@ -287,21 +334,42 @@ export function LabComparison({ searchQuery, initialSort = 'price', initialCity 
           </button>
         </div>
 
-        {/* Search bar (always visible) */}
+        {/* Search bar with autocomplete */}
         <div className="bg-white rounded-2xl shadow-sm p-3 mb-5 border border-gray-100">
           <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative flex-1">
-              <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <div className="relative flex-1" ref={searchWrapperRef}>
+              <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 z-10" />
               <input
                 type="text"
                 value={localSearchQuery}
-                onChange={(e) => {
-                  setLocalSearchQuery(e.target.value);
-                  setActiveTab(e.target.value.trim() ? 'tests' : 'labs');
-                }}
-                placeholder="Search tests or labs..."
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                placeholder="Search tests or labs…"
                 className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
+                autoComplete="off"
               />
+              {/* Suggestions dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-blue-50 text-left transition-colors"
+                      onMouseDown={(e) => { e.preventDefault(); applySuggestion(s); }}
+                    >
+                      {s.type === 'abbreviation'
+                        ? <Zap className="w-4 h-4 text-blue-500 shrink-0" />
+                        : s.type === 'category'
+                          ? <Tag className="w-4 h-4 text-purple-500 shrink-0" />
+                          : <Search className="w-4 h-4 text-gray-400 shrink-0" />}
+                      <span className="text-sm text-gray-700">{s.label}</span>
+                      {s.type === 'category' && (
+                        <span className="ml-auto text-xs text-gray-400">category</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="relative sm:w-52">
               <MapPin className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />

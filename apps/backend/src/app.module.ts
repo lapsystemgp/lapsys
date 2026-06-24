@@ -12,6 +12,7 @@ import { LabController } from './api/lab.controller';
 import { PatientController } from './api/patient.controller';
 import { PublicLabsController } from './public/public-labs.controller';
 import { PublicTestsController } from './public/public-tests.controller';
+import { PublicSuggestController } from './public/public-suggest.controller';
 import { BookingsController } from './bookings/bookings.controller';
 import { BookingsService } from './bookings/bookings.service';
 import { PatientService } from './api/patient.service';
@@ -55,6 +56,7 @@ import { ChatService } from './chat/chat.service';
     PatientController,
     PublicLabsController,
     PublicTestsController,
+    PublicSuggestController,
     BookingsController,
     FaqController,
     AdminController,

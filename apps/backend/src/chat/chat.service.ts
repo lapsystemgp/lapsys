@@ -10,8 +10,9 @@ import {
   type FunctionDeclaration,
   type Part,
 } from '@google/genai';
-import { ChatRole, LabOnboardingStatus, Prisma } from '@prisma/client';
+import { ChatRole, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { fuzzyFindLabTestsForChat, fuzzySearchTests, tokenize } from '../common/utils/search.utils';
 
 const MODEL = 'gemini-2.5-flash';
 const MAX_TOKENS = 1500;
@@ -335,28 +336,19 @@ export class ChatService {
   }
 
   /** Active labs offering a test matching `query`, cheapest matching test per lab. */
-  private async findLabs(
-    query: string,
-    city?: string,
-  ): Promise<AssistantLabCard[]> {
+  private async findLabs(query: string, city?: string): Promise<AssistantLabCard[]> {
     const tokens = tokenize(query);
     if (tokens.length === 0) return [];
 
+    // Step 1: fuzzy-find matching test rows (lab_id, test_id, price).
+    const matchingRows = await fuzzyFindLabTestsForChat(this.prisma, tokens, city);
+    if (matchingRows.length === 0) return [];
+
+    const testIds = matchingRows.map((r) => r.test_id);
+
+    // Step 2: enrich with full lab profile via typed Prisma query.
     const tests = await this.prisma.labTest.findMany({
-      where: {
-        is_active: true,
-        lab_profile: {
-          onboarding_status: LabOnboardingStatus.Active,
-          ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
-        },
-        AND: tokens.map((t) => ({
-          OR: [
-            { name: { contains: t, mode: 'insensitive' } },
-            { category: { contains: t, mode: 'insensitive' } },
-            { description: { contains: t, mode: 'insensitive' } },
-          ],
-        })),
-      },
+      where: { id: { in: testIds } },
       orderBy: { price_egp: 'asc' },
       select: {
         id: true,
@@ -400,7 +392,6 @@ export class ChatService {
 
     return [...byLab.values()]
       .sort((a, b) => {
-        // Highest rated first, then cheapest.
         const ar = a.rating ?? -1;
         const br = b.rating ?? -1;
         if (br !== ar) return br - ar;
@@ -413,33 +404,12 @@ export class ChatService {
   private async searchTests(query: string): Promise<AssistantTestCard[]> {
     const tokens = tokenize(query);
     if (tokens.length === 0) return [];
-
-    const where: Prisma.LabTestWhereInput = {
-      is_active: true,
-      lab_profile: { onboarding_status: LabOnboardingStatus.Active },
-      AND: tokens.map((t) => ({
-        OR: [
-          { name: { contains: t, mode: 'insensitive' } },
-          { category: { contains: t, mode: 'insensitive' } },
-          { description: { contains: t, mode: 'insensitive' } },
-        ],
-      })),
-    };
-
-    const grouped = await this.prisma.labTest.groupBy({
-      by: ['name', 'category'],
-      where,
-      _min: { price_egp: true },
-      _count: { _all: true },
-      orderBy: [{ _min: { price_egp: 'asc' } }],
-      take: TOOL_RESULT_LIMIT,
-    });
-
-    return grouped.map((row) => ({
-      name: row.name,
-      category: row.category,
-      minPriceEgp: row._min.price_egp ?? null,
-      labCount: row._count._all ?? 0,
+    const rows = await fuzzySearchTests(this.prisma, tokens);
+    return rows.slice(0, TOOL_RESULT_LIMIT).map((r) => ({
+      name: r.name,
+      category: r.category,
+      minPriceEgp: r.minPriceEgp,
+      labCount: r.labCount,
     }));
   }
 
@@ -483,13 +453,6 @@ function extractTools(metadata: Prisma.JsonValue | null): ToolResult[] | undefin
   return undefined;
 }
 
-/** Split a query into search tokens, dropping generic "test"/"tests" noise. */
-function tokenize(query: string): string[] {
-  const stopwords = new Set(['test', 'tests']);
-  const raw = query.trim().split(/\s+/).filter(Boolean);
-  const filtered = raw.filter((t) => !stopwords.has(t.toLowerCase()));
-  return filtered.length > 0 ? filtered : raw;
-}
 
 function deriveTitle(text: string): string {
   const trimmed = text.trim().replace(/\s+/g, ' ');

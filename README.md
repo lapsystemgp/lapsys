@@ -119,6 +119,16 @@ Lab emails are derived from the lab name (lowercase, no spaces). All use passwor
 
 ---
 
+## Technical Docs
+
+| Topic | File |
+|---|---|
+| Search (fuzzy matching, pg_trgm) | [`docs/SEARCH.md`](docs/SEARCH.md) |
+| Environment variables | [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md) |
+| Deployment checklist | [`docs/DEPLOYMENT_CHECKLIST.md`](docs/DEPLOYMENT_CHECKLIST.md) |
+
+---
+
 ## Running the Mobile App (Flutter)
 
 ### Prerequisites

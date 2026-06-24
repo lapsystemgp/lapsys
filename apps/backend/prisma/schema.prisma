@@ -389,6 +389,18 @@ model Conversation {
   @@index([user_id, updated_at])
 }
 
+/// Tracks search queries that returned zero results so admins can see what
+/// patients are looking for but can't find in the catalog.
+model SearchZeroResultLog {
+  id         String   @id @default(uuid())
+  query      String
+  source     String
+  created_at DateTime @default(now())
+
+  @@index([created_at])
+  @@index([query])
+}
+
 /// One message (from the patient or the assistant) within a conversation.
 model ChatMessage {
   id              String   @id @default(uuid())

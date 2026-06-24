@@ -1,6 +1,7 @@
 import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
-import { LabOnboardingStatus, Prisma } from '@prisma/client';
+import { LabOnboardingStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { fuzzySearchTests, tokenize } from '../common/utils/search.utils';
 import { clampInt } from './public-utils';
 
 @Controller('public/tests')
@@ -13,43 +14,38 @@ export class PublicTestsController {
     const page = clampInt(query.page, { min: 1, max: 500, defaultValue: 1 });
     const pageSize = clampInt(query.pageSize, { min: 1, max: 50, defaultValue: 12 });
 
-    const stopwords = new Set(['test', 'tests']);
-    const rawTokens = q.split(/\s+/).filter(Boolean);
-    const filteredTokens = rawTokens.filter((t) => !stopwords.has(t.toLowerCase()));
-    const tokens = filteredTokens.length > 0 ? filteredTokens : rawTokens;
+    const tokens = tokenize(q);
 
-    const where: Prisma.LabTestWhereInput = {
-      is_active: true,
-      lab_profile: { onboarding_status: LabOnboardingStatus.Active },
-      ...(tokens.length > 0
-        ? {
-            AND: tokens.map((t) => ({
-              OR: [
-                { name: { contains: t, mode: 'insensitive' } },
-                { category: { contains: t, mode: 'insensitive' } },
-                { description: { contains: t, mode: 'insensitive' } },
-              ],
-            })),
-          }
-        : {}),
-    };
+    let allRows: Array<{ name: string; category: string; minPriceEgp: number | null; labCount: number }>;
 
-    const grouped = await this.prisma.labTest.groupBy({
-      by: ['name', 'category'],
-      where,
-      _min: { price_egp: true },
-      _count: { _all: true },
-      orderBy: [{ name: 'asc' }],
-    });
+    if (tokens.length > 0) {
+      allRows = await fuzzySearchTests(this.prisma, tokens, q);
+    } else {
+      const grouped = await this.prisma.labTest.groupBy({
+        by: ['name', 'category'],
+        where: { is_active: true, lab_profile: { onboarding_status: LabOnboardingStatus.Active } },
+        _min: { price_egp: true },
+        _count: { _all: true },
+        orderBy: [{ name: 'asc' }],
+      });
+      allRows = grouped.map((row) => ({
+        name: row.name,
+        category: row.category,
+        minPriceEgp: row._min.price_egp ?? null,
+        labCount: row._count._all ?? 0,
+      }));
+    }
 
-    const totalCount = grouped.length;
+    // Log zero-result searches so admins can see catalog gaps
+    if (allRows.length === 0 && q.trim().length > 0) {
+      void this.prisma.searchZeroResultLog
+        .create({ data: { query: q.trim(), source: 'tests' } })
+        .catch(() => {});
+    }
+
+    const totalCount = allRows.length;
     const start = (page - 1) * pageSize;
-    const items = grouped.slice(start, start + pageSize).map((row) => ({
-      name: row.name,
-      category: row.category,
-      minPriceEgp: row._min.price_egp ?? null,
-      labCount: row._count._all ?? 0,
-    }));
+    const items = allRows.slice(start, start + pageSize);
 
     return { items, pagination: { page, pageSize, totalCount } };
   }

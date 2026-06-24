@@ -1,4 +1,4 @@
-# TesTly Monorepo (Backend + Frontend)
+# TesTly Monorepo (Backend + Frontend + Mobile)
 
 ## Prerequisites
 - Node.js + npm

@@ -80,7 +80,7 @@ export class AuthController {
     // Web clients use the HTTP-only cookie; mobile clients use the token from the response body.
     response.cookie(AUTH_COOKIE_NAME, access_token, {
       ...buildAuthCookieOptions(),
-      maxAge: 8 * 3600 * 1000, // 8 hours
+      maxAge: 7 * 24 * 3600 * 1000, // 7 days
     });
 
     return { message: 'Login successful', user: userData, access_token, refresh_token };

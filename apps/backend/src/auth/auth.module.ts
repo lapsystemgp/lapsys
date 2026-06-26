@@ -18,7 +18,7 @@ import { AuditLogService } from '../common/services/audit-log.service';
         return {
           global: true,
           secret: process.env.JWT_SECRET,
-          signOptions: { expiresIn: '8h' },
+          signOptions: { expiresIn: '7d' },
         };
       },
     }),

@@ -8,11 +8,19 @@ function toUnauthorizedReason(labStatus: unknown) {
   return 'pending_review';
 }
 
+function dashboardForRole(role: unknown): string {
+  if (role === 'LabStaff') return '/lab/dashboard';
+  if (role === 'Admin') return '/admin/dashboard';
+  return '/patient/dashboard';
+}
+
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value;
 
   if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('reason', 'expired');
+    return NextResponse.redirect(loginUrl);
   }
 
   try {
@@ -28,31 +36,35 @@ export function middleware(request: NextRequest) {
     const role = payload.role;
     const labStatus = payload.lab_onboarding_status;
 
-    if (request.nextUrl.pathname.startsWith('/lab') && role !== 'LabStaff') {
-      return NextResponse.redirect(new URL('/unauthorized', request.url));
-    }
-
+    // Lab onboarding gate (before role checks so the message is accurate)
     if (request.nextUrl.pathname.startsWith('/lab') && role === 'LabStaff' && labStatus !== 'Active') {
       return NextResponse.redirect(
         new URL(`/unauthorized?reason=${toUnauthorizedReason(labStatus)}`, request.url),
       );
     }
 
-    if (request.nextUrl.pathname.startsWith('/patient') && role !== 'Patient') {
-      return NextResponse.redirect(new URL('/unauthorized', request.url));
+    // Role mismatch → redirect to the user's own dashboard instead of a dead-end error page
+    if (request.nextUrl.pathname.startsWith('/lab') && role !== 'LabStaff') {
+      return NextResponse.redirect(new URL(dashboardForRole(role), request.url));
     }
 
-    if (request.nextUrl.pathname.startsWith('/booking') && role !== 'Patient') {
-      return NextResponse.redirect(new URL('/unauthorized', request.url));
+    if (
+      (request.nextUrl.pathname.startsWith('/patient') ||
+        request.nextUrl.pathname.startsWith('/booking')) &&
+      role !== 'Patient'
+    ) {
+      return NextResponse.redirect(new URL(dashboardForRole(role), request.url));
     }
 
     if (request.nextUrl.pathname.startsWith('/admin') && role !== 'Admin') {
-      return NextResponse.redirect(new URL('/unauthorized', request.url));
+      return NextResponse.redirect(new URL(dashboardForRole(role), request.url));
     }
 
     return NextResponse.next();
   } catch {
-    return NextResponse.redirect(new URL('/login', request.url));
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('reason', 'expired');
+    return NextResponse.redirect(loginUrl);
   }
 }
 

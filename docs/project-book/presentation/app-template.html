@@ -164,6 +164,9 @@ ul.pts li::before{content:"";position:absolute;left:4px;top:9px;width:9px;height
 
 @media(max-width:620px){.stage{padding-bottom:96px}.s-title{font-size:30px}}
 
+/* ── inline github link on any slide ─────── */
+.slide-gh{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-m);font-size:11px;letter-spacing:.06em;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));padding:5px 12px;border-radius:8px;text-decoration:none;font-weight:600;margin-bottom:20px;transition:.2s;background:var(--accent-soft)}
+.slide-gh:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
 /* ── code-links slide ─────────────────────── */
 .cl-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
 .cl-repo{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);border:1.5px solid var(--accent);padding:8px 14px;border-radius:10px;text-decoration:none;font-weight:600;transition:.2s}
@@ -296,21 +299,16 @@ function inl(s){return esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/`(.
 function fig(img,cap){ if(!img||!IMAGES[img]) return ""; return `<figure class="figure" data-img="${img}"><span class="zoomtag">click to zoom</span><img src="${IMAGES[img]}" alt="${esc(cap||img)}">${cap?`<figcaption class="figcap">${esc(cap)}</figcaption>`:""}</figure>`; }
 
 function slideHTML(s){
+  const ghSvg='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/><' + '/svg>';
+  const linkHtml=s.link?'<a class="slide-gh" href="'+esc(s.link.url)+'" target="_blank" rel="noopener">'+ghSvg+' '+esc(s.link.label||'View code')+' →<' + '/a>':'';
   const head = `<div class="s-kick"><span class="b">${String(idx+1).padStart(2,"0")} / ${String(DECKS[cur].length).padStart(2,"0")}</span> · ${esc(TOPICS.find(t=>t.id===cur).name)}</div>
-    <h2 class="s-title">${inl(s.title||"")}</h2>${s.subtitle?`<div class="s-intro" style="color:var(--accent);font-weight:600">${inl(s.subtitle)}</div>`:""}${s.intro?`<div class="s-intro">${inl(s.intro)}</div>`:""}`;
+    <h2 class="s-title">${inl(s.title||"")}</h2>${s.subtitle?`<div class="s-intro" style="color:var(--accent);font-weight:600">${inl(s.subtitle)}</div>`:""}${s.intro?`<div class="s-intro">${inl(s.intro)}</div>`:""}${linkHtml}`;
   let bodyParts=[];
   if(s.bullets&&s.bullets.length) bodyParts.push(`<ul class="pts">${s.bullets.map(b=>`<li>${inl(b)}</li>`).join("")}</ul>`);
   if(s.cards&&s.cards.length) bodyParts.push(`<div class="grid">${s.cards.map(c=>`<div class="tc"><div class="nm">${esc(c.name)}${c.tag?`<span class="tag">${esc(c.tag)}</span>`:""}</div>${c.what?`<div class="what">${inl(c.what)}</div>`:""}${c.why?`<div class="why"><b>Why we use it</b>${inl(c.why)}</div>`:""}</div>`).join("")}</div>`);
   if(s.rows&&s.rows.length){ const hasWhat=s.rows.some(r=>r.what);
     bodyParts.push(`<table class="tbl"><thead><tr><th>Library</th>${hasWhat?"<th>What it does</th>":""}<th>Why we use it</th></tr></thead><tbody>${s.rows.map(r=>`<tr><td>${esc(r.name)}</td>${hasWhat?`<td>${inl(r.what||"")}</td>`:""}<td>${inl(r.why||"")}</td></tr>`).join("")}</tbody></table>`); }
   /* ── new slide kinds ── */
-  if(s.kind==="codelinks"){
-    const ghIcon='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/><' + '/svg>';
-    const repoBtn=s.repo?'<a class="cl-repo" href="'+esc(s.repo)+'" target="_blank" rel="noopener">'+ghIcon+' View full repo on GitHub<' + '/a>':'';
-    const clItem=l=>'<a class="cl-item" href="'+esc(l.url)+'" target="_blank" rel="noopener"><div class="cl-path">'+esc(l.path)+'<' + '/div><div class="cl-label">'+esc(l.label)+'<' + '/div><div class="cl-desc">'+esc(l.desc)+'<' + '/div><div class="cl-go">View on GitHub →<' + '/div><' + '/a>';
-    const grid='<div class="cl-grid">'+(s.links||[]).map(clItem).join('')+'<' + '/div>';
-    return head+'<div class="cl-bar">'+repoBtn+'<' + '/div>'+grid;
-  }
   if(s.kind==="qa"){
     const qaItem=(p,i)=>'<details class="qa-item"'+(i===0?' open':'')+'><summary class="qa-q">'+esc(p.q)+'<' + '/summary><div class="qa-a">'+inl(p.a)+'<' + '/div><' + '/details>';
     return head+'<div class="qa-list">'+(s.pairs||[]).map(qaItem).join('')+'<' + '/div>';
@@ -325,7 +323,7 @@ function slideHTML(s){
     if(s.steps) a+=`<div class="steps">${s.steps.map(st=>`<div class="step"><h4>${inl(st.title||"")}</h4>${st.detail?`<p>${inl(st.detail)}</p>`:""}</div>`).join("")}</div>`;
     if(s.why) a+=`<div class="algo-why"><span class="lab">Why it matters</span><p>${inl(s.why)}</p></div>`;
     bodyParts=[a]; // algorithm slide: intro already shown inside prob box -> remove duplicate
-    return `<div class="s-kick"><span class="b">${String(idx+1).padStart(2,"0")} / ${String(DECKS[cur].length).padStart(2,"0")}</span> · ${esc(TOPICS.find(t=>t.id===cur).name)}</div><h2 class="s-title">${inl(s.title||"")}</h2>${a}`;
+    return `<div class="s-kick"><span class="b">${String(idx+1).padStart(2,"0")} / ${String(DECKS[cur].length).padStart(2,"0")}</span> · ${esc(TOPICS.find(t=>t.id===cur).name)}</div><h2 class="s-title">${inl(s.title||"")}</h2>${linkHtml}${a}`;
   }
   if(s.steps&&s.steps.length&&s.kind!=="algorithm"){
     const stepsH=`<div class="steps">${s.steps.map(st=>`<div class="step"><h4>${inl(st.title||"")}</h4>${st.detail?`<p>${inl(st.detail)}</p>`:""}</div>`).join("")}</div>`;

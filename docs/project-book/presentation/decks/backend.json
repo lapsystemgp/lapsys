@@ -9,7 +9,8 @@
       "It checks the rules (who is allowed to do what) and keeps data safe.",
       "It talks to the database, where all the information is stored.",
       "Same brain serves both the website and the phone app."
-    ]
+    ],
+    "link": { "label": "apps/backend/src/", "url": "https://github.com/lapsystemgp/lapsys/tree/main/apps/backend/src" }
   },
   {
     "kind": "steps",
@@ -136,6 +137,7 @@
     "title": "How Login & User Roles Work",
     "intro": "How the backend knows who you are and what you are allowed to do.",
     "imageCaption": "Login gives you two tickets, and guards check them on every request.",
+    "link": { "label": "apps/backend/src/auth/auth.service.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/auth/auth.service.ts" },
     "steps": [
       {
         "title": "1. You log in",
@@ -160,6 +162,7 @@
     "title": "How Booking + Payment Works",
     "intro": "What happens from picking a time slot to paying for the test.",
     "image": "seq-booking",
+    "link": { "label": "apps/backend/src/bookings/bookings.service.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/bookings/bookings.service.ts" },
     "imageCaption": "The patient books a slot, the backend locks it in safely, then payment and confirmation follow.",
     "steps": [
       {
@@ -185,6 +188,7 @@
     "title": "How Lab Results Get Delivered",
     "intro": "How a test result travels from the lab to the patient, safely.",
     "image": "seq-result",
+    "link": { "label": "apps/backend/src/api/lab-storage.service.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/api/lab-storage.service.ts" },
     "imageCaption": "The lab uploads the PDF and the numbers, then the patient is notified and can download it.",
     "steps": [
       {
@@ -218,6 +222,7 @@
   },
   {
     "kind": "algorithm",
+    "link": { "label": "apps/backend/src/api/structured-results.service.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/api/structured-results.service.ts" },
     "title": "Clever Bit 1: Comparing Results Across Different Labs",
     "intro": "Different labs write the same test in different names and different units. So a patient who switches labs can't easily see if their health is improving or getting worse. We fix that by converting everything to one common form.",
     "steps": [
@@ -238,6 +243,7 @@
   },
   {
     "kind": "algorithm",
+    "link": { "label": "apps/backend/src/bookings/bookings.service.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/bookings/bookings.service.ts" },
     "title": "Clever Bit 2: Two People Can't Grab the Same Slot",
     "intro": "Imagine two patients tap 'Book' on the exact same 10:00 AM slot at the exact same moment. Without protection, both could be booked and the lab is double-booked. We make that impossible.",
     "steps": [
@@ -258,6 +264,7 @@
   },
   {
     "kind": "algorithm",
+    "link": { "label": "apps/backend/src/auth/auth.service.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/auth/auth.service.ts" },
     "title": "Clever Bit 3: Staying Logged In, Safely",
     "intro": "We want users to stay logged in for a long time without re-typing their password constantly. But a long-lived login ticket is dangerous if stolen. The trick is to rotate the ticket.",
     "steps": [
@@ -286,6 +293,67 @@
     "note": "**R = 6371** is the mean radius of the Earth in kilometres. The formula converts the lat/lng difference into radians, computes an intermediate value `a` (a squared half-chord length on the sphere), then uses `atan2` to convert it to an arc length. The result is multiplied by R to get kilometres. The same formula runs identically in TypeScript (frontend) and Dart (mobile app) — so every client shows the same distance for the same lab."
   },
   {
+    "kind": "algorithm",
+    "title": "How Smart Search Works: 5 Steps to the Right Result",
+    "link": { "label": "apps/backend/src/common/utils/search.utils.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/common/utils/search.utils.ts" },
+    "intro": "When a user types 'HBA1', 'glucos', or 'فحص السكر', the search still finds the right test. That does not happen by accident — the query runs through a 5-step pipeline combining synonym expansion, SQL fuzzy matching, and typo correction.",
+    "steps": [
+      {
+        "title": "Step 1 — Normalize",
+        "detail": "The query is lowercased and split into tokens. 'Fasting Blood Sugar Test' becomes ['fasting', 'blood', 'sugar', 'test']. Leading/trailing spaces and duplicate spaces are removed."
+      },
+      {
+        "title": "Step 2 — Expand synonyms",
+        "detail": "Each token is looked up in a medical synonym map (synonyms.ts). 'CBC' expands to ['CBC', 'complete blood count']. 'HbA1c' expands to ['HbA1c', 'glycated haemoglobin', 'السكر التراكمي']. Every variant is searched at once so abbreviations, Arabic terms, and full names all find the same tests."
+      },
+      {
+        "title": "Step 3 — SQL: LIKE + pg_trgm",
+        "detail": "The database runs two checks in parallel: exact substring (`LIKE '%token%'`) and trigram similarity (`word_similarity ≥ 0.3`). Trigrams split words into overlapping 3-letter chunks and score how many chunks two strings share — so 'haemoglobin' scores high against 'hemoglobin'."
+      },
+      {
+        "title": "Step 4 — Levenshtein typo filter",
+        "detail": "SQL results are re-checked in JavaScript using edit distance. A 4+ character token allows 1 character change ('glucos' → 'glucose'); 6+ characters allows 2 changes ('haemogloin' → 'haemoglobin'). Short tokens (under 4 chars) require exact match to avoid false positives."
+      },
+      {
+        "title": "Step 5 — Score and rank",
+        "detail": "Each result gets a relevance score combining its pg_trgm similarity and how many query tokens matched. The list is sorted best-first, so the most relevant test or lab appears at the top."
+      }
+    ],
+    "why": "Real medical searches are messy: abbreviations, Arabic/English mixing, typos, and multiple names for the same test. This pipeline handles all of them without requiring the user to type perfectly."
+  },
+  {
+    "kind": "cards",
+    "title": "The Synonym Map: One Search in Any Language",
+    "link": { "label": "apps/backend/src/common/utils/synonyms.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/common/utils/synonyms.ts" },
+    "intro": "The backbone of smart search is a hand-curated dictionary (synonyms.ts) that maps abbreviations, Arabic terms, and alternate names to their full equivalents — so every variation of a test name finds the same results.",
+    "cards": [
+      {
+        "name": "Abbreviations",
+        "tag": "CBC · FBS · TSH · LFT",
+        "what": "'CBC' → 'complete blood count', 'FBS' → 'fasting blood sugar', 'TSH' → 'thyroid stimulating hormone', 'LFT' → 'liver function tests'.",
+        "why": "Doctors and labs abbreviate; patients search in full words. The map bridges both directions simultaneously."
+      },
+      {
+        "name": "Arabic terms",
+        "tag": "السكر · الغدة · الكبد",
+        "what": "'السكر التراكمي' → 'HbA1c', 'الغدة الدرقية' → 'thyroid', 'تعداد الدم الكامل' → 'CBC', 'وظائف الكلى' → 'kidney function'.",
+        "why": "Many Egyptian patients search in Arabic. The map connects Arabic disease names directly to the English test names stored in the database."
+      },
+      {
+        "name": "Alternate spellings",
+        "tag": "haemoglobin / hemoglobin",
+        "what": "British and American spellings, old and new names, and common written variants are all mapped to one canonical form.",
+        "why": "Medical terminology evolved over decades across different countries; the same test can have several legitimate spellings."
+      },
+      {
+        "name": "Panel expansion",
+        "tag": "liver panel · kidney panel",
+        "what": "'liver panel' → ['ALT', 'AST', 'bilirubin', 'albumin']. Searching a panel name returns all its component tests.",
+        "why": "Patients often ask for a 'kidney function check' rather than knowing the individual test names (creatinine, urea, eGFR) that make it up."
+      }
+    ]
+  },
+  {
     "kind": "codesnip",
     "title": "Code: How Fuzzy Search Works",
     "intro": "When a user types 'HBA1' instead of 'HbA1c', or 'glucos' instead of 'glucose', the search still finds the right test. It uses two techniques: Levenshtein edit distance for typos, and PostgreSQL trigrams for partial matches.",
@@ -293,62 +361,6 @@
     "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/common/utils/search.utils.ts",
     "code": "// Levenshtein edit distance — counts minimum character changes\n// between two strings (insert, delete, or substitute one char).\nfunction editDistance(a: string, b: string): number {\n  const m = a.length, n = b.length;\n  const prev = Array.from({ length: n + 1 }, (_, j) => j);\n  const curr = new Array<number>(n + 1);\n  for (let i = 1; i <= m; i++) {\n    curr[0] = i;\n    for (let j = 1; j <= n; j++) {\n      curr[j] = a[i-1] === b[j-1]\n        ? prev[j-1]\n        : 1 + Math.min(prev[j], curr[j-1], prev[j-1]);\n    }\n    prev.splice(0, n+1, ...curr);\n  }\n  return prev[n];\n}\n\n// Returns true if token fuzzy-matches anywhere in text.\n// Allowed edits: 1 for tokens >=4 chars, 2 for >=6 chars.\nexport function fuzzyContains(text: string, token: string): boolean {\n  const t = token.toLowerCase(), s = text.toLowerCase();\n  if (s.includes(t)) return true;  // exact substring wins\n  const maxDist = t.length >= 6 ? 2 : t.length >= 4 ? 1 : 0;\n  if (maxDist === 0) return false;\n  return s.split(/\\s+/).some(w => editDistance(t, w) <= maxDist);\n}",
     "note": "**Edit distance = 1** means one character changed: 'glucos' → 'glucose' (insert 'e'). **Edit distance = 2** handles bigger typos: 'haemogloin' → 'haemoglobin'. Short tokens (under 4 chars) require an exact match to avoid false positives. The database also uses **pg_trgm** (`word_similarity`) in parallel — it splits words into 3-character chunks and scores overlap. Both techniques run together so the search catches both typos and partial words."
-  },
-  {
-    "kind": "codelinks",
-    "title": "Explore the Backend Code",
-    "intro": "All backend source code is on GitHub. Click any card to open that file or folder directly.",
-    "repo": "https://github.com/lapsystemgp/lapsys",
-    "links": [
-      {
-        "path": "apps/backend/src/",
-        "label": "Backend source root",
-        "desc": "All NestJS modules: auth, bookings, labs, results, chat, public, admin, FAQ",
-        "url": "https://github.com/lapsystemgp/lapsys/tree/main/apps/backend/src"
-      },
-      {
-        "path": "apps/backend/src/chat/chat.service.ts",
-        "label": "AI Assistant service",
-        "desc": "Gemini function-calling loop, SSE streaming, tool runners (find_labs, search_tests)",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/chat/chat.service.ts"
-      },
-      {
-        "path": "apps/backend/src/common/utils/search.utils.ts",
-        "label": "Smart search engine",
-        "desc": "Fuzzy search, Levenshtein edit distance, pg_trgm relevance ranking, synonym expansion",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/common/utils/search.utils.ts"
-      },
-      {
-        "path": "apps/backend/src/common/utils/synonyms.ts",
-        "label": "Medical synonym map",
-        "desc": "Maps 'CBC' → 'complete blood count', 'HbA1c' → 'السكر التراكمي', and 40+ medical term groups",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/common/utils/synonyms.ts"
-      },
-      {
-        "path": "apps/backend/src/public/public-utils.ts",
-        "label": "Haversine distance",
-        "desc": "Great-circle distance formula that calculates km between user and each lab",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/public/public-utils.ts"
-      },
-      {
-        "path": "apps/backend/src/auth/auth.service.ts",
-        "label": "Auth & JWT tokens",
-        "desc": "bcrypt password check, access/refresh token issuance, token rotation, role guards",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/auth/auth.service.ts"
-      },
-      {
-        "path": "apps/backend/src/bookings/bookings.service.ts",
-        "label": "Booking & payment logic",
-        "desc": "Slot availability, race-condition prevention, status machine (Pending→Confirmed→Completed)",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/bookings/bookings.service.ts"
-      },
-      {
-        "path": "apps/backend/prisma/schema.prisma",
-        "label": "Database schema",
-        "desc": "All tables: User, LabProfile, LabTest, Booking, BookingResult, Conversation, ChatMessage…",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/prisma/schema.prisma"
-      }
-    ]
   },
   {
     "kind": "qa",
@@ -378,6 +390,141 @@
       {
         "q": "How are uploaded PDFs validated?",
         "a": "The backend checks two things: (1) the file's **MIME type** must be `application/pdf` (not just the filename extension, which anyone can fake), and (2) the file size must be under 10 MB. The first few bytes of every PDF file start with `%PDF-` — the backend reads the buffer header to confirm this before accepting the upload."
+      }
+    ]
+  },
+  {
+    "kind": "algorithm",
+    "title": "How Health Trend Direction Is Computed",
+    "link": { "label": "apps/backend/src/api/structured-results.service.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/api/structured-results.service.ts" },
+    "intro": "When a patient views their glucose or HbA1c over time, a badge says 'Rising', 'Falling', or 'Stable'. That label is not guesswork — the backend computes it from the actual numbers.",
+    "steps": [
+      {
+        "title": "Collect readings for the chosen range",
+        "detail": "All comparable readings for a marker (e.g. glucose) within the selected period — 3 months, 6 months, 12 months, or all time — are fetched. Only readings already converted to the canonical unit are included."
+      },
+      {
+        "title": "Check for enough data",
+        "detail": "If fewer than 2 readings exist, the trend is labelled 'insufficient_data' and no badge is shown. A direction needs at least two points to be meaningful."
+      },
+      {
+        "title": "Calculate percent change",
+        "detail": "(newest − oldest) / oldest × 100. This measures how much the value has actually moved over the period."
+      },
+      {
+        "title": "Apply the stability threshold",
+        "detail": "If the absolute change is less than 2%, the trend is 'stable' — small measurement noise doesn't count as a real change. Above 2%: positive = 'increasing', negative = 'decreasing'."
+      },
+      {
+        "title": "Generate a qualitative note",
+        "detail": "If the latest reading is outside the reference range (e.g. glucose > 100 mg/dL fasting), the backend adds a plain-English note — 'Latest reading is above the reference range' — alongside the direction badge."
+      }
+    ],
+    "why": "A raw number on a chart doesn't tell a patient if they are improving. The trend label and note turn data into a clear, actionable signal without needing a doctor to interpret it."
+  },
+  {
+    "kind": "algorithm",
+    "title": "Clinical Unit Conversion: One Formula, Many Labs",
+    "link": { "label": "apps/backend/src/api/clinical-normalization.service.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/api/clinical-normalization.service.ts" },
+    "intro": "Lab A reports your glucose as 5.4 mmol/L. Lab B reports it as 97 mg/dL. These look completely different but mean the same thing. The backend converts both to one canonical unit so they can be plotted on the same chart.",
+    "steps": [
+      {
+        "title": "Match the result to a canonical marker",
+        "detail": "Each raw result name ('Fasting glucose', 'FBS', 'Blood Sugar') is looked up in an alias table and matched to a CanonicalMarker. This is how 'FBS' and 'Fasting glucose' are recognised as the same measurement."
+      },
+      {
+        "title": "Apply the medical conversion formula",
+        "detail": "Each marker has a known formula: Glucose mg/dL × 0.0555 = mmol/L. HbA1c uses the NGSP formula: (% − 2.15) × 10.929 = mmol/mol. Creatinine mg/dL × 88.4 = µmol/L. Cholesterol mg/dL × 0.0259 = mmol/L."
+      },
+      {
+        "title": "Mark non-convertible units",
+        "detail": "If the unit is not in the conversion table, the reading is stored with `is_comparable = false`. It still shows on the chart but is excluded from trend computation — a wrong conversion never reaches the patient."
+      },
+      {
+        "title": "Store both original and converted values",
+        "detail": "The original lab value (97 mg/dL) is kept alongside the converted value (5.38 mmol/L). The patient always sees what their lab actually wrote, and a conversion note is shown if the unit was changed."
+      }
+    ],
+    "why": "Without unit conversion, comparing results across different labs is impossible. This pipeline is what makes the cross-lab health trend chart medically meaningful rather than just visually pretty."
+  },
+  {
+    "kind": "steps",
+    "title": "Lab History Privacy: Who Sees Your Past Results",
+    "link": { "label": "apps/backend/src/api/lab-patient-context.service.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/api/lab-patient-context.service.ts" },
+    "intro": "When a lab staff member opens a patient's booking, they can optionally see the patient's prior test history for better context. This is opt-in — the patient controls what is shared.",
+    "steps": [
+      {
+        "title": "Default: Same-lab-only (SAME_LAB_ONLY)",
+        "detail": "By default, a lab can only see the bookings and results from their own lab. A patient's history at Lab B is completely invisible to Lab A."
+      },
+      {
+        "title": "Opt-in: Full history (FULL_HISTORY_AUTHORIZED)",
+        "detail": "The patient can choose in their profile settings to allow any approved lab to see their full cross-lab history and structured health data. Useful for patients who want their care coordinated across labs."
+      },
+      {
+        "title": "PDF files stay lab-scoped — always",
+        "detail": "Even with full history authorized, a lab can only download PDFs from their own bookings. Structured numbers (glucose values, trend data) from other labs are shared; the original PDF documents never are."
+      },
+      {
+        "title": "Safety caps on the context",
+        "detail": "The cross-lab context is capped at 45 bookings, 8 trend markers, and 4 data points per marker — small enough to be useful without overwhelming lab staff or the server."
+      }
+    ],
+    "why": "Medical data is among the most sensitive data a person has. Sharing is opt-in, not opt-out — the patient's privacy is the default, and richer sharing is their choice to make."
+  },
+  {
+    "kind": "algorithm",
+    "title": "Search Autocomplete: 3-Tier Suggestion Engine",
+    "link": { "label": "apps/backend/src/public/public-suggest.controller.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/public/public-suggest.controller.ts" },
+    "intro": "As you type in the search box, suggestions appear instantly. These are not random — each comes from one of three tiers, prioritised and blended so the most useful result appears first.",
+    "steps": [
+      {
+        "title": "Tier 1 — Abbreviation hints (instant, zero DB cost)",
+        "detail": "If you type a known abbreviation like 'CBC' or 'TSH', the first suggestion immediately expands it to the full name ('Complete Blood Count'). This is a direct lookup against the in-memory synonym map — no database query needed."
+      },
+      {
+        "title": "Tier 2 — Scored test name suggestions",
+        "detail": "The test catalog is searched and each match is scored: prefix match = 1.0 (highest), substring match = 0.7, pg_trgm similarity = fallback score. Results rank best-first so 'Glucose' beats 'Fasting Blood Glucose Panel' for a query of 'gluco'."
+      },
+      {
+        "title": "Tier 3 — Category suggestions",
+        "detail": "If the query matches a test category (like 'thyroid' or 'liver'), the category name is added as a suggestion. Tapping it pre-filters the entire search to that category rather than a specific test."
+      },
+      {
+        "title": "Deduplicate and cap",
+        "detail": "Suggestions from all three tiers are merged, duplicates removed, and capped at 8 results by default (max 20). The result is a clean, ranked list with no repeated entries."
+      }
+    ],
+    "why": "Search-as-you-type needs to feel instant. Resolving abbreviations in memory and using scored ranking makes the suggestion list both fast and genuinely useful for medical searches."
+  },
+  {
+    "kind": "cards",
+    "title": "More Notable Backend Features",
+    "intro": "A few more engineering decisions that make TesTly production-ready rather than just functional.",
+    "cards": [
+      {
+        "name": "Lab Onboarding Readiness Checker",
+        "tag": "Admin workflow",
+        "what": "Before a lab goes live, the backend verifies it has: a phone number, an accreditation status, a turnaround time, at least one active test, and at least one schedule slot. Missing any item keeps the lab in PendingReview.",
+        "why": "A lab that skips any of these steps would confuse patients. The checker guarantees every live lab is genuinely ready to receive bookings."
+      },
+      {
+        "name": "Booking Status Audit Trail",
+        "tag": "Immutable event log",
+        "what": "Every change to a booking's status (Pending → Confirmed → Completed) is recorded as an immutable event row with a timestamp. The history is never edited or deleted.",
+        "why": "Medical and financial data must be traceable. If a dispute arises about when a result was delivered or a payment was made, the audit trail is the source of truth."
+      },
+      {
+        "name": "Home Test Kit Pipeline",
+        "tag": "KitStatus tracking",
+        "what": "Home kit bookings follow a separate status chain: AwaitingShipment → Shipped (with courier tracking number) → Delivered → SampleReceived, stored in the KitStatus enum.",
+        "why": "Home kits travel by courier and have different milestones than lab visits. A dedicated status chain means patients and labs always know exactly where the kit is."
+      },
+      {
+        "name": "Zero-Result Logging",
+        "tag": "Catalog gap analysis",
+        "what": "Every search that returns zero results is logged with the query text and timestamp in the SearchZeroResultLog table, visible in the admin dashboard.",
+        "why": "If 50 patients search for 'vitamin D' and find nothing, the admin sees it. Zero-result logs turn failed searches into actionable catalog improvement signals."
       }
     ]
   },

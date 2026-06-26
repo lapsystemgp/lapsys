@@ -9,7 +9,8 @@
       "Anyone can browse labs and prices without signing up.",
       "It talks to the backend server over the internet to get and save data.",
       "Built with Next.js and React, two popular tools for making modern websites."
-    ]
+    ],
+    "link": { "label": "apps/frontend/src/", "url": "https://github.com/lapsystemgp/lapsys/tree/main/apps/frontend/src" }
   },
   {
     "kind": "cards",
@@ -128,6 +129,7 @@
     "kind": "steps",
     "title": "How Login Stays Safe in the Browser",
     "intro": "Three simple ideas work together to keep your login secure.",
+    "link": { "label": "apps/frontend/src/middleware.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/middleware.ts" },
     "steps": [
       {
         "title": "Step 1: A cookie the code can't read",
@@ -152,6 +154,7 @@
     "title": "How the AI Assistant Answers Live",
     "intro": "The health assistant types its answer to you word by word, and can show clickable cards.",
     "image": "seq-booking",
+    "link": { "label": "apps/frontend/src/lib/chatApi.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/lib/chatApi.ts" },
     "imageCaption": "Like booking, the assistant is a back-and-forth conversation between browser and server.",
     "steps": [
       {
@@ -197,6 +200,7 @@
   },
   {
     "kind": "algorithm",
+    "link": { "label": "apps/frontend/src/app/tests/[testName]/TestDetailClient.tsx", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/app/tests/%5BtestName%5D/TestDetailClient.tsx" },
     "title": "Algorithm: Finding the Nearest Labs",
     "intro": "When you sort labs by 'Nearest', the website needs to know how far each lab is from you. It works this out right in your browser, with no server help.",
     "steps": [
@@ -221,6 +225,7 @@
   },
   {
     "kind": "algorithm",
+    "link": { "label": "apps/frontend/src/lib/chatApi.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/lib/chatApi.ts" },
     "title": "Algorithm: Reading the Live AI Stream",
     "intro": "The AI answer arrives as a fast trickle of tiny text pieces. The browser must turn that messy stream into clean, meaningful events it can act on.",
     "steps": [
@@ -291,50 +296,6 @@
     "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/lib/chatApi.ts",
     "code": "// Each Server-Sent Event (SSE) frame looks like:\n//   data: {\"type\":\"delta\",\"text\":\"Here are\"}\n//   data: {\"type\":\"tool\",\"result\":{...labCards...}}\n//   data: {\"type\":\"done\",\"messageId\":\"abc\"}\n\nexport async function streamChat(\n  body: ChatRequest,\n  onEvent: (e: StreamEvent) => void\n) {\n  const res = await fetch('/api/chat/stream', {\n    method: 'POST',\n    body: JSON.stringify(body),\n    headers: { 'Content-Type': 'application/json' },\n  });\n\n  const reader = res.body!.getReader();\n  const decoder = new TextDecoder();\n  let buffer = '';\n\n  while (true) {\n    const { done, value } = await reader.read();\n    if (done) break;\n    buffer += decoder.decode(value, { stream: true });\n\n    // SSE frames are separated by double newlines\n    const parts = buffer.split('\\n\\n');\n    buffer = parts.pop() ?? ''; // keep incomplete last frame\n\n    for (const part of parts) {\n      const line = part.replace(/^data: /, '').trim();\n      if (!line) continue;\n      const event = JSON.parse(line) as StreamEvent;\n      onEvent(event); // 'delta' appends text, 'tool' shows cards\n    }\n  }\n}",
     "note": "**Server-Sent Events (SSE)** is a one-way pipe: the browser opens one HTTP connection and the server keeps writing to it. No WebSocket setup needed. The `buffer` accumulates bytes until a complete `\\n\\n`-delimited frame arrives, then parses it as JSON. Each event type ('meta', 'delta', 'tool', 'done', 'error') triggers a different UI update — text frames grow the message bubble, tool frames insert clickable lab cards."
-  },
-  {
-    "kind": "codelinks",
-    "title": "Explore the Frontend Code",
-    "intro": "All web frontend source code is on GitHub. Click any card to open that file or folder directly.",
-    "repo": "https://github.com/lapsystemgp/lapsys",
-    "links": [
-      {
-        "path": "apps/frontend/src/",
-        "label": "Frontend source root",
-        "desc": "All Next.js pages, components, API clients, and hooks for patient, lab, and admin views",
-        "url": "https://github.com/lapsystemgp/lapsys/tree/main/apps/frontend/src"
-      },
-      {
-        "path": "apps/frontend/src/middleware.ts",
-        "label": "Role-based routing guard",
-        "desc": "Runs at the edge before every page: checks JWT role and redirects unauthorized users",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/middleware.ts"
-      },
-      {
-        "path": "apps/frontend/src/lib/chatApi.ts",
-        "label": "AI stream parser (SSE)",
-        "desc": "Opens the live connection to the chat endpoint, splits the byte stream into typed events",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/lib/chatApi.ts"
-      },
-      {
-        "path": "apps/frontend/src/lib/publicApi.ts",
-        "label": "Public API client",
-        "desc": "Fetches labs, tests, and search results — used by anyone before they log in",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/lib/publicApi.ts"
-      },
-      {
-        "path": "apps/frontend/src/app/tests/[testName]/TestDetailClient.tsx",
-        "label": "Test detail + haversine",
-        "desc": "Lab listing for a specific test — sorts by nearest using browser-side GPS + haversine",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/app/tests/%5BtestName%5D/TestDetailClient.tsx"
-      },
-      {
-        "path": "apps/frontend/src/app/page.tsx",
-        "label": "Landing page",
-        "desc": "Public home page: lab search, featured tests, category browse — no login required",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/app/page.tsx"
-      }
-    ]
   },
   {
     "kind": "qa",

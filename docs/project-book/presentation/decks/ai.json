@@ -8,7 +8,8 @@
       "Ask in plain words, like texting a knowledgeable friend",
       "It shows real labs and tests you can tap and book",
       "Built to be honest: it never makes up prices or fake labs"
-    ]
+    ],
+    "link": { "label": "apps/backend/src/chat/chat.service.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/chat/chat.service.ts" }
   },
   {
     "kind": "cards",
@@ -109,6 +110,7 @@
   },
   {
     "kind": "algorithm",
+    "link": { "label": "apps/backend/src/chat/chat.service.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/chat/chat.service.ts" },
     "title": "The Main Algorithm: The Tool-Calling Loop",
     "intro": "The clever part. Instead of the AI guessing about labs and prices, it asks our server to look up real data, then writes its answer from that. This back-and-forth is called the 'function-calling loop'.",
     "steps": [
@@ -165,6 +167,7 @@
   },
   {
     "kind": "algorithm",
+    "link": { "label": "apps/backend/src/chat/chat.service.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/chat/chat.service.ts" },
     "title": "The Guardrails: Keeping a Health AI Safe",
     "intro": "AI can sometimes 'hallucinate' (confidently make things up). In a health and money app that is dangerous, so we built strict rules into the assistant.",
     "steps": [
@@ -189,6 +192,7 @@
   },
   {
     "kind": "cards",
+    "link": { "label": "apps/backend/src/faq/faq.service.ts", "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/faq/faq.service.ts" },
     "title": "The FAQ Bot: Simple On Purpose",
     "intro": "The second, simpler helper. It uses no AI at all, and that is exactly the point.",
     "cards": [
@@ -229,38 +233,6 @@
     "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/chat/chat.service.ts",
     "code": "// Up to 4 rounds: each round Gemini either calls a tool OR writes\n// its final answer. If it calls a tool, we run it and go again.\nfor (let round = 0; round < MAX_TOOL_ROUNDS; round++) {\n  const stream = await client.models.generateContentStream({\n    model: 'gemini-2.5-flash',\n    contents,             // full conversation history\n    config: {\n      systemInstruction: SYSTEM_PROMPT,\n      maxOutputTokens: 1500,\n      tools: [{ functionDeclarations: TOOL_DECLARATIONS }],\n    },\n  });\n\n  const calls = [];\n  for await (const chunk of stream) {\n    if (chunk.text) {\n      answer += chunk.text;\n      onEvent({ type: 'delta', text: chunk.text }); // stream to browser\n    }\n    for (const fc of chunk.functionCalls ?? []) {\n      calls.push({ name: fc.name, args: fc.args }); // collect tool calls\n    }\n  }\n\n  if (calls.length === 0) break; // no tools called → done\n\n  // Run every tool, emit cards to browser, collect results for Gemini\n  for (const call of calls) {\n    const { result, modelPayload } = await runTool(call.name, call.args);\n    if (result) onEvent({ type: 'tool', result }); // lab/test cards appear\n    contents.push({ role: 'user',\n      parts: [{ functionResponse: { name: call.name,\n                                    response: modelPayload } }] });\n  }\n}",
     "note": "**`MAX_TOOL_ROUNDS = 4`** is a hard safety limit. Without it, a confused model could loop indefinitely, burning API credits and making the user wait forever. The `contents` array grows each round — tool calls are appended as 'model' turns, tool results as 'user' turns. This is how Gemini sees the full back-and-forth. Cards (`type: 'tool'`) are emitted to the browser **while the loop is still running**, so they appear instantly before the text summary even starts streaming."
-  },
-  {
-    "kind": "codelinks",
-    "title": "Explore the AI Code",
-    "intro": "All AI assistant source code is on GitHub. Click any card to open that file or folder directly.",
-    "repo": "https://github.com/lapsystemgp/lapsys",
-    "links": [
-      {
-        "path": "apps/backend/src/chat/chat.service.ts",
-        "label": "AI assistant service",
-        "desc": "System prompt, tool declarations, function-calling loop, SSE streaming, conversation persistence",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/chat/chat.service.ts"
-      },
-      {
-        "path": "apps/backend/src/chat/chat.controller.ts",
-        "label": "SSE endpoint",
-        "desc": "HTTP controller that opens the Server-Sent Events stream and forwards events to the browser",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/chat/chat.controller.ts"
-      },
-      {
-        "path": "apps/backend/src/common/utils/search.utils.ts",
-        "label": "Fuzzy search (AI tools use this)",
-        "desc": "find_labs and search_tests tools call fuzzyFindLabTestsForChat and fuzzySearchTests from here",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/common/utils/search.utils.ts"
-      },
-      {
-        "path": "apps/frontend/src/lib/chatApi.ts",
-        "label": "Frontend SSE parser",
-        "desc": "Browser-side code that reads the live stream and routes delta/tool/done events to the UI",
-        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/lib/chatApi.ts"
-      }
-    ]
   },
   {
     "kind": "qa",

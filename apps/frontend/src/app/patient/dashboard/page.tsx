@@ -110,6 +110,7 @@ export default function PatientDashboardPage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [reviewDrafts, setReviewDrafts] = useState<Record<string, { rating: number; comment: string }>>({});
   const [submittingReviewId, setSubmittingReviewId] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [demoPayBookingId, setDemoPayBookingId] = useState<string | null>(null);
   const [payModalBooking, setPayModalBooking] = useState<{ id: string; amount: number; testName: string } | null>(null);
 
@@ -147,12 +148,15 @@ export default function PatientDashboardPage() {
   }, [workspace]);
 
   const handleCancel = async (bookingId: string) => {
+    setCancellingId(bookingId);
     try {
       await cancelPatientBooking(bookingId);
       await loadWorkspace();
       toast.success("Booking cancelled.");
     } catch {
       toast.error("Could not cancel booking. Please try again.");
+    } finally {
+      setCancellingId(null);
     }
   };
 
@@ -407,9 +411,10 @@ export default function PatientDashboardPage() {
                           {/* Cancel Booking — #14: font-medium */}
                           <button
                             onClick={() => handleCancel(booking.id)}
-                            className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 font-medium"
+                            disabled={cancellingId === booking.id}
+                            className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 font-medium disabled:opacity-60 disabled:cursor-not-allowed"
                           >
-                            Cancel Booking
+                            {cancellingId === booking.id ? "Cancelling…" : "Cancel Booking"}
                           </button>
                         </div>
                       )}

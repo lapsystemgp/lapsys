@@ -103,7 +103,7 @@ export default function AdminDashboardPage() {
       setChartData(charts);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) { router.push("/login"); return; }
-      if (err instanceof ApiError && err.status === 403) { router.push("/unauthorized"); return; }
+      if (err instanceof ApiError && err.status === 403) { router.push("/unauthorized?reason=forbidden"); return; }
       toast.error("Unable to load admin workspace.");
     } finally {
       setLoading(false);

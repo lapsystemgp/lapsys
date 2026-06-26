@@ -66,6 +66,11 @@ export default function LabDashboardPage() {
   const [uploadState, setUploadState] = useState<Record<string, { summary: string; file: File | null }>>({});
 
   const [uploadingIds, setUploadingIds] = useState<Set<string>>(new Set());
+  const [creatingTest, setCreatingTest] = useState(false);
+  const [deletingTestId, setDeletingTestId] = useState<string | null>(null);
+  const [togglingTestId, setTogglingTestId] = useState<string | null>(null);
+  const [creatingSlot, setCreatingSlot] = useState(false);
+  const [deactivatingSlotId, setDeactivatingSlotId] = useState<string | null>(null);
   const [cashActionId, setCashActionId] = useState<string | null>(null);
   const [kitActionId, setKitActionId] = useState<string | null>(null);
   const [kitTrackingInputs, setKitTrackingInputs] = useState<Record<string, string>>({});
@@ -185,6 +190,7 @@ export default function LabDashboardPage() {
 
   const handleCreateTest = async () => {
     if (!newTest.name.trim() || !newTest.category.trim() || !newTest.priceEgp.trim()) return;
+    setCreatingTest(true);
     try {
       await createLabTest({
         name: newTest.name,
@@ -196,16 +202,21 @@ export default function LabDashboardPage() {
       toast.success("Test created.");
     } catch {
       toast.error("Could not create test.");
+    } finally {
+      setCreatingTest(false);
     }
   };
 
   const handleToggleTest = async (testId: string, isActive: boolean) => {
+    setTogglingTestId(testId);
     try {
       await updateLabTest(testId, { isActive: !isActive });
       await loadWorkspace();
       toast.success(isActive ? "Test deactivated." : "Test activated.");
     } catch {
       toast.error("Could not update test state.");
+    } finally {
+      setTogglingTestId(null);
     }
   };
 
@@ -236,6 +247,7 @@ export default function LabDashboardPage() {
   };
 
   const handleDeleteTest = async (testId: string) => {
+    setDeletingTestId(testId);
     try {
       await deleteLabTest(testId);
       if (editingTestId === testId) {
@@ -250,11 +262,14 @@ export default function LabDashboardPage() {
         return;
       }
       toast.error("Could not delete test.");
+    } finally {
+      setDeletingTestId(null);
     }
   };
 
   const handleCreateSlot = async () => {
     if (!newSlot.startsAt || !newSlot.endsAt) return;
+    setCreatingSlot(true);
     try {
       await createScheduleSlot({
         startsAt: new Date(newSlot.startsAt).toISOString(),
@@ -266,16 +281,21 @@ export default function LabDashboardPage() {
       toast.success("Schedule slot added.");
     } catch {
       toast.error("Could not create schedule slot.");
+    } finally {
+      setCreatingSlot(false);
     }
   };
 
   const handleDeactivateSlot = async (slotId: string) => {
+    setDeactivatingSlotId(slotId);
     try {
       await deactivateScheduleSlot(slotId);
       await loadWorkspace();
       toast.success("Slot deactivated.");
     } catch {
       toast.error("Could not deactivate slot.");
+    } finally {
+      setDeactivatingSlotId(null);
     }
   };
 
@@ -565,7 +585,9 @@ export default function LabDashboardPage() {
                     <input value={newTest.category} onChange={(e) => setNewTest((p) => ({ ...p, category: e.target.value }))} placeholder="Category" className="px-3 py-2 border border-gray-200 rounded-lg" />
                     <input value={newTest.priceEgp} onChange={(e) => setNewTest((p) => ({ ...p, priceEgp: e.target.value }))} placeholder="Price EGP" type="number" className="px-3 py-2 border border-gray-200 rounded-lg" />
                     {/* Create button */}
-                    <button onClick={handleCreateTest} className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700">Create</button>
+                    <button onClick={handleCreateTest} disabled={creatingTest} className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed">
+                      {creatingTest ? "Creating…" : "Create"}
+                    </button>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -628,13 +650,18 @@ export default function LabDashboardPage() {
                             {/* Delete button */}
                             <button
                               onClick={() => handleDeleteTest(test.id)}
-                              className="px-3 py-2 border border-red-300 text-red-600 rounded-lg font-medium hover:bg-red-50"
+                              disabled={deletingTestId === test.id || togglingTestId === test.id}
+                              className="px-3 py-2 border border-red-300 text-red-600 rounded-lg font-medium hover:bg-red-50 disabled:opacity-60 disabled:cursor-not-allowed"
                             >
-                              Delete
+                              {deletingTestId === test.id ? "Deleting…" : "Delete"}
                             </button>
                             {/* Active/Inactive button */}
-                            <button onClick={() => handleToggleTest(test.id, test.isActive)} className={`px-3 py-2 rounded-lg font-medium ${test.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
-                              {test.isActive ? "Active" : "Inactive"}
+                            <button
+                              onClick={() => handleToggleTest(test.id, test.isActive)}
+                              disabled={togglingTestId === test.id || deletingTestId === test.id}
+                              className={`px-3 py-2 rounded-lg font-medium disabled:opacity-60 disabled:cursor-not-allowed ${test.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}
+                            >
+                              {togglingTestId === test.id ? "Saving…" : test.isActive ? "Active" : "Inactive"}
                             </button>
                           </div>
                         </div>
@@ -725,7 +752,9 @@ export default function LabDashboardPage() {
                     <input type="datetime-local" value={newSlot.endsAt} onChange={(e) => setNewSlot((p) => ({ ...p, endsAt: e.target.value }))} className="px-3 py-2 border border-gray-200 rounded-lg" />
                     <input type="number" min={1} value={newSlot.capacity} onChange={(e) => setNewSlot((p) => ({ ...p, capacity: e.target.value }))} className="px-3 py-2 border border-gray-200 rounded-lg" />
                     {/* "Create Slot" button */}
-                    <button onClick={handleCreateSlot} className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700">Create Slot</button>
+                    <button onClick={handleCreateSlot} disabled={creatingSlot} className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed">
+                      {creatingSlot ? "Creating…" : "Create Slot"}
+                    </button>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -738,8 +767,12 @@ export default function LabDashboardPage() {
                         <p className="text-sm text-gray-600">Capacity: {slot.capacity}</p>
                       </div>
                       {/* "Deactivate" button */}
-                      <button onClick={() => handleDeactivateSlot(slot.id)} className="px-3 py-2 border border-red-300 text-red-600 font-medium rounded-lg hover:bg-red-50">
-                        Deactivate
+                      <button
+                        onClick={() => handleDeactivateSlot(slot.id)}
+                        disabled={deactivatingSlotId === slot.id}
+                        className="px-3 py-2 border border-red-300 text-red-600 font-medium rounded-lg hover:bg-red-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {deactivatingSlotId === slot.id ? "Deactivating…" : "Deactivate"}
                       </button>
                     </div>
                   ))}

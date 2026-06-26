@@ -277,6 +277,111 @@
     "why": "If a refresh ticket is ever stolen, it works at most once before it is rotated out, sharply limiting the damage."
   },
   {
+    "kind": "codesnip",
+    "title": "Code: How Distance Is Calculated",
+    "intro": "Every lab has a latitude and longitude stored in the database. The backend calculates the straight-line distance to the user using the haversine formula — a standard formula that works on a curved Earth, not a flat map.",
+    "file": "apps/backend/src/public/public-utils.ts",
+    "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/public/public-utils.ts",
+    "code": "export function haversineKm(\n  lat1: number, lng1: number,\n  lat2: number, lng2: number\n): number {\n  const R = 6371;  // Earth radius in km\n  const toRad = (deg: number) => (deg * Math.PI) / 180;\n\n  const dLat = toRad(lat2 - lat1);\n  const dLng = toRad(lng2 - lng1);\n\n  const a =\n    Math.sin(dLat / 2) ** 2 +\n    Math.cos(toRad(lat1)) *\n    Math.cos(toRad(lat2)) *\n    Math.sin(dLng / 2) ** 2;\n\n  const km = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\n  return Math.round(km * 10) / 10;  // round to 1 decimal\n}",
+    "note": "**R = 6371** is the mean radius of the Earth in kilometres. The formula converts the lat/lng difference into radians, computes an intermediate value `a` (a squared half-chord length on the sphere), then uses `atan2` to convert it to an arc length. The result is multiplied by R to get kilometres. The same formula runs identically in TypeScript (frontend) and Dart (mobile app) — so every client shows the same distance for the same lab."
+  },
+  {
+    "kind": "codesnip",
+    "title": "Code: How Fuzzy Search Works",
+    "intro": "When a user types 'HBA1' instead of 'HbA1c', or 'glucos' instead of 'glucose', the search still finds the right test. It uses two techniques: Levenshtein edit distance for typos, and PostgreSQL trigrams for partial matches.",
+    "file": "apps/backend/src/common/utils/search.utils.ts",
+    "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/common/utils/search.utils.ts",
+    "code": "// Levenshtein edit distance — counts minimum character changes\n// between two strings (insert, delete, or substitute one char).\nfunction editDistance(a: string, b: string): number {\n  const m = a.length, n = b.length;\n  const prev = Array.from({ length: n + 1 }, (_, j) => j);\n  const curr = new Array<number>(n + 1);\n  for (let i = 1; i <= m; i++) {\n    curr[0] = i;\n    for (let j = 1; j <= n; j++) {\n      curr[j] = a[i-1] === b[j-1]\n        ? prev[j-1]\n        : 1 + Math.min(prev[j], curr[j-1], prev[j-1]);\n    }\n    prev.splice(0, n+1, ...curr);\n  }\n  return prev[n];\n}\n\n// Returns true if token fuzzy-matches anywhere in text.\n// Allowed edits: 1 for tokens >=4 chars, 2 for >=6 chars.\nexport function fuzzyContains(text: string, token: string): boolean {\n  const t = token.toLowerCase(), s = text.toLowerCase();\n  if (s.includes(t)) return true;  // exact substring wins\n  const maxDist = t.length >= 6 ? 2 : t.length >= 4 ? 1 : 0;\n  if (maxDist === 0) return false;\n  return s.split(/\\s+/).some(w => editDistance(t, w) <= maxDist);\n}",
+    "note": "**Edit distance = 1** means one character changed: 'glucos' → 'glucose' (insert 'e'). **Edit distance = 2** handles bigger typos: 'haemogloin' → 'haemoglobin'. Short tokens (under 4 chars) require an exact match to avoid false positives. The database also uses **pg_trgm** (`word_similarity`) in parallel — it splits words into 3-character chunks and scores overlap. Both techniques run together so the search catches both typos and partial words."
+  },
+  {
+    "kind": "codelinks",
+    "title": "Explore the Backend Code",
+    "intro": "All backend source code is on GitHub. Click any card to open that file or folder directly.",
+    "repo": "https://github.com/lapsystemgp/lapsys",
+    "links": [
+      {
+        "path": "apps/backend/src/",
+        "label": "Backend source root",
+        "desc": "All NestJS modules: auth, bookings, labs, results, chat, public, admin, FAQ",
+        "url": "https://github.com/lapsystemgp/lapsys/tree/main/apps/backend/src"
+      },
+      {
+        "path": "apps/backend/src/chat/chat.service.ts",
+        "label": "AI Assistant service",
+        "desc": "Gemini function-calling loop, SSE streaming, tool runners (find_labs, search_tests)",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/chat/chat.service.ts"
+      },
+      {
+        "path": "apps/backend/src/common/utils/search.utils.ts",
+        "label": "Smart search engine",
+        "desc": "Fuzzy search, Levenshtein edit distance, pg_trgm relevance ranking, synonym expansion",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/common/utils/search.utils.ts"
+      },
+      {
+        "path": "apps/backend/src/common/utils/synonyms.ts",
+        "label": "Medical synonym map",
+        "desc": "Maps 'CBC' → 'complete blood count', 'HbA1c' → 'السكر التراكمي', and 40+ medical term groups",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/common/utils/synonyms.ts"
+      },
+      {
+        "path": "apps/backend/src/public/public-utils.ts",
+        "label": "Haversine distance",
+        "desc": "Great-circle distance formula that calculates km between user and each lab",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/public/public-utils.ts"
+      },
+      {
+        "path": "apps/backend/src/auth/auth.service.ts",
+        "label": "Auth & JWT tokens",
+        "desc": "bcrypt password check, access/refresh token issuance, token rotation, role guards",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/auth/auth.service.ts"
+      },
+      {
+        "path": "apps/backend/src/bookings/bookings.service.ts",
+        "label": "Booking & payment logic",
+        "desc": "Slot availability, race-condition prevention, status machine (Pending→Confirmed→Completed)",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/bookings/bookings.service.ts"
+      },
+      {
+        "path": "apps/backend/prisma/schema.prisma",
+        "label": "Database schema",
+        "desc": "All tables: User, LabProfile, LabTest, Booking, BookingResult, Conversation, ChatMessage…",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/prisma/schema.prisma"
+      }
+    ]
+  },
+  {
+    "kind": "qa",
+    "title": "Q&A: Backend Deep Questions",
+    "intro": "Common questions from developers reading the code for the first time.",
+    "pairs": [
+      {
+        "q": "How does the search avoid SQL injection?",
+        "a": "The search uses Prisma's `$queryRaw` with **tagged template literals**. Each `${value}` in the template becomes a parameterized placeholder — the database driver escapes it automatically. No string is ever concatenated into the SQL text, so there is nothing for an attacker to inject."
+      },
+      {
+        "q": "What is `word_similarity` and why not just LIKE?",
+        "a": "**word_similarity** is a PostgreSQL function from the `pg_trgm` extension. It splits words into overlapping 3-character chunks (trigrams) and scores how many chunks two strings share. `LIKE '%cbc%'` only finds exact substrings. `word_similarity` also catches 'CBC' vs 'C.B.C', partial words, and minor variations. We run both in parallel: LIKE catches exact hits, pg_trgm scores fuzzy relevance."
+      },
+      {
+        "q": "Why is the similarity threshold 0.3?",
+        "a": "0.3 is a balance tested against real medical terms. Lower (e.g. 0.1) returns too many irrelevant results. Higher (e.g. 0.5) misses legitimate short abbreviations. 'CBC' vs 'complete blood count' scores ~0.2 similarity (the words are totally different), so the synonym map expands the query first — **then** trigrams catch typos within each synonym."
+      },
+      {
+        "q": "How does booking prevent two people grabbing the same slot at the same moment?",
+        "a": "The database has a **unique constraint** on (lab_id, appointment_time, status='Active'). Both users send their request at the same time. The backend wraps the insert in a Prisma transaction. One insert succeeds; the second violates the unique constraint and gets a database error. The backend catches that error and returns a clean '409 Slot already taken' response — no double-booking, no crash."
+      },
+      {
+        "q": "Why store only a hash of the refresh token?",
+        "a": "If the database were ever breached, an attacker with plain refresh tokens could impersonate any user indefinitely. By storing only a **bcrypt/SHA-256 hash**, the attacker gets hashes they cannot reverse into real tokens. The real token lives only on the user's device and in the HTTP response — it never sits in the database in readable form."
+      },
+      {
+        "q": "How are uploaded PDFs validated?",
+        "a": "The backend checks two things: (1) the file's **MIME type** must be `application/pdf` (not just the filename extension, which anyone can fake), and (2) the file size must be under 10 MB. The first few bytes of every PDF file start with `%PDF-` — the backend reads the buffer header to confirm this before accepting the upload."
+      }
+    ]
+  },
+  {
     "kind": "title",
     "title": "Putting It All Together",
     "subtitle": "One brain, many safe jobs",

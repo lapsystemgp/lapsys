@@ -213,6 +213,87 @@
     ]
   },
   {
+    "kind": "codesnip",
+    "title": "Code: The System Prompt — How We Control Gemini",
+    "intro": "Before every conversation, we send Gemini a fixed set of instructions called the system prompt. This is the most important piece of code in the AI assistant — it defines what Gemini is allowed to say and what it must never do.",
+    "file": "apps/backend/src/chat/chat.service.ts",
+    "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/chat/chat.service.ts",
+    "code": "const SYSTEM_PROMPT = `You are the TesTly Health Assistant,\nan in-app AI helper for a medical lab-testing marketplace.\n\nYour role:\n- Explain lab tests, what biomarkers mean, normal ranges,\n  and how to prepare (e.g. fasting).\n- Help users find where to book tests and at what price\n  using the tools available to you.\n\nAgentic behaviour — use your tools, do not guess:\n- When the user asks WHERE to get a test, nearest/cheapest\n  lab, or about availability → call find_labs.\n- When the user asks WHAT a test costs, what tests exist,\n  or to compare tests → call search_tests.\n- After a tool returns, give a SHORT natural-language summary.\n  The app renders the cards — do NOT repeat every price.\n\nHard rules:\n- You are NOT a doctor. Do NOT provide diagnoses, treatment\n  plans, drug dosing, or interpret a specific person's results.\n- For emergencies (chest pain, difficulty breathing, severe\n  bleeding) → tell the user to seek emergency care immediately.\n- NEVER invent labs, prices, or availability not given by a tool.\n- Reply in the same language the user writes in (English or Arabic).`",
+    "note": "The system prompt is sent to Gemini **before** every conversation turn, as the `systemInstruction` config field. It cannot be overridden by the user — even if someone types 'ignore all previous instructions', the system prompt was given in a different, higher-priority channel. This is what keeps Gemini on-topic and honest. The two tool declarations (`find_labs`, `search_tests`) are also passed alongside it so Gemini knows what actions are available."
+  },
+  {
+    "kind": "codesnip",
+    "title": "Code: The Function-Calling Loop",
+    "intro": "The loop is the heart of the assistant. Gemini alternates between calling tools (looking up real data) and writing text (explaining what it found), until it has a complete answer.",
+    "file": "apps/backend/src/chat/chat.service.ts",
+    "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/chat/chat.service.ts",
+    "code": "// Up to 4 rounds: each round Gemini either calls a tool OR writes\n// its final answer. If it calls a tool, we run it and go again.\nfor (let round = 0; round < MAX_TOOL_ROUNDS; round++) {\n  const stream = await client.models.generateContentStream({\n    model: 'gemini-2.5-flash',\n    contents,             // full conversation history\n    config: {\n      systemInstruction: SYSTEM_PROMPT,\n      maxOutputTokens: 1500,\n      tools: [{ functionDeclarations: TOOL_DECLARATIONS }],\n    },\n  });\n\n  const calls = [];\n  for await (const chunk of stream) {\n    if (chunk.text) {\n      answer += chunk.text;\n      onEvent({ type: 'delta', text: chunk.text }); // stream to browser\n    }\n    for (const fc of chunk.functionCalls ?? []) {\n      calls.push({ name: fc.name, args: fc.args }); // collect tool calls\n    }\n  }\n\n  if (calls.length === 0) break; // no tools called → done\n\n  // Run every tool, emit cards to browser, collect results for Gemini\n  for (const call of calls) {\n    const { result, modelPayload } = await runTool(call.name, call.args);\n    if (result) onEvent({ type: 'tool', result }); // lab/test cards appear\n    contents.push({ role: 'user',\n      parts: [{ functionResponse: { name: call.name,\n                                    response: modelPayload } }] });\n  }\n}",
+    "note": "**`MAX_TOOL_ROUNDS = 4`** is a hard safety limit. Without it, a confused model could loop indefinitely, burning API credits and making the user wait forever. The `contents` array grows each round — tool calls are appended as 'model' turns, tool results as 'user' turns. This is how Gemini sees the full back-and-forth. Cards (`type: 'tool'`) are emitted to the browser **while the loop is still running**, so they appear instantly before the text summary even starts streaming."
+  },
+  {
+    "kind": "codelinks",
+    "title": "Explore the AI Code",
+    "intro": "All AI assistant source code is on GitHub. Click any card to open that file or folder directly.",
+    "repo": "https://github.com/lapsystemgp/lapsys",
+    "links": [
+      {
+        "path": "apps/backend/src/chat/chat.service.ts",
+        "label": "AI assistant service",
+        "desc": "System prompt, tool declarations, function-calling loop, SSE streaming, conversation persistence",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/chat/chat.service.ts"
+      },
+      {
+        "path": "apps/backend/src/chat/chat.controller.ts",
+        "label": "SSE endpoint",
+        "desc": "HTTP controller that opens the Server-Sent Events stream and forwards events to the browser",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/chat/chat.controller.ts"
+      },
+      {
+        "path": "apps/backend/src/common/utils/search.utils.ts",
+        "label": "Fuzzy search (AI tools use this)",
+        "desc": "find_labs and search_tests tools call fuzzyFindLabTestsForChat and fuzzySearchTests from here",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/backend/src/common/utils/search.utils.ts"
+      },
+      {
+        "path": "apps/frontend/src/lib/chatApi.ts",
+        "label": "Frontend SSE parser",
+        "desc": "Browser-side code that reads the live stream and routes delta/tool/done events to the UI",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/lib/chatApi.ts"
+      }
+    ]
+  },
+  {
+    "kind": "qa",
+    "title": "Q&A: How the AI Assistant Really Works",
+    "intro": "Deep questions about the AI assistant — answered by reading the actual code.",
+    "pairs": [
+      {
+        "q": "Why can't the AI book a test for you?",
+        "a": "By deliberate design. Booking involves **real money and a medical decision**. The assistant provides information, links, and prices — the patient makes the conscious choice to tap 'Book'. An AI that autonomously books and charges medical tests without explicit human confirmation would be both legally risky and ethically wrong. The assistant can say 'Lab B is cheapest at 520 EGP, tap the card to book' — but it cannot tap that button itself."
+      },
+      {
+        "q": "What stops the AI from running forever and costing a lot?",
+        "a": "Two limits: (1) **`MAX_TOOL_ROUNDS = 4`** — the function-calling loop exits after 4 rounds regardless of what the model wants to do. (2) **`maxOutputTokens = 1500`** — each generation call is capped at 1500 tokens of output. Together these bound the worst-case cost per message. The Gemini 2.5 Flash model is also the cheapest and fastest in the Gemini family, chosen precisely because it handles many concurrent chat users affordably."
+      },
+      {
+        "q": "How does Gemini know to call find_labs vs search_tests?",
+        "a": "Each tool has a precise **description** in its declaration. `find_labs`: 'use when the user asks WHERE to get a test, the nearest/cheapest lab, or about availability'. `search_tests`: 'use when the user asks WHAT a test costs, what tests exist, or to compare tests'. Gemini reads these descriptions and picks the right tool based on the user's intent — this is why the description text is carefully written. If the user asks both at once, Gemini can call both tools in the same round."
+      },
+      {
+        "q": "What if Gemini tries to invent a lab price?",
+        "a": "It can't succeed because it has **no data to draw from**. The system prompt says 'never invent prices or lab availability not given by a tool'. More importantly, Gemini genuinely has no knowledge of TesTly's specific lab catalog — it must call `find_labs` or `search_tests` to get any prices. If it skips the tool and tries to answer from memory, it will produce vague non-answers ('prices vary') rather than specific fake prices, because it simply doesn't know them."
+      },
+      {
+        "q": "How does the AI answer in Arabic?",
+        "a": "The system prompt says **'Reply in the same language the user writes in (English or Arabic)'**. Gemini 2.5 Flash natively handles both languages with no translation step. The tool parameter descriptions are in English (because that is what Gemini reliably parses for function calling), but the response text is generated in whichever language the user used. Arabic messages trigger Arabic replies automatically."
+      },
+      {
+        "q": "What is a Server-Sent Event (SSE) and why not WebSockets?",
+        "a": "**SSE** is a one-way HTTP pipe: the browser opens one request and the server keeps writing to it indefinitely, one event at a time. **WebSockets** are bidirectional but require a protocol upgrade handshake and more complex lifecycle management. For chat, only the server needs to push data to the client (text deltas and cards) — the client only needs to send a single initial request. SSE is simpler, works over standard HTTP/2, requires no special proxy configuration, and is natively supported by `EventSource` in every browser."
+      }
+    ]
+  },
+  {
     "kind": "diagram",
     "title": "Putting It All Together",
     "image": "architecture",

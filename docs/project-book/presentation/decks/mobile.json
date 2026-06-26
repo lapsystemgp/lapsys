@@ -283,6 +283,95 @@
     "why": "This makes the app feel alive and consistent - you never see one screen disagree with another - while keeping the code simple and fast."
   },
   {
+    "kind": "codesnip",
+    "title": "Code: Distance Calculation in Dart",
+    "intro": "The mobile app calculates lab distances locally on the phone — identical formula to the backend and website so every client shows the same number.",
+    "file": "apps/mobile/lib/core/location/location_service.dart",
+    "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/mobile/lib/core/location/location_service.dart",
+    "code": "import 'dart:math' as math;\n\n// Great-circle distance in km, rounded to 1 decimal.\n// Matches TypeScript haversineKm in backend and frontend exactly.\ndouble haversineKm(\n  double lat1, double lng1,\n  double lat2, double lng2\n) {\n  const r = 6371.0; // Earth radius in km\n  double toRad(double d) => d * math.pi / 180.0;\n\n  final dLat = toRad(lat2 - lat1);\n  final dLng = toRad(lng2 - lng1);\n  final a = math.pow(math.sin(dLat / 2), 2) +\n    math.cos(toRad(lat1)) *\n    math.cos(toRad(lat2)) *\n    math.pow(math.sin(dLng / 2), 2);\n  final km = r * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));\n  return (km * 10).round() / 10;\n}\n\n// LocationService: handles permission dance + GPS fix\nclass LocationService {\n  Future<LatLng?> getCurrentLocation() async {\n    if (!await Geolocator.isLocationServiceEnabled()) return null;\n    var perm = await Geolocator.checkPermission();\n    if (perm == LocationPermission.denied)\n      perm = await Geolocator.requestPermission();\n    if (perm == LocationPermission.denied ||\n        perm == LocationPermission.deniedForever) return null;\n    final pos = await Geolocator.getCurrentPosition(\n      locationSettings: const LocationSettings(\n        accuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 27)\n      ));\n    return LatLng(pos.latitude, pos.longitude);\n  }\n}",
+    "note": "**`LocationAccuracy.low`** is intentional — we only need a city-level fix to sort labs by distance, not precision navigation. `low` accuracy is 5–10× faster to obtain and uses far less battery. If the user denies permission or the timeout fires, `getCurrentLocation()` returns **null** and the app falls back to sorting by rating instead of distance, gracefully."
+  },
+  {
+    "kind": "codesnip",
+    "title": "Code: Automatic Token Refresh",
+    "intro": "When an API call returns '401 Unauthorized' (access token expired), the Dio interceptor silently fetches a new token and retries — the user never gets logged out mid-action.",
+    "file": "apps/mobile/lib/core/network/auth_interceptor.dart",
+    "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/mobile/lib/core/network/auth_interceptor.dart",
+    "code": "class AuthInterceptor extends Interceptor {\n  bool _isRefreshing = false;\n  final _queue = <ErrorInterceptorHandler>[];\n\n  @override\n  void onError(DioException err, ErrorInterceptorHandler handler) async {\n    // Only act on 401 errors from our own backend\n    if (err.response?.statusCode != 401) {\n      return handler.next(err);\n    }\n\n    if (_isRefreshing) {\n      // Queue this request — wait for the refresh in progress\n      _queue.add(handler); return;\n    }\n\n    _isRefreshing = true;\n    try {\n      final newToken = await _refreshAccessToken();\n      // Retry the original request with the new token\n      err.requestOptions.headers['Authorization'] = 'Bearer $newToken';\n      final retried = await _dio.fetch(err.requestOptions);\n      handler.resolve(retried);\n      // Drain the queue — let waiting requests retry too\n      for (final h in _queue) h.resolve(retried);\n    } catch (_) {\n      // Refresh also failed — force logout\n      await _tokenStore.clear();\n      handler.next(err);\n    } finally {\n      _isRefreshing = false; _queue.clear();\n    }\n  }\n}",
+    "note": "The `_isRefreshing` flag + `_queue` pattern is critical: if 5 API calls fail at the same moment, only **one** refresh request is sent. The other 4 are queued and retried with the new token once the refresh completes. Without this, 5 simultaneous refresh calls would flood the server and likely all fail, logging the user out."
+  },
+  {
+    "kind": "codelinks",
+    "title": "Explore the Mobile Code",
+    "intro": "All Flutter/Dart mobile source code is on GitHub. Click any card to open that file or folder directly.",
+    "repo": "https://github.com/lapsystemgp/lapsys",
+    "links": [
+      {
+        "path": "apps/mobile/lib/",
+        "label": "Mobile source root",
+        "desc": "All Flutter screens, providers, network layer, and core services for the iOS + Android app",
+        "url": "https://github.com/lapsystemgp/lapsys/tree/main/apps/mobile/lib"
+      },
+      {
+        "path": "apps/mobile/lib/core/network/auth_interceptor.dart",
+        "label": "Token refresh interceptor",
+        "desc": "Catches 401 errors, refreshes the access token once, retries all queued requests",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/mobile/lib/core/network/auth_interceptor.dart"
+      },
+      {
+        "path": "apps/mobile/lib/core/network/dio_client.dart",
+        "label": "HTTP client setup",
+        "desc": "Configures Dio with base URL, timeout, auth interceptor, and error handling",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/mobile/lib/core/network/dio_client.dart"
+      },
+      {
+        "path": "apps/mobile/lib/core/location/location_service.dart",
+        "label": "GPS + haversine distance",
+        "desc": "Permission dance, low-accuracy GPS fix, and great-circle distance calculation in Dart",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/mobile/lib/core/location/location_service.dart"
+      },
+      {
+        "path": "apps/mobile/lib/core/storage/secure_token_store.dart",
+        "label": "Secure token storage",
+        "desc": "Wraps flutter_secure_storage — uses iOS Keychain and Android Keystore for JWT tokens",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/mobile/lib/core/storage/secure_token_store.dart"
+      },
+      {
+        "path": "apps/mobile/lib/core/router/app_router.dart",
+        "label": "Navigation + role routing",
+        "desc": "go_router configuration: redirect rules based on auth state and user role",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/mobile/lib/core/router/app_router.dart"
+      }
+    ]
+  },
+  {
+    "kind": "qa",
+    "title": "Q&A: Mobile Deep Questions",
+    "intro": "Questions about Flutter architecture, security, and how the app handles real-world conditions.",
+    "pairs": [
+      {
+        "q": "Why Flutter instead of React Native?",
+        "a": "Flutter uses its own rendering engine (Skia/Impeller) to draw every pixel — it does not use native UI components. This means **pixel-perfect UI on both platforms** with no native bridge slowdowns. Dart compiles to native ARM code. React Native calls native components through a JS bridge, which can cause frame drops. Flutter is also backed by Google, which matters for long-term support."
+      },
+      {
+        "q": "Why Riverpod instead of Provider or Bloc?",
+        "a": "Riverpod is a compile-time-safe version of Provider that does not depend on the widget tree. Providers are defined globally, can be read from anywhere, and are automatically disposed when no longer watched. Bloc is more verbose (requires events, states, and a bloc class). For a team project, Riverpod's **simpler API and better testability** made it the right choice."
+      },
+      {
+        "q": "What is flutter_secure_storage and why not just SharedPreferences?",
+        "a": "`SharedPreferences` writes data to a plain text file on disk — anyone who can read the device storage (e.g. via a backup on a rooted phone) can see the tokens. `flutter_secure_storage` uses **iOS Keychain** (hardware-encrypted) and **Android Keystore** (hardware-backed encryption chip). A login token stolen from Keychain is cryptographically unusable without the device's secure enclave."
+      },
+      {
+        "q": "How does the app handle a bad internet connection?",
+        "a": "Dio is configured with a connection timeout and a receive timeout. If the server does not respond in time, Dio throws a `DioException` with type `connectionTimeout` or `receiveTimeout`. The app catches this in each screen's `AsyncValue` handler and shows an error state with a 'Retry' button. Riverpod's `ref.refresh()` re-fetches the data on tap — no need to restart the app."
+      },
+      {
+        "q": "How does tapping a push notification open the right screen?",
+        "a": "Firebase Cloud Messaging delivers the notification with a **data payload** that includes a `type` ('booking', 'result') and an `id`. When the user taps it, `firebase_messaging` calls our `onMessageOpenedApp` handler. We read the payload and call `GoRouter`'s `push()` with the matching route (e.g. `/patient/results/abc123`). If the app is closed, `getInitialMessage()` retrieves the payload on first launch."
+      }
+    ]
+  },
+  {
     "kind": "diagram",
     "title": "Putting It All Together",
     "intro": "Here is the whole phone app in one picture: one codebase, three layers, talking safely to one backend.",

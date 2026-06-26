@@ -163,6 +163,38 @@ ul.pts li::before{content:"";position:absolute;left:4px;top:9px;width:9px;height
 .lbox .x{position:fixed;top:18px;right:22px;color:#fff;font-family:var(--font-m);font-size:13px;border:1px solid rgba(255,255,255,.4);padding:7px 12px;border-radius:9px}
 
 @media(max-width:620px){.stage{padding-bottom:96px}.s-title{font-size:30px}}
+
+/* ── code-links slide ─────────────────────── */
+.cl-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.cl-repo{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-m);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);border:1.5px solid var(--accent);padding:8px 14px;border-radius:10px;text-decoration:none;font-weight:600;transition:.2s}
+.cl-repo:hover{background:var(--accent);color:#fff}
+.cl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:11px}
+.cl-item{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;gap:5px;transition:.22s;position:relative;overflow:hidden}
+.cl-item::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);transform:scaleY(0);transform-origin:top;transition:.25s}
+.cl-item:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--line));transform:translateY(-3px);box-shadow:var(--shadow)}
+.cl-item:hover::after{transform:scaleY(1)}
+.cl-path{font-family:var(--font-m);font-size:10.5px;color:var(--accent);font-weight:600;word-break:break-all}
+.cl-label{font-family:var(--font-d);font-weight:700;font-size:14.5px;letter-spacing:-.01em}
+.cl-desc{color:var(--ink-soft);font-size:12.5px;flex:1}
+.cl-go{font-family:var(--font-m);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-top:4px}
+/* ── Q&A slide ────────────────────────────── */
+.qa-list{display:grid;gap:9px;max-width:78ch}
+.qa-item{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.qa-item[open]{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.qa-q{padding:14px 18px;cursor:pointer;font-family:var(--font-d);font-weight:700;font-size:15px;display:flex;justify-content:space-between;align-items:center;gap:14px;user-select:none;list-style:none}
+.qa-q::marker,.qa-q::-webkit-details-marker{display:none}
+.qa-q::after{content:"\002B";font-family:var(--font-m);font-size:18px;color:var(--accent);flex-shrink:0;line-height:1}
+.qa-item[open] .qa-q::after{content:"\2212"}
+.qa-a{padding:0 18px 14px;color:var(--ink-soft);font-size:14px;border-top:1px dashed var(--line);padding-top:12px;line-height:1.65}
+/* ── code snippet slide ───────────────────── */
+.csnip{border-radius:14px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow)}
+.csnip-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:color-mix(in srgb,var(--accent) 10%,var(--panel));border-bottom:1px solid var(--line);gap:10px;flex-wrap:wrap}
+.csnip-file{font-family:var(--font-m);font-size:11px;color:var(--accent);font-weight:600}
+.csnip-gh{font-family:var(--font-m);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);text-decoration:none;border:1px solid var(--accent);padding:4px 10px;border-radius:7px;font-weight:600;transition:.2s;white-space:nowrap}
+.csnip-gh:hover{background:var(--accent);color:#fff}
+.csnip-code{background:color-mix(in srgb,var(--ink) 3%,var(--panel));padding:16px 18px;overflow-x:auto;font-family:var(--font-m);font-size:12px;line-height:1.65;margin:0;color:var(--ink);max-height:360px;overflow-y:auto;white-space:pre}
+.csnip-note{margin-top:14px;background:var(--accent-soft);border-left:3px solid var(--accent);padding:12px 16px;border-radius:0 10px 10px 0;font-size:14px;color:var(--ink)}
+.csnip-note b{font-family:var(--font-m);font-size:10.5px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:4px;font-weight:600}
 </style>
 </head>
 <body>
@@ -271,6 +303,23 @@ function slideHTML(s){
   if(s.cards&&s.cards.length) bodyParts.push(`<div class="grid">${s.cards.map(c=>`<div class="tc"><div class="nm">${esc(c.name)}${c.tag?`<span class="tag">${esc(c.tag)}</span>`:""}</div>${c.what?`<div class="what">${inl(c.what)}</div>`:""}${c.why?`<div class="why"><b>Why we use it</b>${inl(c.why)}</div>`:""}</div>`).join("")}</div>`);
   if(s.rows&&s.rows.length){ const hasWhat=s.rows.some(r=>r.what);
     bodyParts.push(`<table class="tbl"><thead><tr><th>Library</th>${hasWhat?"<th>What it does</th>":""}<th>Why we use it</th></tr></thead><tbody>${s.rows.map(r=>`<tr><td>${esc(r.name)}</td>${hasWhat?`<td>${inl(r.what||"")}</td>`:""}<td>${inl(r.why||"")}</td></tr>`).join("")}</tbody></table>`); }
+  /* ── new slide kinds ── */
+  if(s.kind==="codelinks"){
+    const ghIcon='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/><' + '/svg>';
+    const repoBtn=s.repo?'<a class="cl-repo" href="'+esc(s.repo)+'" target="_blank" rel="noopener">'+ghIcon+' View full repo on GitHub<' + '/a>':'';
+    const clItem=l=>'<a class="cl-item" href="'+esc(l.url)+'" target="_blank" rel="noopener"><div class="cl-path">'+esc(l.path)+'<' + '/div><div class="cl-label">'+esc(l.label)+'<' + '/div><div class="cl-desc">'+esc(l.desc)+'<' + '/div><div class="cl-go">View on GitHub →<' + '/div><' + '/a>';
+    const grid='<div class="cl-grid">'+(s.links||[]).map(clItem).join('')+'<' + '/div>';
+    return head+'<div class="cl-bar">'+repoBtn+'<' + '/div>'+grid;
+  }
+  if(s.kind==="qa"){
+    const qaItem=(p,i)=>'<details class="qa-item"'+(i===0?' open':'')+'><summary class="qa-q">'+esc(p.q)+'<' + '/summary><div class="qa-a">'+inl(p.a)+'<' + '/div><' + '/details>';
+    return head+'<div class="qa-list">'+(s.pairs||[]).map(qaItem).join('')+'<' + '/div>';
+  }
+  if(s.kind==="codesnip"){
+    const bar='<div class="csnip-bar"><span class="csnip-file">'+esc(s.file||'')+'<' + '/span>'+(s.url?'<a class="csnip-gh" href="'+esc(s.url)+'" target="_blank" rel="noopener">View on GitHub →<' + '/a>':'')+'<' + '/div>';
+    const note=s.note?'<div class="csnip-note"><b>What this means<' + '/b>'+inl(s.note)+'<' + '/div>':'';
+    return head+'<div class="csnip">'+bar+'<pre class="csnip-code">'+esc(s.code||'')+'<' + '/pre><' + '/div>'+note;
+  }
   if(s.kind==="algorithm"){
     let a=`<div class="algo-prob"><b>The problem</b>${inl(s.intro||"")}</div>`;
     if(s.steps) a+=`<div class="steps">${s.steps.map(st=>`<div class="step"><h4>${inl(st.title||"")}</h4>${st.detail?`<p>${inl(st.detail)}</p>`:""}</div>`).join("")}</div>`;

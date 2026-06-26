@@ -275,6 +275,95 @@
     ]
   },
   {
+    "kind": "codesnip",
+    "title": "Code: Nearest Labs Calculated in Your Browser",
+    "intro": "When you sort by 'Nearest', the website runs the haversine formula right in your browser — no server round-trip needed. Your location stays on your device.",
+    "file": "apps/frontend/src/app/tests/[testName]/TestDetailClient.tsx",
+    "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/app/tests/%5BtestName%5D/TestDetailClient.tsx",
+    "code": "function haversineKm(\n  lat1: number, lng1: number,\n  lat2: number, lng2: number\n): number {\n  const R = 6371;  // Earth radius in km\n  const toRad = (d: number) => (d * Math.PI) / 180;\n  const dLat = toRad(lat2 - lat1);\n  const dLng = toRad(lng2 - lng1);\n  const a =\n    Math.sin(dLat / 2) ** 2 +\n    Math.cos(toRad(lat1)) *\n    Math.cos(toRad(lat2)) *\n    Math.sin(dLng / 2) ** 2;\n  return Math.round(\n    R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 10\n  ) / 10;\n}\n\n// Usage: browser watches GPS, recalculates distance to each lab live\nwatchIdRef.current = navigator.geolocation.watchPosition(\n  pos => setUserLocation({ lat: pos.coords.latitude,\n                            lng: pos.coords.longitude }),\n  () => {},\n  { enableHighAccuracy: false, timeout: 10_000 }\n);\n\n// Sort labs nearest-first using the distance\nconst labsWithDistance = data.labs.map(lab => ({\n  ...lab,\n  distanceKm: userLocation\n    ? haversineKm(userLocation.lat, userLocation.lng,\n                  lab.latitude, lab.longitude)\n    : null\n})).sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));",
+    "note": "**`watchPosition`** (not `getCurrentPosition`) is used so the distance updates live as the GPS gets a better fix. The user's location is **never sent to the server** — it stays in the browser's memory. The same haversine formula is copied identically into the backend (TypeScript) and mobile app (Dart) so all three platforms show the same number for the same lab."
+  },
+  {
+    "kind": "codesnip",
+    "title": "Code: Reading the Live AI Stream",
+    "intro": "The AI answer arrives as a continuous trickle of text events. The frontend splits this raw stream into typed events and updates the screen for each one.",
+    "file": "apps/frontend/src/lib/chatApi.ts",
+    "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/lib/chatApi.ts",
+    "code": "// Each Server-Sent Event (SSE) frame looks like:\n//   data: {\"type\":\"delta\",\"text\":\"Here are\"}\n//   data: {\"type\":\"tool\",\"result\":{...labCards...}}\n//   data: {\"type\":\"done\",\"messageId\":\"abc\"}\n\nexport async function streamChat(\n  body: ChatRequest,\n  onEvent: (e: StreamEvent) => void\n) {\n  const res = await fetch('/api/chat/stream', {\n    method: 'POST',\n    body: JSON.stringify(body),\n    headers: { 'Content-Type': 'application/json' },\n  });\n\n  const reader = res.body!.getReader();\n  const decoder = new TextDecoder();\n  let buffer = '';\n\n  while (true) {\n    const { done, value } = await reader.read();\n    if (done) break;\n    buffer += decoder.decode(value, { stream: true });\n\n    // SSE frames are separated by double newlines\n    const parts = buffer.split('\\n\\n');\n    buffer = parts.pop() ?? ''; // keep incomplete last frame\n\n    for (const part of parts) {\n      const line = part.replace(/^data: /, '').trim();\n      if (!line) continue;\n      const event = JSON.parse(line) as StreamEvent;\n      onEvent(event); // 'delta' appends text, 'tool' shows cards\n    }\n  }\n}",
+    "note": "**Server-Sent Events (SSE)** is a one-way pipe: the browser opens one HTTP connection and the server keeps writing to it. No WebSocket setup needed. The `buffer` accumulates bytes until a complete `\\n\\n`-delimited frame arrives, then parses it as JSON. Each event type ('meta', 'delta', 'tool', 'done', 'error') triggers a different UI update — text frames grow the message bubble, tool frames insert clickable lab cards."
+  },
+  {
+    "kind": "codelinks",
+    "title": "Explore the Frontend Code",
+    "intro": "All web frontend source code is on GitHub. Click any card to open that file or folder directly.",
+    "repo": "https://github.com/lapsystemgp/lapsys",
+    "links": [
+      {
+        "path": "apps/frontend/src/",
+        "label": "Frontend source root",
+        "desc": "All Next.js pages, components, API clients, and hooks for patient, lab, and admin views",
+        "url": "https://github.com/lapsystemgp/lapsys/tree/main/apps/frontend/src"
+      },
+      {
+        "path": "apps/frontend/src/middleware.ts",
+        "label": "Role-based routing guard",
+        "desc": "Runs at the edge before every page: checks JWT role and redirects unauthorized users",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/middleware.ts"
+      },
+      {
+        "path": "apps/frontend/src/lib/chatApi.ts",
+        "label": "AI stream parser (SSE)",
+        "desc": "Opens the live connection to the chat endpoint, splits the byte stream into typed events",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/lib/chatApi.ts"
+      },
+      {
+        "path": "apps/frontend/src/lib/publicApi.ts",
+        "label": "Public API client",
+        "desc": "Fetches labs, tests, and search results — used by anyone before they log in",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/lib/publicApi.ts"
+      },
+      {
+        "path": "apps/frontend/src/app/tests/[testName]/TestDetailClient.tsx",
+        "label": "Test detail + haversine",
+        "desc": "Lab listing for a specific test — sorts by nearest using browser-side GPS + haversine",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/app/tests/%5BtestName%5D/TestDetailClient.tsx"
+      },
+      {
+        "path": "apps/frontend/src/app/page.tsx",
+        "label": "Landing page",
+        "desc": "Public home page: lab search, featured tests, category browse — no login required",
+        "url": "https://github.com/lapsystemgp/lapsys/blob/main/apps/frontend/src/app/page.tsx"
+      }
+    ]
+  },
+  {
+    "kind": "qa",
+    "title": "Q&A: Frontend Deep Questions",
+    "intro": "Questions about how the web app is built and how specific features work.",
+    "pairs": [
+      {
+        "q": "Why is the login cookie 'httpOnly' and what does that protect against?",
+        "a": "An `httpOnly` cookie cannot be read by JavaScript — only the browser can include it in HTTP requests. This blocks **XSS attacks**: if a malicious script somehow runs on the page (e.g. from an injected ad or a compromised package), it cannot steal the login cookie because `document.cookie` simply doesn't show it. The cookie travels to the server automatically on every request, invisible to all client-side code."
+      },
+      {
+        "q": "What is 'edge middleware' and why run the role check there?",
+        "a": "Next.js Edge Middleware runs on Cloudflare/Vercel's network **before** the request reaches the actual server — physically closer to the user, typically under 1ms. It reads the JWT from the cookie (using the `jose` library, which works in the Edge runtime), checks the role, and redirects unauthorized users instantly. The real backend still re-checks every request; the edge guard is a fast first gate, not the only gate."
+      },
+      {
+        "q": "Why proxy API calls through /api instead of calling the backend directly?",
+        "a": "Browsers enforce **SameSite cookie rules**: cookies are only sent to the same origin (domain+port) as the page. The frontend lives on one URL, the backend on another. By routing all API calls through `/api/*` on the frontend's own domain, the browser sees everything as 'same origin' and sends the login cookie. No CORS problems, no cookie rejected as 'third-party'."
+      },
+      {
+        "q": "How do health-trend charts know the 'safe range' for each test?",
+        "a": "The backend stores reference ranges per test marker (e.g. HbA1c: 4–5.6%). When the patient's results API responds, it includes `referenceMin` and `referenceMax` for each marker. The Recharts component receives these values and draws a shaded `ReferenceArea` between them. Each data point is colored green (inside range), red (outside), or grey (unknown) by comparing its value against the same bounds."
+      },
+      {
+        "q": "What happens if the user denies location permission?",
+        "a": "The `watchPosition` call immediately fires its error callback. The frontend catches this, sets `userLocation` to null, and falls back to sorting labs by **rating** (the next best default). No error message is shown — the sort selector just silently omits 'Nearest' as an active option. The app never breaks; it degrades gracefully."
+      }
+    ]
+  },
+  {
     "kind": "title",
     "title": "Putting It All Together",
     "subtitle": "One website, three roles, built to be safe and clear",

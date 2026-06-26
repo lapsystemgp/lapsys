@@ -65,6 +65,7 @@ export default function LabDashboardPage() {
   const [newSlot, setNewSlot] = useState({ startsAt: "", endsAt: "", capacity: "1" });
   const [uploadState, setUploadState] = useState<Record<string, { summary: string; file: File | null }>>({});
 
+  const [uploadingIds, setUploadingIds] = useState<Set<string>>(new Set());
   const [cashActionId, setCashActionId] = useState<string | null>(null);
   const [kitActionId, setKitActionId] = useState<string | null>(null);
   const [kitTrackingInputs, setKitTrackingInputs] = useState<Record<string, string>>({});
@@ -284,6 +285,7 @@ export default function LabDashboardPage() {
       toast.error("Select a PDF and add a summary before uploading.");
       return;
     }
+    setUploadingIds((prev) => new Set(prev).add(bookingId));
     try {
       await uploadLabResult(bookingId, {
         file: state.file,
@@ -294,6 +296,12 @@ export default function LabDashboardPage() {
       toast.success("Result uploaded.");
     } catch {
       toast.error("Could not upload result.");
+    } finally {
+      setUploadingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(bookingId);
+        return next;
+      });
     }
   };
 
@@ -640,7 +648,7 @@ export default function LabDashboardPage() {
             {tab === "results" && (
               <div key="results" className="space-y-3 animate-fade-in">
                 {workspace.bookings
-                  .filter((booking) => booking.status === "Confirmed" || booking.status === "Completed")
+                  .filter((booking) => booking.status === "Confirmed")
                   .map((booking) => {
                     const state = uploadState[booking.id] ?? { summary: "", file: null };
                     return (
@@ -675,13 +683,18 @@ export default function LabDashboardPage() {
                             className="px-3 py-2 border border-gray-200 rounded-lg"
                           />
                           {/* Upload Result button */}
-                          <button onClick={() => handleUploadResult(booking.id)} className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700">
-                            Upload Result
+                          <button
+                            onClick={() => handleUploadResult(booking.id)}
+                            disabled={uploadingIds.has(booking.id)}
+                            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                          >
+                            {uploadingIds.has(booking.id) ? "Uploading…" : "Upload Result"}
                           </button>
                           {/* Mark Delivered button */}
                           <button
                             onClick={() => handleDeliverResult(booking.id)}
-                            className="px-4 py-2 border border-green-300 text-green-700 font-semibold rounded-xl hover:bg-green-50"
+                            disabled={uploadingIds.has(booking.id)}
+                            className="px-4 py-2 border border-green-300 text-green-700 font-semibold rounded-xl hover:bg-green-50 disabled:opacity-60 disabled:cursor-not-allowed"
                           >
                             Mark Delivered
                           </button>

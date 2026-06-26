@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, HeartPulse, Star } from "lucide-react";
+import { ArrowLeft, CreditCard, HeartPulse, Lock, Star, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Breadcrumb } from "../../../components/Breadcrumb";
@@ -48,7 +48,7 @@ function paymentStatusClass(status: string) {
 }
 
 function formatPaymentMethod(method: string) {
-  if (method === "Online") return "Online (demo)";
+  if (method === "Online") return "Card Payment";
   if (method === "CashHomeCollection") return "Cash on collection";
   if (method === "CashLabVisit") return "Cash at lab";
   if (method === "CashOnDelivery") return "Cash on delivery";
@@ -111,6 +111,7 @@ export default function PatientDashboardPage() {
   const [reviewDrafts, setReviewDrafts] = useState<Record<string, { rating: number; comment: string }>>({});
   const [submittingReviewId, setSubmittingReviewId] = useState<string | null>(null);
   const [demoPayBookingId, setDemoPayBookingId] = useState<string | null>(null);
+  const [payModalBooking, setPayModalBooking] = useState<{ id: string; amount: number; testName: string } | null>(null);
 
   const loadWorkspace = useCallback(async () => {
     setLoading(true);
@@ -159,13 +160,25 @@ export default function PatientDashboardPage() {
     setDemoPayBookingId(bookingId);
     try {
       await demoOnlinePayment(bookingId, outcome);
-      await loadWorkspace();
-      toast.success(outcome === "success" ? "Payment processed successfully." : "Payment declined (demo).");
-    } catch {
-      toast.error("Demo payment could not be completed.");
-    } finally {
+    } catch (err) {
+      let msg = "Payment could not be completed. Please try again.";
+      if (err instanceof ApiError && err.bodyText) {
+        try {
+          const parsed = JSON.parse(err.bodyText);
+          const raw = parsed.message;
+          msg = typeof raw === "string" ? raw : Array.isArray(raw) ? raw.join(". ") : msg;
+        } catch { /* ignore parse error */ }
+      }
+      toast.error(msg);
       setDemoPayBookingId(null);
+      return;
     }
+    setPayModalBooking(null);
+    toast.success(outcome === "success" ? "Payment processed successfully." : "Payment declined.");
+    setDemoPayBookingId(null);
+    try {
+      await loadWorkspace();
+    } catch { /* workspace will refresh on next interaction */ }
   };
 
   const handleSaveProfile = async () => {
@@ -379,21 +392,13 @@ export default function PatientDashboardPage() {
                       {booking.paymentMethod === "Online" &&
                         booking.status === "Pending" &&
                         (booking.paymentStatus === "Pending" || booking.paymentStatus === "Failed") && (
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            {/* Demo pay successfully — #13: font-semibold */}
+                          <div className="mt-4">
                             <button
-                              onClick={() => handleDemoOnlinePayment(booking.id, "success")}
-                              disabled={demoPayBookingId === booking.id}
-                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-semibold"
+                              onClick={() => setPayModalBooking({ id: booking.id, amount: booking.totalPriceEgp, testName: booking.test.name })}
+                              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold text-sm"
                             >
-                              {demoPayBookingId === booking.id ? "Processing..." : "Demo: pay successfully"}
-                            </button>
-                            <button
-                              onClick={() => handleDemoOnlinePayment(booking.id, "failure")}
-                              disabled={demoPayBookingId === booking.id}
-                              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                            >
-                              Demo: decline payment
+                              <CreditCard className="w-4 h-4" />
+                              Pay Now
                             </button>
                           </div>
                         )}
@@ -624,6 +629,126 @@ export default function PatientDashboardPage() {
           </>
         )}
       </main>
+
+      {payModalBooking && (
+        <PaymentModal
+          booking={payModalBooking}
+          isProcessing={demoPayBookingId === payModalBooking.id}
+          onPay={handleDemoOnlinePayment}
+          onClose={() => setPayModalBooking(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function PaymentModal({
+  booking,
+  isProcessing,
+  onPay,
+  onClose,
+}: {
+  booking: { id: string; amount: number; testName: string };
+  isProcessing: boolean;
+  onPay: (bookingId: string, outcome: "success" | "failure") => void;
+  onClose: () => void;
+}) {
+  const [cardNumber, setCardNumber] = useState("4242 4242 4242 4242");
+  const [cardName, setCardName] = useState("");
+  const [expiry, setExpiry] = useState("12/28");
+  const [cvv, setCvv] = useState("•••");
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-5 flex items-center justify-between">
+          <div>
+            <p className="font-bold text-lg">Secure Payment</p>
+            <p className="text-blue-100 text-sm truncate max-w-[220px]">{booking.testName}</p>
+          </div>
+          <button
+            onClick={onClose}
+            disabled={isProcessing}
+            className="hover:bg-white/20 p-2 rounded-lg transition-colors disabled:opacity-40"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          {/* Amount */}
+          <div className="bg-blue-50 rounded-xl p-4 flex items-center justify-between">
+            <span className="text-gray-600 text-sm">Total due</span>
+            <span className="text-2xl font-bold text-blue-600">EGP {booking.amount}</span>
+          </div>
+
+          {/* Card number */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
+            <input
+              value={cardNumber}
+              onChange={(e) => setCardNumber(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl font-mono text-base tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500"
+              maxLength={19}
+              disabled={isProcessing}
+            />
+          </div>
+
+          {/* Name on card */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name on Card</label>
+            <input
+              value={cardName}
+              onChange={(e) => setCardName(e.target.value)}
+              placeholder="Full name"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isProcessing}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+              <input
+                value={expiry}
+                onChange={(e) => setExpiry(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                maxLength={5}
+                placeholder="MM/YY"
+                disabled={isProcessing}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+              <input
+                value={cvv}
+                onChange={(e) => setCvv(e.target.value)}
+                type="password"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                maxLength={4}
+                placeholder="•••"
+                disabled={isProcessing}
+              />
+            </div>
+          </div>
+
+          {/* Pay button */}
+          <button
+            onClick={() => onPay(booking.id, "success")}
+            disabled={isProcessing}
+            className="w-full py-3 bg-blue-600 text-white rounded-xl font-bold text-base hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          >
+            {isProcessing ? "Processing payment…" : `Pay EGP ${booking.amount}`}
+          </button>
+
+          <div className="flex items-center justify-center gap-1.5 text-xs text-gray-400">
+            <Lock className="w-3 h-3" />
+            Your payment is secured with 256-bit SSL encryption
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

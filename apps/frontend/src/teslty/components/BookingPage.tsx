@@ -201,7 +201,7 @@ export function BookingPage({
             {bookingType === "kit"
               ? "The lab will ship your kit within 2 business days. Track its progress from your dashboard."
               : onlineFlow
-                ? "Use the demo payment buttons on your patient dashboard so the lab can confirm this booking."
+                ? "Your booking is confirmed. Complete payment from your patient dashboard to allow the lab to process it."
                 : "Pay in cash when the sample is collected or when you visit the lab."}
           </p>
           <div className="bg-blue-50 rounded-xl p-4 text-left">
@@ -217,7 +217,7 @@ export function BookingPage({
             <div className="text-gray-700 mt-2 text-sm">
               Payment:{" "}
               {effectivePaymentMethod === "Online"
-                ? "Card / online (demo)"
+                ? "Card payment"
                 : effectivePaymentMethod === "CashHomeCollection"
                   ? "Cash on home collection"
                   : effectivePaymentMethod === "CashOnDelivery"
@@ -381,9 +381,6 @@ export function BookingPage({
         {/* Payment card */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4 animate-slide-up animation-delay-300">
           <h3 className="text-base font-semibold text-gray-900 mb-3">Payment</h3>
-          <p className="text-sm text-gray-600 mb-3">
-            This project uses a simulated payment gateway for online payments — no real charges are made.
-          </p>
           <div className="space-y-3">
             <button
               type="button"
@@ -392,8 +389,8 @@ export function BookingPage({
                 effectivePaymentMethod === "Online" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-gray-300"
               }`}
             >
-              <div className="font-semibold text-gray-900">Pay online (demo)</div>
-              <div className="text-gray-600 text-sm">Simulated card payment — complete from your dashboard after booking.</div>
+              <div className="font-semibold text-gray-900">Card Payment</div>
+              <div className="text-gray-600 text-sm">Pay securely by card — you will be prompted to complete payment after booking.</div>
             </button>
             {bookingType === "home" && (
               <button
@@ -487,7 +484,7 @@ export function BookingPage({
               <span className="text-gray-600">Payment method</span>
               <span className="text-gray-900">
                 {effectivePaymentMethod === "Online"
-                  ? "Online (demo)"
+                  ? "Card payment"
                   : effectivePaymentMethod === "CashHomeCollection"
                     ? "Cash on collection"
                     : effectivePaymentMethod === "CashOnDelivery"

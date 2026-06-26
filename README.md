@@ -1,5 +1,13 @@
 # TesTly Monorepo (Backend + Frontend + Mobile)
 
+## Download Android App
+
+[![Download APK](https://img.shields.io/badge/Download-APK%20v1.0.0-brightgreen?style=for-the-badge&logo=android)](https://github.com/lapsystemgp/lapsys/raw/main/releases/testly-v1.0.0.apk)
+
+> **Android only** · Requires Android 5.0+ · Enable "Install from unknown sources" before installing
+
+---
+
 ## Prerequisites
 - Node.js + npm
 

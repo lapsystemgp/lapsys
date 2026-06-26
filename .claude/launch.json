@@ -12,6 +12,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "start:dev", "--prefix", "apps/backend"],
       "port": 3001
+    },
+    {
+      "name": "presentation",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "docs/project-book"],
+      "port": 8765
     }
   ]
 }

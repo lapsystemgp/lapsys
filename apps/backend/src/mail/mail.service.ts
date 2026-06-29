@@ -21,8 +21,12 @@ export class MailService {
     const user = this.config.get<string>('SMTP_USER') || undefined;
     const pass = this.config.get<string>('SMTP_PASS') || undefined;
     this.brevoKey = this.config.get<string>('BREVO_API_KEY') || undefined;
-    // Sender must match a verified sender (Brevo) or the authenticated account (Gmail).
-    this.from = this.config.get<string>('MAIL_FROM') || user || 'no-reply@localhost';
+    // Sender must match a verified sender (Brevo) or the authenticated account
+    // (Gmail). Normalize to lowercase — Brevo's sender check is case-sensitive and
+    // rejects "Foo@gmail.com" if the verified sender is "foo@gmail.com".
+    this.from = (this.config.get<string>('MAIL_FROM') || user || 'no-reply@localhost')
+      .trim()
+      .toLowerCase();
 
     // Prefer Brevo's HTTP API: it works over port 443, which PaaS hosts (Railway)
     // don't block — unlike outbound SMTP ports.

@@ -28,6 +28,13 @@ export class MailService {
         greetingTimeout: 10_000,
         socketTimeout: 15_000,
       });
+      this.logger.log(`Mail transport ready: SMTP ${host}:${port} as ${this.user}`);
+    } else {
+      this.logger.warn(
+        `Mail transport NOT configured (host=${host ? 'set' : 'MISSING'}, user=${
+          this.user ? 'set' : 'MISSING'
+        }, pass=${pass ? 'set' : 'MISSING'}) — OTP codes will only be logged, no emails sent.`,
+      );
     }
   }
 

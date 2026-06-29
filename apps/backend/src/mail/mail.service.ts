@@ -38,6 +38,43 @@ export class MailService {
     }
   }
 
+  // Temporary diagnostic: verifies the SMTP connection and (optionally) sends a
+  // test email, returning the exact result/error so mail issues can be diagnosed
+  // from the browser without reading server logs. Safe to remove once mail works.
+  async healthCheck(to?: string): Promise<Record<string, unknown>> {
+    if (!this.transporter) {
+      return {
+        configured: false,
+        message: 'SMTP not configured — set SMTP_HOST, SMTP_USER, SMTP_PASS.',
+      };
+    }
+    const result: Record<string, unknown> = { configured: true, from: this.from };
+    try {
+      await this.transporter.verify();
+      result.verify = 'ok';
+    } catch (err) {
+      result.verify = 'failed';
+      result.verifyError = err instanceof Error ? err.message : String(err);
+      return result;
+    }
+    if (to) {
+      try {
+        const info = await this.transporter.sendMail({
+          from: `TesTly <${this.from}>`,
+          to,
+          subject: 'TesTly mail health check',
+          text: 'If you received this, OTP email delivery works.',
+        });
+        result.send = 'ok';
+        result.accepted = info.accepted;
+      } catch (err) {
+        result.send = 'failed';
+        result.sendError = err instanceof Error ? err.message : String(err);
+      }
+    }
+    return result;
+  }
+
   async sendOtpEmail(email: string, code: string): Promise<void> {
     if (!this.transporter) {
       this.logger.warn(

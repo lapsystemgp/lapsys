@@ -7,11 +7,13 @@ import {
   HttpStatus,
   Logger,
   Post,
+  Query,
   Req,
   Res,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import { MailService } from '../mail/mail.service';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -35,7 +37,15 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly auditLogService: AuditLogService,
+    private readonly mailService: MailService,
   ) {}
+
+  // Temporary diagnostic — open /auth/mail-health?to=you@example.com in a browser
+  // to see whether SMTP connects and a test email sends. Remove once mail works.
+  @Get('mail-health')
+  async mailHealth(@Query('to') to?: string) {
+    return this.mailService.healthCheck(to);
+  }
 
   @Post('register/patient')
   @ApiOperation({ summary: 'Register a new patient' })

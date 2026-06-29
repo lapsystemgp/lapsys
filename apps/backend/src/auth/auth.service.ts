@@ -1,7 +1,9 @@
 import {
   Injectable,
+  Logger,
   ConflictException,
   ForbiddenException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -20,6 +22,8 @@ const OTP_MAX_ATTEMPTS = 5;
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
@@ -55,7 +59,7 @@ export class AuthService {
       select: { id: true, email: true, role: true, created_at: true },
     });
 
-    await this.issueEmailOtp(user.id, user.email);
+    await this.issueEmailOtpOrRollback(user.id, user.email);
 
     return { ...user, email_verification_required: true };
   }
@@ -93,7 +97,7 @@ export class AuthService {
       select: { id: true, email: true, role: true, created_at: true },
     });
 
-    await this.issueEmailOtp(user.id, user.email);
+    await this.issueEmailOtpOrRollback(user.id, user.email);
 
     return { ...user, email_verification_required: true };
   }
@@ -246,6 +250,33 @@ export class AuthService {
 
   private hashCode(raw: string): string {
     return createHash('sha256').update(raw).digest('hex');
+  }
+
+  // Issue the OTP during registration. If sending the email fails, roll back the
+  // just-created user so the signup can be retried cleanly instead of leaving an
+  // orphaned, unverified account that blocks re-registration with a 409.
+  private async issueEmailOtpOrRollback(userId: string, email: string): Promise<void> {
+    try {
+      await this.issueEmailOtp(userId, email);
+    } catch (err) {
+      // PatientProfile/LabProfile don't cascade on user delete, so remove them
+      // first; email codes cascade with the user.
+      await this.prisma
+        .$transaction([
+          this.prisma.patientProfile.deleteMany({ where: { user_id: userId } }),
+          this.prisma.labProfile.deleteMany({ where: { user_id: userId } }),
+          this.prisma.user.delete({ where: { id: userId } }),
+        ])
+        .catch(() => undefined);
+      this.logger.error(
+        `Registration rolled back for ${email}: failed to send verification email — ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+      throw new ServiceUnavailableException(
+        'Could not send the verification email. Please try again shortly.',
+      );
+    }
   }
 
   private async issueEmailOtp(userId: string, email: string): Promise<void> {

@@ -52,57 +52,6 @@ export class MailService {
     }
   }
 
-  // Temporary diagnostic: checks the configured transport and (optionally) sends a
-  // test email, returning the exact result/error. Safe to remove once mail works.
-  async healthCheck(to?: string): Promise<Record<string, unknown>> {
-    if (this.mode === 'none') {
-      return { configured: false, message: 'Set BREVO_API_KEY (recommended) or SMTP_HOST/USER/PASS.' };
-    }
-    const result: Record<string, unknown> = { configured: true, mode: this.mode, from: this.from };
-
-    if (this.mode === 'brevo') {
-      try {
-        const res = await fetch('https://api.brevo.com/v3/account', {
-          headers: { 'api-key': this.brevoKey as string, accept: 'application/json' },
-        });
-        result.verify = res.ok ? 'ok' : 'failed';
-        if (!res.ok) {
-          result.verifyError = `Brevo ${res.status}: ${await res.text()}`;
-          return result;
-        }
-      } catch (err) {
-        result.verify = 'failed';
-        result.verifyError = err instanceof Error ? err.message : String(err);
-        return result;
-      }
-    } else {
-      try {
-        await this.transporter!.verify();
-        result.verify = 'ok';
-      } catch (err) {
-        result.verify = 'failed';
-        result.verifyError = err instanceof Error ? err.message : String(err);
-        return result;
-      }
-    }
-
-    if (to) {
-      try {
-        await this.deliver(to, {
-          subject: 'TesTly mail health check',
-          html: '<p>If you received this, OTP email delivery works.</p>',
-          text: 'If you received this, OTP email delivery works.',
-        });
-        result.send = 'ok';
-        result.accepted = [to];
-      } catch (err) {
-        result.send = 'failed';
-        result.sendError = err instanceof Error ? err.message : String(err);
-      }
-    }
-    return result;
-  }
-
   async sendOtpEmail(email: string, code: string): Promise<void> {
     const content: MailContent = {
       subject: 'Your TesTly verification code',

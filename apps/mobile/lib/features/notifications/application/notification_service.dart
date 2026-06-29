@@ -150,13 +150,25 @@ class NotificationService {
     }
   }
 
+  // Maps an FCM data payload to an in-app route. The `type` values must match
+  // what the backend sends in NotificationsService.sendToUser (new_booking,
+  // booking_status, kit_shipped, result_delivered, new_review).
   String? _payloadToRoute(Map<String, dynamic> data) {
     final type = data['type'] as String?;
-    final id = (data['id'] ?? data['bookingId']) as String?;
-    if (type == null || id == null) return null;
+    if (type == null) return null;
+    final bookingId = (data['bookingId'] ?? data['id']) as String?;
+
+    String? booking(String base) =>
+        bookingId == null ? null : '$base/$bookingId';
+
     return switch (type) {
-      'booking' => '/patient/bookings/$id',
-      'result' => '/patient/results/$id',
+      // Patient-facing
+      'booking_status' || 'kit_shipped' || 'booking' =>
+        booking('/patient/bookings'),
+      'result_delivered' || 'result' => booking('/patient/results'),
+      // Lab-facing
+      'new_booking' => booking('/lab/bookings'),
+      'new_review' => '/lab/reviews',
       _ => null,
     };
   }

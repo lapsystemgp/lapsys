@@ -97,6 +97,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      // Bare root. Android can push "/" into the router when the app is
+      // resumed from a notification tap; without this go_router 404s with
+      // "no routes for location: /". Redirect it to login — the global
+      // redirect above then forwards authenticated users to their home shell.
+      GoRoute(path: '/', redirect: (_, __) => Routes.login),
       GoRoute(path: Routes.login, builder: (_, __) => const LoginScreen()),
       GoRoute(
         path: Routes.registerPatient,

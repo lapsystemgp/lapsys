@@ -36,8 +36,15 @@ export function middleware(request: NextRequest) {
     const role = payload.role;
     const labStatus = payload.lab_onboarding_status;
 
-    // Lab onboarding gate (before role checks so the message is accurate)
-    if (request.nextUrl.pathname.startsWith('/lab') && role === 'LabStaff' && labStatus !== 'Active') {
+    // Lab onboarding gate (before role checks so the message is accurate).
+    // PendingReview labs are allowed into /lab so they can complete onboarding
+    // (add active tests + schedule slots) — those are prerequisites the admin
+    // requires before activating the lab. Only fully blocked states are bounced.
+    if (
+      request.nextUrl.pathname.startsWith('/lab') &&
+      role === 'LabStaff' &&
+      (labStatus === 'Rejected' || labStatus === 'Suspended')
+    ) {
       return NextResponse.redirect(
         new URL(`/unauthorized?reason=${toUnauthorizedReason(labStatus)}`, request.url),
       );

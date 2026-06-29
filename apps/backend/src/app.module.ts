@@ -45,6 +45,8 @@ import { ChatService } from './chat/chat.service';
         CORS_ORIGIN: Joi.string().default('http://localhost:3000'),
         FCM_SERVICE_ACCOUNT_JSON: Joi.string().optional(),
         GEMINI_API_KEY: Joi.string().optional(),
+        RESEND_API_KEY: Joi.string().optional(),
+        MAIL_FROM: Joi.string().default('onboarding@resend.dev'),
       }),
     }),
     AuthModule,

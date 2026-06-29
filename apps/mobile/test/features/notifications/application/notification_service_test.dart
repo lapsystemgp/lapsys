@@ -7,32 +7,59 @@ void main() {
   group('Notification payload → route mapping', () {
     String? payloadToRoute(Map<String, dynamic> data) {
       final type = data['type'] as String?;
-      final id = (data['id'] ?? data['bookingId']) as String?;
-      if (type == null || id == null) return null;
+      if (type == null) return null;
+      final bookingId = (data['bookingId'] ?? data['id']) as String?;
+      String? booking(String base) =>
+          bookingId == null ? null : '$base/$bookingId';
       return switch (type) {
-        'booking' => '/patient/bookings/$id',
-        'result' => '/patient/results/$id',
+        'booking_status' || 'kit_shipped' || 'booking' =>
+          booking('/patient/bookings'),
+        'result_delivered' || 'result' => booking('/patient/results'),
+        'new_booking' => booking('/lab/bookings'),
+        'new_review' => '/lab/reviews',
         _ => null,
       };
     }
 
-    test('maps booking type to bookings route', () {
+    // Real backend `type` values (NotificationsService.sendToUser).
+    test('maps booking_status to patient bookings route', () {
       expect(
-        payloadToRoute({'type': 'booking', 'id': 'b-123'}),
+        payloadToRoute({'type': 'booking_status', 'bookingId': 'b-123'}),
         '/patient/bookings/b-123',
       );
     });
 
-    test('maps result type to results route', () {
+    test('maps kit_shipped to patient bookings route', () {
       expect(
-        payloadToRoute({'type': 'result', 'id': 'b-456'}),
+        payloadToRoute({'type': 'kit_shipped', 'bookingId': 'b-1'}),
+        '/patient/bookings/b-1',
+      );
+    });
+
+    test('maps result_delivered to patient results route', () {
+      expect(
+        payloadToRoute({'type': 'result_delivered', 'bookingId': 'b-456'}),
         '/patient/results/b-456',
       );
     });
 
-    test('accepts bookingId key as fallback for id', () {
+    test('maps new_booking to lab bookings route', () {
       expect(
-        payloadToRoute({'type': 'booking', 'bookingId': 'b-789'}),
+        payloadToRoute({'type': 'new_booking', 'bookingId': 'b-9'}),
+        '/lab/bookings/b-9',
+      );
+    });
+
+    test('maps new_review to lab reviews route', () {
+      expect(
+        payloadToRoute({'type': 'new_review', 'labProfileId': 'l-1'}),
+        '/lab/reviews',
+      );
+    });
+
+    test('accepts id key as fallback for bookingId', () {
+      expect(
+        payloadToRoute({'type': 'booking', 'id': 'b-789'}),
         '/patient/bookings/b-789',
       );
     });
@@ -41,8 +68,8 @@ void main() {
       expect(payloadToRoute({'id': 'b-1'}), isNull);
     });
 
-    test('returns null when id is missing', () {
-      expect(payloadToRoute({'type': 'booking'}), isNull);
+    test('returns null when bookingId is missing for a booking route', () {
+      expect(payloadToRoute({'type': 'booking_status'}), isNull);
     });
 
     test('returns null for unknown type', () {

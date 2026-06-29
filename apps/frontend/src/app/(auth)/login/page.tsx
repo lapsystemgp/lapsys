@@ -21,7 +21,7 @@ function LoginRouteInner() {
       sessionExpired={sessionExpired}
       onBack={() => router.push("/")}
       onAuthenticated={({ role, lab_onboarding_status }) => {
-        if (role === "lab" && lab_onboarding_status !== "Active") {
+        if (role === "lab" && (lab_onboarding_status === "Rejected" || lab_onboarding_status === "Suspended")) {
           router.push(`/unauthorized?reason=${labUnauthorizedReason(lab_onboarding_status)}`);
           return;
         }

@@ -36,8 +36,15 @@ type RequestWithUser = {
   user?: { id?: string };
 };
 
+// NOTE: LabActiveGuard is intentionally NOT applied controller-wide. A lab in
+// PendingReview must be able to reach its onboarding routes (workspace, profile,
+// tests, schedule) to satisfy the activation requirements (at least 1 active test
+// + 1 active schedule slot). Applying it controller-wide created a deadlock: the
+// lab could never add the items required for an admin to activate it. The guard is
+// applied per-route on operational endpoints (patient context, result handling)
+// that should only work once the lab is Active.
 @Controller('lab')
-@UseGuards(JwtAuthGuard, RolesGuard, LabActiveGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class LabController {
   constructor(
     private readonly labService: LabService,
@@ -59,6 +66,7 @@ export class LabController {
 
   @Get('patient-context')
   @Roles(Role.LabStaff)
+  @UseGuards(LabActiveGuard)
   getPatientContext(
     @Req() req: RequestWithUser,
     @Query('bookingId') bookingId?: string,
@@ -117,6 +125,7 @@ export class LabController {
   @Post('results/:bookingId/upload')
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
   @Roles(Role.LabStaff)
+  @UseGuards(LabActiveGuard)
   uploadResult(
     @Req() req: RequestWithUser,
     @Param('bookingId') bookingId: string,
@@ -128,6 +137,7 @@ export class LabController {
 
   @Patch('results/:bookingId/status')
   @Roles(Role.LabStaff)
+  @UseGuards(LabActiveGuard)
   setResultStatus(
     @Req() req: RequestWithUser,
     @Param('bookingId') bookingId: string,
@@ -138,6 +148,7 @@ export class LabController {
 
   @Put('results/:bookingId/structured')
   @Roles(Role.LabStaff)
+  @UseGuards(LabActiveGuard)
   upsertStructuredResults(
     @Req() req: RequestWithUser,
     @Param('bookingId') bookingId: string,

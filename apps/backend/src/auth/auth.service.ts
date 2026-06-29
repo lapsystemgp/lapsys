@@ -1,6 +1,5 @@
 import {
   Injectable,
-  Logger,
   ConflictException,
   ForbiddenException,
   UnauthorizedException,
@@ -11,22 +10,16 @@ import { LoginDto } from './dto/login.dto';
 import { PatientRegisterDto } from './dto/patient-register.dto';
 import { LabRegisterDto } from './dto/lab-register.dto';
 import * as bcrypt from 'bcrypt';
-import { createHash, randomBytes, randomInt } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
 import { LabOnboardingStatus, Role } from '@prisma/client';
-import { MailService } from '../mail/mail.service';
 
 const REFRESH_TOKEN_TTL_DAYS = 30;
-const OTP_TTL_MINUTES = 10;
-const OTP_MAX_ATTEMPTS = 5;
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
-
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-    private mailService: MailService,
   ) {}
 
   async registerPatient(registerDto: PatientRegisterDto) {
@@ -58,9 +51,7 @@ export class AuthService {
       select: { id: true, email: true, role: true, created_at: true },
     });
 
-    await this.issueEmailOtp(user.id, user.email);
-
-    return { ...user, email_verification_required: true };
+    return user;
   }
 
   async registerLab(registerDto: LabRegisterDto) {
@@ -96,9 +87,7 @@ export class AuthService {
       select: { id: true, email: true, role: true, created_at: true },
     });
 
-    await this.issueEmailOtp(user.id, user.email);
-
-    return { ...user, email_verification_required: true };
+    return user;
   }
 
   async validateUser(loginDto: LoginDto) {
@@ -112,9 +101,6 @@ export class AuthService {
     if (!passwordValid) return null;
     if (!this.matchesSelectedRole(user.role, loginDto.selectedRole)) {
       return { wrongRole: true as const };
-    }
-    if (!user.email_verified) {
-      return { emailNotVerified: true as const, email: user.email };
     }
     const { password_hash, ...result } = user;
     return result;
@@ -245,106 +231,6 @@ export class AuthService {
 
   private hashToken(raw: string): string {
     return createHash('sha256').update(raw).digest('hex');
-  }
-
-  private hashCode(raw: string): string {
-    return createHash('sha256').update(raw).digest('hex');
-  }
-
-  private async issueEmailOtp(userId: string, email: string): Promise<void> {
-    const code = randomInt(100000, 1000000).toString();
-    const codeHash = this.hashCode(code);
-    const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + OTP_TTL_MINUTES);
-
-    // Delete any prior codes for this user
-    await this.prisma.emailVerificationCode.deleteMany({ where: { user_id: userId } });
-
-    await this.prisma.emailVerificationCode.create({
-      data: { user_id: userId, code_hash: codeHash, expires_at: expiresAt },
-    });
-
-    // Send the email fire-and-forget: a slow or blocked SMTP server must never
-    // hang the registration response. The OTP row already exists, so the user
-    // can verify (or hit "resend") as soon as the email arrives. Failures are
-    // logged; the user is not rolled back.
-    void this.mailService
-      .sendOtpEmail(email, code)
-      .catch((err) =>
-        this.logger.error(
-          `Failed to send OTP email to ${email}: ${
-            err instanceof Error ? err.message : String(err)
-          }`,
-        ),
-      );
-  }
-
-  async verifyEmailOtp(
-    email: string,
-    code: string,
-  ): Promise<ReturnType<AuthService['login']>> {
-    const normalizedEmail = this.normalizeEmail(email);
-    const user = await this.prisma.user.findUnique({
-      where: { email: normalizedEmail },
-    });
-
-    if (!user) {
-      throw new ForbiddenException('Invalid or expired code');
-    }
-
-    if (user.email_verified) {
-      // Already verified — just issue tokens (idempotent)
-      return this.login({ id: user.id, email: user.email, role: user.role });
-    }
-
-    const record = await this.prisma.emailVerificationCode.findFirst({
-      where: { user_id: user.id },
-      orderBy: { created_at: 'desc' },
-    });
-
-    if (!record) {
-      throw new ForbiddenException('Invalid or expired code');
-    }
-
-    if (record.expires_at < new Date()) {
-      throw new ForbiddenException('Verification code has expired');
-    }
-
-    if (record.attempts >= OTP_MAX_ATTEMPTS) {
-      throw new ForbiddenException('Too many failed attempts. Please request a new code.');
-    }
-
-    const codeHash = this.hashCode(code);
-    if (codeHash !== record.code_hash) {
-      await this.prisma.emailVerificationCode.update({
-        where: { id: record.id },
-        data: { attempts: { increment: 1 } },
-      });
-      throw new ForbiddenException('Invalid or expired code');
-    }
-
-    // Success: mark email verified and clean up
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { email_verified: true, email_verified_at: new Date() },
-    });
-    await this.prisma.emailVerificationCode.deleteMany({ where: { user_id: user.id } });
-
-    return this.login({ id: user.id, email: user.email, role: user.role });
-  }
-
-  async resendEmailOtp(email: string): Promise<{ message: string }> {
-    const normalizedEmail = this.normalizeEmail(email);
-    const user = await this.prisma.user.findUnique({
-      where: { email: normalizedEmail },
-    });
-
-    // Always return generic success to avoid leaking whether the email exists
-    if (user && !user.email_verified) {
-      await this.issueEmailOtp(user.id, user.email);
-    }
-
-    return { message: 'If that email is pending verification, a new code has been sent.' };
   }
 
   async getCurrentUser(userId: string) {

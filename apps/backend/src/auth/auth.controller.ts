@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -21,8 +20,6 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AUTH_COOKIE_NAME, buildAuthCookieOptions } from './auth.constants';
 import { PatientRegisterDto } from './dto/patient-register.dto';
 import { LabRegisterDto } from './dto/lab-register.dto';
-import { VerifyEmailDto } from './dto/verify-email.dto';
-import { ResendOtpDto } from './dto/resend-otp.dto';
 import { AuditLogService } from '../common/services/audit-log.service';
 import { Role } from '@prisma/client';
 
@@ -73,9 +70,6 @@ export class AuthController {
       throw new UnauthorizedException(
         'Wrong account type. Please select the correct role for your account.',
       );
-    }
-    if ('emailNotVerified' in result) {
-      throw new ForbiddenException({ error: 'EMAIL_NOT_VERIFIED', email: result.email });
     }
 
     const { access_token, refresh_token, user: userData } = await this.authService.login(
@@ -132,34 +126,5 @@ export class AuthController {
     }
     this.auditLogService.log('auth.logout', {});
     return { message: 'Logged out' };
-  }
-
-  @Post('verify-email')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Verify email address with OTP code' })
-  @ApiResponse({ status: 200, description: 'Email verified, login successful' })
-  @ApiResponse({ status: 403, description: 'Invalid or expired code' })
-  async verifyEmail(
-    @Body() dto: VerifyEmailDto,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    const { access_token, refresh_token, user: userData } =
-      await this.authService.verifyEmailOtp(dto.email, dto.code);
-
-    response.cookie(AUTH_COOKIE_NAME, access_token, {
-      ...buildAuthCookieOptions(),
-      maxAge: 7 * 24 * 3600 * 1000,
-    });
-
-    this.auditLogService.log('auth.email_verified', { email: dto.email });
-    return { message: 'Email verified successfully', user: userData, access_token, refresh_token };
-  }
-
-  @Post('resend-otp')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Resend email OTP verification code' })
-  @ApiResponse({ status: 200, description: 'Code sent (if email pending verification)' })
-  async resendOtp(@Body() dto: ResendOtpDto) {
-    return this.authService.resendEmailOtp(dto.email);
   }
 }

@@ -1,14 +1,9 @@
-import { setDefaultResultOrder } from 'node:dns';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-
-// Prefer IPv4 in DNS resolution — some hosts (e.g. Railway) lack an IPv6 route,
-// so resolving outbound hosts (SMTP, etc.) to IPv6 first fails with ENETUNREACH.
-setDefaultResultOrder('ipv4first');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, TestTube, Mail, Lock, User, Eye, EyeOff, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, TestTube, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { API_BASE_URL } from '../../lib/api';
 import { useSession } from '../../components/SessionProvider';
 import { useToast } from '../../components/ToastProvider';
@@ -13,8 +13,6 @@ interface LoginPageProps {
   onAuthenticated?: (params: { role: 'patient' | 'lab'; lab_onboarding_status?: string | null }) => void;
   sessionExpired?: boolean;
 }
-
-const RESEND_COOLDOWN_SECONDS = 30;
 
 export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthenticated, sessionExpired }: LoginPageProps) {
   const toast = useToast();
@@ -40,13 +38,6 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // OTP step
-  const [step, setStep] = useState<'form' | 'otp'>('form');
-  const [otpEmail, setOtpEmail] = useState('');
-  const [otpCode, setOtpCode] = useState('');
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const cooldownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
-
   const { refresh } = useSession();
 
   const normalizeEmail = (value: string) => value.trim().toLowerCase();
@@ -63,7 +54,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
     try {
       const contentType = response.headers.get('content-type') ?? '';
       if (contentType.includes('application/json')) {
-        const data = (await response.json()) as { message?: string | string[]; error?: string };
+        const data = (await response.json()) as { message?: string | string[] };
         if (Array.isArray(data.message)) {
           return data.message.join(', ');
         }
@@ -79,71 +70,19 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
     }
   };
 
-  const readErrorJson = async (response: Response) => {
-    try {
-      const contentType = response.headers.get('content-type') ?? '';
-      if (contentType.includes('application/json')) {
-        return (await response.json()) as Record<string, unknown>;
-      }
-    } catch {
-      // ignore
-    }
-    return null;
-  };
-
-  const startResendCooldown = () => {
-    setResendCooldown(RESEND_COOLDOWN_SECONDS);
-    if (cooldownTimer.current) clearInterval(cooldownTimer.current);
-    cooldownTimer.current = setInterval(() => {
-      setResendCooldown((prev) => {
-        if (prev <= 1) {
-          if (cooldownTimer.current) clearInterval(cooldownTimer.current);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const switchToOtpStep = (pendingEmail: string) => {
-    setOtpEmail(pendingEmail);
-    setOtpCode('');
-    setStep('otp');
-    startResendCooldown();
-  };
-
-  const handleLoginSuccess = async (data: {
-    user?: { role?: string; lab_onboarding_status?: string | null };
-    access_token?: string;
-    refresh_token?: string;
-  }) => {
-    const role = data.user?.role === 'LabStaff' ? 'lab' : 'patient';
-    const lab_onboarding_status = data.user?.lab_onboarding_status ?? null;
-
-    await refresh();
-
-    if (onAuthenticated) {
-      onAuthenticated({ role, lab_onboarding_status });
-    } else {
-      onLogin(role);
-    }
-  };
-
   const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       if (isSignup) {
-        const normalizedEmailValue = normalizeEmail(email);
-
         if (userType === 'patient') {
           const registerRes = await fetch(`${API_BASE_URL}/auth/register/patient`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({
-              email: normalizedEmailValue,
+              email: normalizeEmail(email),
               password,
               full_name: name || undefined,
             }),
@@ -166,7 +105,7 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({
-              email: normalizedEmailValue,
+              email: normalizeEmail(email),
               password,
               lab_name: name,
               address: labAddress,
@@ -182,13 +121,8 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
             throw new Error(msg || 'Failed to register');
           }
         }
-
-        // After successful registration, switch to OTP step instead of auto-login
-        switchToOtpStep(normalizeEmail(email));
-        return;
       }
 
-      // Login flow
       const loginRes = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -201,32 +135,24 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
       });
 
       if (!loginRes.ok) {
-        const json = await readErrorJson(loginRes);
-        // Detect EMAIL_NOT_VERIFIED — switch to OTP step
-        if (
-          json &&
-          typeof json.message === 'object' &&
-          json.message !== null &&
-          (json.message as Record<string, unknown>).error === 'EMAIL_NOT_VERIFIED'
-        ) {
-          const pendingEmail =
-            typeof (json.message as Record<string, unknown>).email === 'string'
-              ? ((json.message as Record<string, unknown>).email as string)
-              : normalizeEmail(email);
-          switchToOtpStep(pendingEmail);
-          return;
-        }
-        const msg =
-          (typeof json?.message === 'string' ? json.message : null) ??
-          'Invalid credentials';
-        throw new Error(msg);
+        const msg = await readErrorMessage(loginRes, 'Invalid credentials');
+        throw new Error(msg || 'Invalid credentials');
       }
 
       const data = (await loginRes.json()) as {
         user?: { role?: string; lab_onboarding_status?: string | null };
       };
 
-      await handleLoginSuccess(data);
+      const role = data.user?.role === 'LabStaff' ? 'lab' : 'patient';
+      const lab_onboarding_status = data.user?.lab_onboarding_status ?? null;
+
+      await refresh();
+
+      if (onAuthenticated) {
+        onAuthenticated({ role, lab_onboarding_status });
+      } else {
+        onLogin(role);
+      }
     } catch (err: unknown) {
       const rawMessage = readRuntimeErrorMessage(err);
       if (rawMessage.toLowerCase() === 'failed to fetch') {
@@ -238,151 +164,6 @@ export function LoginPage({ onLogin, onBack, defaultMode = 'login', onAuthentica
       setLoading(false);
     }
   };
-
-  const handleVerifyOtp = async (e: { preventDefault(): void }) => {
-    e.preventDefault();
-    if (otpCode.length !== 6) {
-      toast.error('Please enter the 6-digit code sent to your email.');
-      return;
-    }
-    setLoading(true);
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/auth/verify-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email: otpEmail, code: otpCode }),
-      });
-
-      if (!res.ok) {
-        const msg = await readErrorMessage(res, 'Invalid or expired code');
-        throw new Error(msg);
-      }
-
-      const data = (await res.json()) as {
-        user?: { role?: string; lab_onboarding_status?: string | null };
-      };
-
-      await handleLoginSuccess(data);
-    } catch (err: unknown) {
-      const rawMessage = readRuntimeErrorMessage(err);
-      if (rawMessage.toLowerCase() === 'failed to fetch') {
-        toast.error('Unable to reach the server. Please check that the backend is running.');
-      } else {
-        toast.error(rawMessage || 'Something went wrong');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendOtp = async () => {
-    if (resendCooldown > 0) return;
-    setLoading(true);
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email: otpEmail }),
-      });
-
-      if (!res.ok) {
-        const msg = await readErrorMessage(res, 'Failed to resend code');
-        throw new Error(msg);
-      }
-
-      toast.error(''); // clear any error
-      startResendCooldown();
-    } catch (err: unknown) {
-      const rawMessage = readRuntimeErrorMessage(err);
-      toast.error(rawMessage || 'Failed to resend code');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (step === 'otp') {
-    return (
-      <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-50 relative">
-        <button
-          onClick={() => setStep('form')}
-          className="absolute top-6 left-5 flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:-translate-x-0.5 transition-all duration-150"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Back
-        </button>
-
-        <div className="min-h-screen w-full flex items-start justify-center pt-14">
-          <div className="animate-scale-in w-full max-w-md">
-            <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 sm:p-8">
-              {/* Logo */}
-              <div className="flex justify-center mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-sm">
-                    <TestTube className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-xl font-bold text-gray-900">Tes<span className="text-blue-600">Tly</span></span>
-                </div>
-              </div>
-
-              <h2 className="text-xl font-bold text-center text-gray-900 mb-1">Check your email</h2>
-              <p className="text-center text-gray-600 font-medium mb-1 text-sm">
-                We sent a 6-digit code to
-              </p>
-              <p className="text-center text-blue-600 font-semibold mb-5 text-sm break-all">{otpEmail}</p>
-
-              <form onSubmit={handleVerifyOtp} className="space-y-4">
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">Verification Code</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="\d{6}"
-                    maxLength={6}
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    className="w-full px-4 py-3 text-center text-2xl tracking-widest font-mono border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
-                    placeholder="000000"
-                    required
-                    autoFocus
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading || otpCode.length !== 6}
-                  className="w-full py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-sm hover:shadow-md hover:bg-blue-700 active:scale-[0.99] transition-all duration-150 disabled:opacity-60"
-                >
-                  {loading ? 'Verifying…' : 'Verify Email'}
-                </button>
-              </form>
-
-              <div className="mt-4 text-center">
-                <button
-                  onClick={handleResendOtp}
-                  disabled={loading || resendCooldown > 0}
-                  className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold disabled:text-gray-400 disabled:cursor-not-allowed text-sm"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend code'}
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-4 text-center text-gray-600">
-              <p className="flex items-center justify-center gap-2 font-medium">
-                <Lock className="w-4 h-4" />
-                Secured with AES-256 encryption
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-50 relative">

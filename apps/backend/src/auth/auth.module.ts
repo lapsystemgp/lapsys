@@ -6,7 +6,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { AuditLogService } from '../common/services/audit-log.service';
-import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
@@ -23,7 +22,6 @@ import { MailModule } from '../mail/mail.module';
         };
       },
     }),
-    MailModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, PrismaService, JwtStrategy, AuditLogService],

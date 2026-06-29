@@ -23,6 +23,10 @@ export class MailService {
         port,
         secure: port === 465, // 465 = implicit TLS; 587 = STARTTLS
         auth: { user: this.user, pass },
+        // Fail fast instead of hanging for minutes if the host blocks outbound SMTP.
+        connectionTimeout: 10_000,
+        greetingTimeout: 10_000,
+        socketTimeout: 15_000,
       });
     }
   }

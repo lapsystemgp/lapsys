@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
+import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 @Injectable()
 export class MailService {
@@ -18,16 +19,21 @@ export class MailService {
     this.from = this.config.get<string>('MAIL_FROM') || this.user || 'no-reply@localhost';
 
     if (host && this.user && pass) {
-      this.transporter = nodemailer.createTransport({
+      // `family` is honored by nodemailer at runtime but missing from its types.
+      const options: SMTPTransport.Options & { family?: number } = {
         host,
         port,
         secure: port === 465, // 465 = implicit TLS; 587 = STARTTLS
         auth: { user: this.user, pass },
+        // Force IPv4: many hosts (e.g. Railway) have no IPv6 route, so connecting
+        // to Gmail's IPv6 address fails with ENETUNREACH.
+        family: 4,
         // Fail fast instead of hanging for minutes if the host blocks outbound SMTP.
         connectionTimeout: 10_000,
         greetingTimeout: 10_000,
         socketTimeout: 15_000,
-      });
+      };
+      this.transporter = nodemailer.createTransport(options);
       this.logger.log(`Mail transport ready: SMTP ${host}:${port} as ${this.user}`);
     } else {
       this.logger.warn(
